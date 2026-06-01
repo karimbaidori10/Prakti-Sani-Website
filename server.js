@@ -11,6 +11,12 @@ const mongo = new MongoClient(process.env.MONGO_URI);
 
 let pointsCollection;
 let termineCollection;
+let examsCollection;
+let docsCollection;
+let logsCollection;
+
+const ADMIN_ROLE_ID = process.env.ADMIN_ROLE_ID;
+const PRAKTI_SANI_ROLE_ID = process.env.PRAKTI_SANI_ROLE_ID;
 
 app.set("view engine", "ejs");
 
@@ -19,7 +25,7 @@ app.use(express.json());
 app.use(express.static("public"));
 
 app.use(session({
-    secret: "lsmd-dashboard-secret",
+    secret: process.env.SESSION_SECRET || "lsmd-dashboard-secret",
     resave: false,
     saveUninitialized: false
 }));
@@ -32,12 +38,38 @@ function requireLogin(req, res, next) {
     next();
 }
 
-async function getAllPoints() {
-    const users = await pointsCollection.find({}).toArray();
-    return users.sort((a, b) => b.points - a.points);
+function requireAdmin(req, res, next) {
+    if (!req.session.isAdmin) {
+        return res.status(403).send("❌ Kein Zugriff auf diesen Bereich.");
+    }
+
+    next();
 }
 
+function viewData(req, extra = {}) {
+    return {
+        user: req.session.user || null,
+        isAdmin: req.session.isAdmin || false,
+        active: "",
+        ...extra
+    };
+}
+
+async function addLog(action, data = {}) {
+    await logsCollection.insertOne({
+        action,
+        data,
+        createdAt: new Date()
+    });
+}
+
+async function getAllPoints() {
+    return await pointsCollection.find({}).sort({ points: -1 }).toArray();
+}
+
+// =====================
 // LOGIN
+// =====================
 app.get("/login", (req, res) => {
     res.render("login", { error: null });
 });
@@ -47,7 +79,13 @@ app.post("/login", (req, res) => {
 
     if (password === process.env.WEB_ADMIN_PASSWORD) {
         req.session.loggedIn = true;
-        return res.redirect("/");
+        req.session.isAdmin = true;
+        req.session.user = {
+            username: "Leitung",
+            role: "Admin"
+        };
+
+        return res.redirect("/dashboard");
     }
 
     res.render("login", { error: "Falsches Passwort" });
@@ -59,23 +97,90 @@ app.get("/logout", (req, res) => {
     });
 });
 
-// DASHBOARD
-app.get("/", requireLogin, async (req, res) => {
-    const users = await getAllPoints();
-    const termine = await termineCollection.find({}).sort({ date: 1 }).toArray();
-
-    res.render("dashboard", {
-        users,
-        termine
-    });
+// =====================
+// ROUTES
+// =====================
+app.get("/", requireLogin, (req, res) => {
+    res.redirect("/dashboard");
 });
 
-// PUNKTE HINZUFÜGEN
-app.post("/points/add", requireLogin, async (req, res) => {
+app.get("/dashboard", requireLogin, async (req, res) => {
+    const users = await getAllPoints();
+    const termine = await termineCollection.find({}).sort({ date: 1 }).limit(5).toArray();
+    const exams = await examsCollection.find({}).sort({ createdAt: -1 }).limit(5).toArray();
+
+    res.render("dashboard", viewData(req, {
+        active: "dashboard",
+        users,
+        termine,
+        exams
+    }));
+});
+
+app.get("/leaderboard", requireLogin, async (req, res) => {
+    const users = await getAllPoints();
+
+    res.render("leaderboard", viewData(req, {
+        active: "leaderboard",
+        users
+    }));
+});
+
+app.get("/users", requireLogin, async (req, res) => {
+    const users = await getAllPoints();
+
+    res.render("users", viewData(req, {
+        active: "users",
+        users
+    }));
+});
+
+app.get("/termine", requireLogin, async (req, res) => {
+    const termine = await termineCollection.find({}).sort({ date: 1, time: 1 }).toArray();
+
+    res.render("termine", viewData(req, {
+        active: "termine",
+        termine
+    }));
+});
+
+app.get("/pruefungen", requireLogin, async (req, res) => {
+    const exams = await examsCollection.find({}).sort({ createdAt: -1 }).toArray();
+
+    res.render("pruefungen", viewData(req, {
+        active: "pruefungen",
+        exams
+    }));
+});
+
+app.get("/dokumente", requireLogin, async (req, res) => {
+    const docs = await docsCollection.find({}).sort({ createdAt: -1 }).toArray();
+
+    res.render("dokumente", viewData(req, {
+        active: "dokumente",
+        docs
+    }));
+});
+
+app.get("/admin", requireLogin, requireAdmin, async (req, res) => {
+    const users = await getAllPoints();
+    const logs = await logsCollection.find({}).sort({ createdAt: -1 }).limit(50).toArray();
+
+    res.render("admin", viewData(req, {
+        active: "admin",
+        users,
+        logs
+    }));
+});
+
+// =====================
+// POINTS
+// =====================
+app.post("/points/add", requireLogin, requireAdmin, async (req, res) => {
     const { userId, points } = req.body;
     const amount = Number(points);
 
-    if (!userId || isNaN(amount)) return res.redirect("/");
+    if (!userId || isNaN(amount)) return res.redirect("/admin");
 
     await pointsCollection.updateOne(
         { userId },
@@ -83,15 +188,16 @@ app.post("/points/add", requireLogin, async (req, res) => {
         { upsert: true }
     );
 
-    res.redirect("/");
+    await addLog("Punkte hinzugefügt", { userId, amount });
+
+    res.redirect("/admin");
 });
 
-// PUNKTE ENTFERNEN
-app.post("/points/remove", requireLogin, async (req, res) => {
+app.post("/points/remove", requireLogin, requireAdmin, async (req, res) => {
     const { userId, points } = req.body;
     const amount = Number(points);
 
-    if (!userId || isNaN(amount)) return res.redirect("/");
+    if (!userId || isNaN(amount)) return res.redirect("/admin");
 
     const user = await pointsCollection.findOne({ userId });
     const current = user?.points || 0;
@@ -103,15 +209,16 @@ app.post("/points/remove", requireLogin, async (req, res) => {
         { upsert: true }
     );
 
-    res.redirect("/");
+    await addLog("Punkte entfernt", { userId, amount });
+
+    res.redirect("/admin");
 });
 
-// PUNKTE SETZEN
-app.post("/points/set", requireLogin, async (req, res) => {
+app.post("/points/set", requireLogin, requireAdmin, async (req, res) => {
     const { userId, points } = req.body;
     const amount = Math.max(0, Number(points));
 
-    if (!userId || isNaN(amount)) return res.redirect("/");
+    if (!userId || isNaN(amount)) return res.redirect("/admin");
 
     await pointsCollection.updateOne(
         { userId },
@@ -119,10 +226,14 @@ app.post("/points/set", requireLogin, async (req, res) => {
         { upsert: true }
     );
 
-    res.redirect("/");
+    await addLog("Punkte gesetzt", { userId, amount });
+
+    res.redirect("/admin");
 });
 
-// TERMIN ERSTELLEN
+// =====================
+// TERMINE
+// =====================
 app.post("/termine/create", requireLogin, async (req, res) => {
     const {
         name,
@@ -147,10 +258,11 @@ app.post("/termine/create", requireLogin, async (req, res) => {
         createdAt: new Date()
     });
 
-    res.redirect("/");
+    await addLog("Termin erstellt", { name, examType, date, time });
+
+    res.redirect("/termine");
 });
 
-// TERMIN STATUS ÄNDERN
 app.post("/termine/status/:id", requireLogin, async (req, res) => {
     const { status } = req.body;
 
@@ -159,19 +271,91 @@ app.post("/termine/status/:id", requireLogin, async (req, res) => {
         { $set: { status } }
     );
 
-    res.redirect("/");
+    await addLog("Termin Status geändert", { id: req.params.id, status });
+
+    res.redirect("/termine");
 });
 
-// TERMIN LÖSCHEN
-app.post("/termine/delete/:id", requireLogin, async (req, res) => {
+app.post("/termine/delete/:id", requireLogin, requireAdmin, async (req, res) => {
     await termineCollection.deleteOne({
         _id: new ObjectId(req.params.id)
     });
 
-    res.redirect("/");
+    await addLog("Termin gelöscht", { id: req.params.id });
+
+    res.redirect("/termine");
 });
 
+// =====================
+// PRÜFUNGEN
+// =====================
+app.post("/pruefungen/create", requireLogin, async (req, res) => {
+    const {
+        name,
+        discordId,
+        examType,
+        result,
+        examiner,
+        notes
+    } = req.body;
+
+    await examsCollection.insertOne({
+        name,
+        discordId,
+        examType,
+        result,
+        examiner,
+        notes,
+        createdAt: new Date()
+    });
+
+    await addLog("Prüfung gespeichert", { name, examType, result });
+
+    res.redirect("/pruefungen");
+});
+
+app.post("/pruefungen/delete/:id", requireLogin, requireAdmin, async (req, res) => {
+    await examsCollection.deleteOne({
+        _id: new ObjectId(req.params.id)
+    });
+
+    await addLog("Prüfung gelöscht", { id: req.params.id });
+
+    res.redirect("/pruefungen");
+});
+
+// =====================
+// DOKUMENTE
+// =====================
+app.post("/dokumente/create", requireLogin, requireAdmin, async (req, res) => {
+    const { title, type, url, notes } = req.body;
+
+    await docsCollection.insertOne({
+        title,
+        type,
+        url,
+        notes,
+        createdAt: new Date()
+    });
+
+    await addLog("Dokument hinzugefügt", { title, type });
+
+    res.redirect("/dokumente");
+});
+
+app.post("/dokumente/delete/:id", requireLogin, requireAdmin, async (req, res) => {
+    await docsCollection.deleteOne({
+        _id: new ObjectId(req.params.id)
+    });
+
+    await addLog("Dokument gelöscht", { id: req.params.id });
+
+    res.redirect("/dokumente");
+});
+
+// =====================
 // START
+// =====================
 async function start() {
     await mongo.connect();
 
@@ -179,6 +363,9 @@ async function start() {
 
     pointsCollection = db.collection("points");
     termineCollection = db.collection("examAppointments");
+    examsCollection = db.collection("exams");
+    docsCollection = db.collection("documents");
+    logsCollection = db.collection("dashboardLogs");
 
     app.listen(PORT, () => {
         console.log(`✅ LSMD Website läuft auf Port ${PORT}`);
