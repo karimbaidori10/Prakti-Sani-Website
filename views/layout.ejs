@@ -8,10 +8,9 @@
 <body>
 
 <div class="app">
-
     <aside class="sidebar">
         <div class="brand">
-            <div class="logo">🚑</div>
+            <div class="logo">LSMD</div>
             <div>
                 <h2>LSMD</h2>
                 <p>Punkte-System</p>
@@ -19,15 +18,15 @@
         </div>
 
         <nav>
-            <a class="<%= active === 'dashboard' ? 'active' : '' %>" href="/dashboard">🏠 Dashboard</a>
-            <a class="<%= active === 'leaderboard' ? 'active' : '' %>" href="/leaderboard">🏆 Leaderboard</a>
-            <a class="<%= active === 'users' ? 'active' : '' %>" href="/users">👥 Mitglieder</a>
-            <a class="<%= active === 'termine' ? 'active' : '' %>" href="/termine">📅 Termine</a>
-            <a class="<%= active === 'pruefungen' ? 'active' : '' %>" href="/pruefungen">📝 Prüfungen</a>
-            <a class="<%= active === 'dokumente' ? 'active' : '' %>" href="/dokumente">📘 Dokumente</a>
+            <a class="<%= active === 'dashboard' ? 'active' : '' %>" href="/dashboard">Dashboard</a>
+            <a class="<%= active === 'leaderboard' ? 'active' : '' %>" href="/leaderboard">Leaderboard</a>
+            <a class="<%= active === 'users' ? 'active' : '' %>" href="/users">Mitglieder</a>
+            <a class="<%= active === 'termine' ? 'active' : '' %>" href="/termine">Termine</a>
+            <a class="<%= active === 'pruefungen' ? 'active' : '' %>" href="/pruefungen">Pruefungen</a>
+            <a class="<%= active === 'dokumente' ? 'active' : '' %>" href="/dokumente">Dokumente</a>
 
             <% if (isAdmin) { %>
-                <a class="<%= active === 'admin' ? 'active' : '' %>" href="/admin">👮 Admin Panel</a>
+                <a class="<%= active === 'admin' ? 'active' : '' %>" href="/admin">Admin Panel</a>
             <% } %>
         </nav>
 
@@ -41,7 +40,6 @@
     <main class="content">
         <%- body %>
     </main>
-
 </div>
 
 <script src="/app.js"></script>
