@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <title>LSMD Login</title>
+    <link rel="stylesheet" href="/style.css">
+</head>
+<body class="login-body">
+
+<div class="login-box">
+    <h1>🚑 LSMD Dashboard</h1>
+    <p>Leitungs-Login</p>
+
+    <% if (error) { %>
+        <div class="error"><%= error %></div>
+    <% } %>
+
+    <form method="POST" action="/login">
+        <input type="password" name="password" placeholder="Passwort" required>
+        <button type="submit">Einloggen</button>
+    </form>
+</div>
+
+</body>
+</html>

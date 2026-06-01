@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <title>LSMD Dashboard</title>
+    <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+
+<header>
+    <h1>🚑 LSMD Leitungs-Dashboard</h1>
+    <a href="/logout">Logout</a>
+</header>
+
+<main>
+
+    <section class="card">
+        <h2>📊 Punkteverwaltung</h2>
+
+        <form method="POST" action="/points/add" class="grid">
+            <input name="userId" placeholder="Discord User ID" required>
+            <input name="points" type="number" placeholder="Punkte" required>
+            <button>➕ Hinzufügen</button>
+        </form>
+
+        <form method="POST" action="/points/remove" class="grid">
+            <input name="userId" placeholder="Discord User ID" required>
+            <input name="points" type="number" placeholder="Punkte" required>
+            <button>➖ Entfernen</button>
+        </form>
+
+        <form method="POST" action="/points/set" class="grid">
+            <input name="userId" placeholder="Discord User ID" required>
+            <input name="points" type="number" placeholder="Punkte setzen" required>
+            <button>✏️ Setzen</button>
+        </form>
+    </section>
+
+    <section class="card">
+        <h2>🏆 Leaderboard</h2>
+
+        <table>
+            <tr>
+                <th>#</th>
+                <th>User ID</th>
+                <th>Punkte</th>
+            </tr>
+
+            <% users.forEach((user, index) => { %>
+                <tr>
+                    <td><%= index + 1 %></td>
+                    <td><%= user.userId %></td>
+                    <td><%= user.points %></td>
+                </tr>
+            <% }) %>
+        </table>
+    </section>
+
+    <section class="card">
+        <h2>📅 Prüfungstermin erstellen</h2>
+
+        <form method="POST" action="/termine/create" class="form">
+            <input name="name" placeholder="Name" required>
+            <input name="discordId" placeholder="Discord ID">
+            
+            <select name="examType" required>
+                <option value="">Prüfungsart wählen</option>
+                <option>Prakti-Prüfung</option>
+                <option>Darf alleine fahren</option>
+                <option>Sanitäter-Prüfung</option>
+                <option>Theorie-Prüfung</option>
+                <option>Regelwerk</option>
+                <option>Blaues Blatt</option>
+                <option>Funkleitfaden</option>
+            </select>
+
+            <input type="date" name="date" required>
+            <input type="time" name="time" required>
+            <input name="examiner" placeholder="Prüfer">
+            
+            <select name="status">
+                <option value="offen">Offen</option>
+                <option value="bestanden">Bestanden</option>
+                <option value="nicht bestanden">Nicht bestanden</option>
+                <option value="verschoben">Verschoben</option>
+            </select>
+
+            <textarea name="notes" placeholder="Notizen"></textarea>
+
+            <button>📌 Termin speichern</button>
+        </form>
+    </section>
+
+    <section class="card">
+        <h2>📋 Termine</h2>
+
+        <table>
+            <tr>
+                <th>Name</th>
+                <th>Prüfung</th>
+                <th>Datum</th>
+                <th>Uhrzeit</th>
+                <th>Prüfer</th>
+                <th>Status</th>
+                <th>Aktion</th>
+            </tr>
+
+            <% termine.forEach(t => { %>
+                <tr>
+                    <td><%= t.name %></td>
+                    <td><%= t.examType %></td>
+                    <td><%= t.date %></td>
+                    <td><%= t.time %></td>
+                    <td><%= t.examiner %></td>
+                    <td><%= t.status %></td>
+                    <td>
+                        <form method="POST" action="/termine/status/<%= t._id %>">
+                            <select name="status">
+                                <option value="offen">Offen</option>
+                                <option value="bestanden">Bestanden</option>
+                                <option value="nicht bestanden">Nicht bestanden</option>
+                                <option value="verschoben">Verschoben</option>
+                            </select>
+                            <button>Ändern</button>
+                        </form>
+
+                        <form method="POST" action="/termine/delete/<%= t._id %>">
+                            <button class="danger">Löschen</button>
+                        </form>
+                    </td>
+                </tr>
+            <% }) %>
+        </table>
+    </section>
+
+</main>
+
+</body>
+</html>
