@@ -21,6 +21,9 @@ const PRAKTI_SANI_ROLE_ID = process.env.PRAKTI_SANI_ROLE_ID;
 
 app.set("view engine", "ejs");
 
+app.use(expressLayouts);
+app.set("layout", "layout");
+
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(express.static("public"));
