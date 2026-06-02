@@ -1,0 +1,86 @@
+<div class="page-header">
+    <h1>Admin</h1>
+    <p>Verwaltung für Leitung und Admins.</p>
+</div>
+
+<div class="card">
+    <h2>Statistiken</h2>
+    <p>Mitglieder: <%= users ? users.length : 0 %></p>
+    <p>Logs: <%= logs ? logs.length : 0 %></p>
+</div>
+
+<div class="card">
+    <h2>Punkte verwalten</h2>
+
+    <form action="/points/set" method="POST" class="form">
+        <input type="text" name="userId" placeholder="Discord User ID" required>
+        <input type="number" name="points" placeholder="Punkte" required>
+        <button type="submit">Punkte setzen</button>
+    </form>
+
+    <form action="/points/add" method="POST" class="form">
+        <input type="text" name="userId" placeholder="Discord User ID" required>
+        <input type="number" name="points" placeholder="Punkte hinzufügen" required>
+        <button type="submit">Punkte hinzufügen</button>
+    </form>
+
+    <form action="/points/remove" method="POST" class="form">
+        <input type="text" name="userId" placeholder="Discord User ID" required>
+        <input type="number" name="points" placeholder="Punkte entfernen" required>
+        <button type="submit">Punkte entfernen</button>
+    </form>
+</div>
+
+<div class="card">
+    <h2>Aktuelle Mitglieder / Punkte</h2>
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th>User ID</th>
+                <th>Punkte</th>
+            </tr>
+        </thead>
+        <tbody>
+            <% if (users && users.length > 0) { %>
+                <% users.forEach(user => { %>
+                    <tr>
+                        <td><%= user.userId %></td>
+                        <td><%= user.points %></td>
+                    </tr>
+                <% }) %>
+            <% } else { %>
+                <tr>
+                    <td colspan="2">Noch keine Mitglieder vorhanden.</td>
+                </tr>
+            <% } %>
+        </tbody>
+    </table>
+</div>
+
+<div class="card">
+    <h2>Admin Logs</h2>
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Aktion</th>
+                <th>Datum</th>
+            </tr>
+        </thead>
+        <tbody>
+            <% if (logs && logs.length > 0) { %>
+                <% logs.forEach(log => { %>
+                    <tr>
+                        <td><%= log.action %></td>
+                        <td><%= new Date(log.createdAt).toLocaleString("de-DE") %></td>
+                    </tr>
+                <% }) %>
+            <% } else { %>
+                <tr>
+                    <td colspan="2">Noch keine Logs vorhanden.</td>
+                </tr>
+            <% } %>
+        </tbody>
+    </table>
+</div>
