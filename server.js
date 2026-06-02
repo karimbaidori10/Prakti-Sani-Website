@@ -202,7 +202,37 @@ async function addLog(action, data = {}) {
 }
 
 async function getAllPoints() {
-    return await pointsCollection.find({}).sort({ points: -1 }).toArray();
+    const users = await pointsCollection.find({}).sort({ points: -1 }).toArray();
+
+    const enrichedUsers = await Promise.all(users.map(async (user) => {
+        if (user.displayName && user.rank) {
+            return user;
+        }
+
+        const discordInfo = await getDiscordMemberInfo(user.userId);
+
+        if (!discordInfo) {
+            return user;
+        }
+
+        await pointsCollection.updateOne(
+            { userId: user.userId },
+            {
+                $set: {
+                    displayName: discordInfo.displayName,
+                    rank: discordInfo.rank
+                }
+            }
+        );
+
+        return {
+            ...user,
+            displayName: discordInfo.displayName,
+            rank: discordInfo.rank
+        };
+    }));
+
+    return enrichedUsers;
 }
 
 // =====================

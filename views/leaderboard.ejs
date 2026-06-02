@@ -128,8 +128,9 @@
                     </div>
 
                     <div class="leader-info">
-                        <h3>User <%= index + 1 %></h3>
-                        <p>Discord ID: <%= user.userId %></p>
+                        <h3><%= user.displayName || ("User " + (index + 1)) %></h3>
+<p>Rang: <%= user.rank || "Kein Rang" %></p>
+<p>Discord ID: <%= user.userId %></p>
                     </div>
 
                     <div class="leader-points">

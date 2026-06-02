@@ -76,8 +76,9 @@
                     </div>
 
                     <div class="member-info">
-                        <h3>User <%= index + 1 %></h3>
-                        <p>Discord ID: <%= member.userId %></p>
+                        <h3><%= member.displayName || ("User " + (index + 1)) %></h3>
+<p>Rang: <%= member.rank || "Kein Rang" %></p>
+<p>Discord ID: <%= member.userId %></p>
                     </div>
 
                     <div class="member-points">
