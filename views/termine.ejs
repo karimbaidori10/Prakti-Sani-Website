@@ -1,92 +1,161 @@
-<h1>Termine</h1>
+<div class="page-header">
+    <h1>📅 Termine</h1>
+    <p>Prüfungstermine planen, verwalten und Status aktuell halten.</p>
+</div>
 
-<section class="card">
-    <h2>Neuen Prüfungstermin erstellen</h2>
+<section class="dashboard-grid">
+    <div class="card">
+        <div class="card-header">
+            <h2>➕ Neuen Termin erstellen</h2>
+            <span class="chip blue">Planung</span>
+        </div>
 
-    <form method="POST" action="/termine/create" class="form">
-        <input name="name" placeholder="Name des Teilnehmers" required>
+        <form method="POST" action="/termine/create" class="form">
+            <input name="name" placeholder="Name des Teilnehmers" required>
 
-        <input name="discordId" placeholder="Discord ID optional">
+            <input name="discordId" placeholder="Discord ID optional">
 
-        <select name="examType" required>
-            <option value="">Prüfungsart wählen</option>
-            <option>Prakti-Prüfung</option>
-            <option>Darf alleine fahren</option>
-            <option>Sanitäter-Prüfung</option>
-            <option>Theorie-Prüfung</option>
-            <option>Regelwerk</option>
-            <option>Blaues Blatt</option>
-            <option>Funkleitfaden</option>
-        </select>
+            <select name="examType" required>
+                <option value="">Prüfungsart wählen</option>
+                <option>Prakti-Prüfung</option>
+                <option>Darf alleine fahren</option>
+                <option>Sanitäter-Prüfung</option>
+                <option>Theorie-Prüfung</option>
+                <option>Regelwerk</option>
+                <option>Blaues Blatt</option>
+                <option>Funkleitfaden</option>
+            </select>
 
-        <input type="date" name="date" required>
-        <input type="time" name="time" required>
+            <div class="form-row">
+                <input type="date" name="date" required>
+                <input type="time" name="time" required>
+            </div>
 
-        <input name="examiner" placeholder="Prüfer / Ausbilder">
+            <input name="examiner" placeholder="Prüfer / Ausbilder">
 
-        <select name="status">
-            <option value="offen">Offen</option>
-            <option value="bestanden">Bestanden</option>
-            <option value="nicht bestanden">Nicht bestanden</option>
-            <option value="verschoben">Verschoben</option>
-        </select>
+            <select name="status">
+                <option value="offen">Offen</option>
+                <option value="bestanden">Bestanden</option>
+                <option value="nicht bestanden">Nicht bestanden</option>
+                <option value="verschoben">Verschoben</option>
+            </select>
 
-        <textarea name="notes" placeholder="Notizen"></textarea>
+            <textarea name="notes" placeholder="Notizen"></textarea>
 
-        <button type="submit">Termin speichern</button>
-    </form>
+            <button type="submit">Termin speichern</button>
+        </form>
+    </div>
+
+    <div class="card">
+        <div class="card-header">
+            <h2>⚡ Termin-Status</h2>
+            <span class="chip green">Live</span>
+        </div>
+
+        <div class="mini-stats">
+            <div class="mini-stat">
+                <strong><%= termine ? termine.length : 0 %></strong>
+                <span>Gesamt</span>
+            </div>
+
+            <div class="mini-stat">
+                <strong><%= termine ? termine.filter(t => t.status === "offen").length : 0 %></strong>
+                <span>Offen</span>
+            </div>
+
+            <div class="mini-stat">
+                <strong><%= termine ? termine.filter(t => t.status === "bestanden").length : 0 %></strong>
+                <span>Bestanden</span>
+            </div>
+
+            <div class="mini-stat">
+                <strong><%= termine ? termine.filter(t => t.status === "verschoben").length : 0 %></strong>
+                <span>Verschoben</span>
+            </div>
+        </div>
+
+        <div class="clean-divider"></div>
+
+        <p style="color: var(--muted);">
+            Tipp: Später bauen wir hier die Kalenderansicht ein, damit Termine direkt als Monatskalender angezeigt werden.
+        </p>
+    </div>
 </section>
 
 <section class="card">
-    <h2>Terminübersicht</h2>
+    <div class="card-header">
+        <h2>📋 Terminübersicht</h2>
+        <span class="chip blue"><%= termine ? termine.length : 0 %> Termine</span>
+    </div>
 
-    <% if (termine.length === 0) { %>
-        <p>Keine Termine vorhanden.</p>
+    <% if (!termine || termine.length === 0) { %>
+        <div class="empty-state">
+            <div>📭</div>
+            <h3>Keine Termine vorhanden</h3>
+            <p>Erstelle links deinen ersten Prüfungstermin.</p>
+        </div>
     <% } else { %>
 
-        <table>
-            <thead>
-                <tr>
-                    <th>Name</th>
-                    <th>Prüfung</th>
-                    <th>Datum</th>
-                    <th>Uhrzeit</th>
-                    <th>Prüfer</th>
-                    <th>Status</th>
-                    <th>Aktion</th>
-                </tr>
-            </thead>
+        <div class="termine-list">
+            <% termine.forEach(t => { %>
+                <div class="termin-card">
+                    <div class="date-box">
+                        <strong><%= t.date ? new Date(t.date).getDate() : "--" %></strong>
+                        <span>
+                            <%= t.date ? new Date(t.date).toLocaleString("de-DE", { month: "short" }).toUpperCase() : "---" %>
+                        </span>
+                    </div>
 
-            <tbody>
-                <% termine.forEach(t => { %>
-                    <tr>
-                        <td><%= t.name %></td>
-                        <td><%= t.examType %></td>
-                        <td><%= t.date %></td>
-                        <td><%= t.time %></td>
-                        <td><%= t.examiner || "-" %></td>
-                        <td><%= t.status %></td>
-                        <td>
-                            <form method="POST" action="/termine/status/<%= t._id %>">
-                                <select name="status">
-                                    <option value="offen">Offen</option>
-                                    <option value="bestanden">Bestanden</option>
-                                    <option value="nicht bestanden">Nicht bestanden</option>
-                                    <option value="verschoben">Verschoben</option>
-                                </select>
-                                <button type="submit">Ändern</button>
-                            </form>
-
-                            <% if (isAdmin) { %>
-                                <form method="POST" action="/termine/delete/<%= t._id %>">
-                                    <button type="submit" class="danger">Löschen</button>
-                                </form>
+                    <div class="termin-main">
+                        <h3><%= t.examType %></h3>
+                        <p>
+                            👤 <%= t.name %>
+                            <% if (t.discordId) { %>
+                                · 🆔 <%= t.discordId %>
                             <% } %>
-                        </td>
-                    </tr>
-                <% }) %>
-            </tbody>
-        </table>
+                        </p>
+
+                        <p>
+                            🕒 <%= t.time || "--:--" %> Uhr
+                            · 🧑‍🏫 <%= t.examiner || "Kein Prüfer eingetragen" %>
+                        </p>
+
+                        <% if (t.notes) { %>
+                            <p class="termin-note">📝 <%= t.notes %></p>
+                        <% } %>
+                    </div>
+
+                    <div class="termin-status">
+                        <% if (t.status === "bestanden") { %>
+                            <span class="badge success">Bestanden</span>
+                        <% } else if (t.status === "nicht bestanden") { %>
+                            <span class="badge danger">Nicht bestanden</span>
+                        <% } else if (t.status === "verschoben") { %>
+                            <span class="badge warning">Verschoben</span>
+                        <% } else { %>
+                            <span class="badge warning">Offen</span>
+                        <% } %>
+
+                        <form method="POST" action="/termine/status/<%= t._id %>" class="mini-form">
+                            <select name="status">
+                                <option value="offen" <%= t.status === "offen" ? "selected" : "" %>>Offen</option>
+                                <option value="bestanden" <%= t.status === "bestanden" ? "selected" : "" %>>Bestanden</option>
+                                <option value="nicht bestanden" <%= t.status === "nicht bestanden" ? "selected" : "" %>>Nicht bestanden</option>
+                                <option value="verschoben" <%= t.status === "verschoben" ? "selected" : "" %>>Verschoben</option>
+                            </select>
+
+                            <button type="submit">Ändern</button>
+                        </form>
+
+                        <% if (isAdmin) { %>
+                            <form method="POST" action="/termine/delete/<%= t._id %>">
+                                <button type="submit" class="danger-btn">Löschen</button>
+                            </form>
+                        <% } %>
+                    </div>
+                </div>
+            <% }) %>
+        </div>
 
     <% } %>
 </section>
