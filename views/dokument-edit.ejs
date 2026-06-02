@@ -1,0 +1,50 @@
+﻿<%- include('layout', { title: 'Dokument bearbeiten', active: 'dokumente' }) %>
+
+<div class="page-head">
+  <div>
+    <h1>Dokument bearbeiten</h1>
+    <p>Ändere Titel, Beschreibung oder Kategorie des Dokuments.</p>
+  </div>
+
+  <a class="btn secondary" href="/dokumente">Zurück</a>
+</div>
+
+<div class="card">
+  <form method="POST" action="/dokumente/edit/<%= dokument._id %>" class="form-grid">
+
+    <div class="form-group">
+      <label>Titel</label>
+      <input 
+        type="text" 
+        name="title" 
+        value="<%= dokument.title || '' %>" 
+        required
+      >
+    </div>
+
+    <div class="form-group">
+      <label>Kategorie</label>
+      <input 
+        type="text" 
+        name="category" 
+        value="<%= dokument.category || '' %>"
+        placeholder="z.B. Ausbildung, Allgemein, Verwaltung"
+      >
+    </div>
+
+    <div class="form-group full">
+      <label>Beschreibung</label>
+      <textarea 
+        name="description" 
+        rows="5"
+        placeholder="Kurze Beschreibung..."
+      ><%= dokument.description || '' %></textarea>
+    </div>
+
+    <div class="form-actions full">
+      <button class="btn" type="submit">Speichern</button>
+      <a class="btn secondary" href="/dokumente">Abbrechen</a>
+    </div>
+
+  </form>
+</div>
