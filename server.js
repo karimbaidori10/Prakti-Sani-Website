@@ -1,4 +1,4 @@
-require("dotenv").config();
+﻿require("dotenv").config();
 
 const express = require("express");
 const expressLayouts = require("express-ejs-layouts");
@@ -100,7 +100,7 @@ function requireLogin(req, res, next) {
 
 function requireAdmin(req, res, next) {
     if (!req.session.isAdmin) {
-        return res.status(403).send("❌ Kein Zugriff auf diesen Bereich.");
+        return res.status(403).send("âŒ Kein Zugriff auf diesen Bereich.");
     }
 
     next();
@@ -235,7 +235,7 @@ app.get("/dokumente", requireLogin, async (req, res) => {
 });
 
 // Dokument bearbeiten anzeigen
-app.get('/dokumente/edit/:id', ensureAuth, ensureAllowedRole, async (req, res) => {
+app.get('/dokumente/edit/:id', requireLogin, requireAdmin, async (req, res) => {
   try {
     const dokument = await Dokument.findById(req.params.id);
 
@@ -256,7 +256,7 @@ app.get('/dokumente/edit/:id', ensureAuth, ensureAllowedRole, async (req, res) =
 });
 
 // Dokument bearbeiten speichern
-app.post('/dokumente/edit/:id', ensureAuth, ensureAllowedRole, async (req, res) => {
+app.post('/dokumente/edit/:id', requireLogin, requireAdmin, async (req, res) => {
   try {
     const { title, category, description } = req.body;
 
@@ -299,7 +299,7 @@ app.post("/points/add", requireLogin, requireAdmin, async (req, res) => {
         { upsert: true }
     );
 
-    await addLog("Punkte hinzugefügt", { userId, amount });
+    await addLog("Punkte hinzugefÃ¼gt", { userId, amount });
 
     res.redirect("/admin");
 });
@@ -382,7 +382,7 @@ app.post("/termine/status/:id", requireLogin, async (req, res) => {
         { $set: { status } }
     );
 
-    await addLog("Termin Status geändert", { id: req.params.id, status });
+    await addLog("Termin Status geÃ¤ndert", { id: req.params.id, status });
 
     res.redirect("/termine");
 });
@@ -392,13 +392,13 @@ app.post("/termine/delete/:id", requireLogin, requireAdmin, async (req, res) => 
         _id: new ObjectId(req.params.id)
     });
 
-    await addLog("Termin gelöscht", { id: req.params.id });
+    await addLog("Termin gelÃ¶scht", { id: req.params.id });
 
     res.redirect("/termine");
 });
 
 // =====================
-// PRÜFUNGEN
+// PRÃœFUNGEN
 // =====================
 
 app.get("/pruefungen/edit/:id", requireLogin, async (req, res) => {
@@ -440,7 +440,7 @@ app.post("/pruefungen/edit/:id", requireLogin, async (req, res) => {
         }
     );
 
-    await addLog("Prüfung bearbeitet", { id: req.params.id, name, examType, result });
+    await addLog("PrÃ¼fung bearbeitet", { id: req.params.id, name, examType, result });
 
     res.redirect("/pruefungen");
 });
@@ -465,7 +465,7 @@ app.post("/pruefungen/create", requireLogin, async (req, res) => {
         createdAt: new Date()
     });
 
-    await addLog("Prüfung gespeichert", { name, examType, result });
+    await addLog("PrÃ¼fung gespeichert", { name, examType, result });
 
     res.redirect("/pruefungen");
 });
@@ -475,7 +475,7 @@ app.post("/pruefungen/delete/:id", requireLogin, requireAdmin, async (req, res) 
         _id: new ObjectId(req.params.id)
     });
 
-    await addLog("Prüfung gelöscht", { id: req.params.id });
+    await addLog("PrÃ¼fung gelÃ¶scht", { id: req.params.id });
 
     res.redirect("/pruefungen");
 });
@@ -494,7 +494,7 @@ app.post("/dokumente/create", requireLogin, requireAdmin, async (req, res) => {
         createdAt: new Date()
     });
 
-    await addLog("Dokument hinzugefügt", { title, type });
+    await addLog("Dokument hinzugefÃ¼gt", { title, type });
 
     res.redirect("/dokumente");
 });
@@ -504,7 +504,7 @@ app.post("/dokumente/delete/:id", requireLogin, requireAdmin, async (req, res) =
         _id: new ObjectId(req.params.id)
     });
 
-    await addLog("Dokument gelöscht", { id: req.params.id });
+    await addLog("Dokument gelÃ¶scht", { id: req.params.id });
 
     res.redirect("/dokumente");
 });
@@ -524,7 +524,7 @@ async function start() {
     logsCollection = db.collection("dashboardLogs");
 
     app.listen(PORT, () => {
-        console.log(`✅ LSMD Website läuft auf Port ${PORT}`);
+        console.log(`âœ… LSMD Website lÃ¤uft auf Port ${PORT}`);
     });
 }
 
