@@ -137,6 +137,12 @@
                             <span class="badge warning">Offen</span>
                         <% } %>
 
+<% if (isAdmin) { %>
+    <a href="/termine/edit/<%= t._id %>" class="open-doc-btn">
+        Bearbeiten
+    </a>
+<% } %>
+
                         <form method="POST" action="/termine/status/<%= t._id %>" class="mini-form">
                             <select name="status">
                                 <option value="offen" <%= t.status === "offen" ? "selected" : "" %>>Offen</option>
