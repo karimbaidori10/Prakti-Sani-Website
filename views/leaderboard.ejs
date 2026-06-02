@@ -1,54 +1,152 @@
-<h1>Leaderboard</h1>
+<div class="page-header">
+    <h1>🏆 Leaderboard</h1>
+    <p>Ranking der aktivsten Mitglieder nach Punkten und Wochenziel.</p>
+</div>
 
-<section class="card">
-    <h2>Top Ausbilder</h2>
+<% const topUser = users && users.length > 0 ? users[0] : null; %>
+<% const secondUser = users && users.length > 1 ? users[1] : null; %>
+<% const thirdUser = users && users.length > 2 ? users[2] : null; %>
 
-    <% if (users.length === 0) { %>
-        <p>Keine Punkte vorhanden.</p>
+<section class="podium-section">
+    <% if (!users || users.length === 0) { %>
+        <div class="card">
+            <div class="empty-state">
+                <div>📭</div>
+                <h3>Keine Punkte vorhanden</h3>
+                <p>Sobald Punkte vergeben werden, erscheint hier das Leaderboard.</p>
+            </div>
+        </div>
     <% } else { %>
 
-        <table>
-            <thead>
-                <tr>
-                    <th>Platz</th>
-                    <th>User ID</th>
-                    <th>Punkte</th>
-                    <th>Status</th>
-                </tr>
-            </thead>
+        <div class="podium-grid">
+            <% if (secondUser) { %>
+                <div class="podium-card second">
+                    <div class="podium-medal">🥈</div>
+                    <h3>Platz 2</h3>
+                    <p><%= secondUser.userId %></p>
+                    <strong><%= secondUser.points || 0 %> Punkte</strong>
+                </div>
+            <% } %>
 
-            <tbody>
-                <% users.forEach((user, index) => { %>
-                    <tr>
-                        <td>
-                            <% if (index === 0) { %>
-                                Platz 1
-                            <% } else if (index === 1) { %>
-                                Platz 2
-                            <% } else if (index === 2) { %>
-                                Platz 3
-                            <% } else { %>
-                                Platz <%= index + 1 %>
-                            <% } %>
-                        </td>
+            <% if (topUser) { %>
+                <div class="podium-card first">
+                    <div class="podium-medal">🥇</div>
+                    <h3>Platz 1</h3>
+                    <p><%= topUser.userId %></p>
+                    <strong><%= topUser.points || 0 %> Punkte</strong>
+                    <span class="champion-badge">Champion</span>
+                </div>
+            <% } %>
 
-                        <td><%= user.userId %></td>
+            <% if (thirdUser) { %>
+                <div class="podium-card third">
+                    <div class="podium-medal">🥉</div>
+                    <h3>Platz 3</h3>
+                    <p><%= thirdUser.userId %></p>
+                    <strong><%= thirdUser.points || 0 %> Punkte</strong>
+                </div>
+            <% } %>
+        </div>
 
-                        <td>
-                            <strong><%= user.points %></strong>
-                        </td>
+    <% } %>
+</section>
 
-                        <td>
-                            <% if (user.points >= 5) { %>
-                                Ziel erreicht
-                            <% } else { %>
-                                Noch offen
-                            <% } %>
-                        </td>
-                    </tr>
-                <% }) %>
-            </tbody>
-        </table>
+<section class="stats-grid">
+    <div class="stat-card stat-yellow">
+        <div class="stat-icon">🏆</div>
+        <div>
+            <h2><%= users && users.length > 0 ? users[0].points : 0 %></h2>
+            <strong>Top Punkte</strong>
+            <p>Aktueller Höchstwert</p>
+        </div>
+    </div>
+
+    <div class="stat-card stat-blue">
+        <div class="stat-icon">👥</div>
+        <div>
+            <h2><%= users ? users.length : 0 %></h2>
+            <strong>Teilnehmer</strong>
+            <p>Im Ranking</p>
+        </div>
+    </div>
+
+    <div class="stat-card stat-green">
+        <div class="stat-icon">✅</div>
+        <div>
+            <h2><%= users ? users.filter(u => Number(u.points || 0) >= 5).length : 0 %></h2>
+            <strong>Ziel erreicht</strong>
+            <p>Mindestens 5 Punkte</p>
+        </div>
+    </div>
+
+    <div class="stat-card stat-red">
+        <div class="stat-icon">🔥</div>
+        <div>
+            <h2>
+                <%= users && users.length > 0
+                    ? Math.round(users.reduce((sum, u) => sum + Number(u.points || 0), 0) / users.length)
+                    : 0
+                %>
+            </h2>
+            <strong>Ø Punkte</strong>
+            <p>Durchschnitt</p>
+        </div>
+    </div>
+</section>
+
+<section class="card">
+    <div class="card-header">
+        <h2>📊 Vollständiges Ranking</h2>
+        <span class="chip blue"><%= users ? users.length : 0 %> Einträge</span>
+    </div>
+
+    <% if (!users || users.length === 0) { %>
+        <div class="empty-state">
+            <div>📭</div>
+            <h3>Keine Daten vorhanden</h3>
+            <p>Vergib Punkte im Adminbereich, damit das Ranking startet.</p>
+        </div>
+    <% } else { %>
+
+        <div class="leaderboard-list">
+            <% users.forEach((user, index) => { %>
+                <div class="leaderboard-row <%= index < 3 ? 'top-rank' : '' %>">
+                    <div class="rank-number">
+                        <% if (index === 0) { %>
+                            🥇
+                        <% } else if (index === 1) { %>
+                            🥈
+                        <% } else if (index === 2) { %>
+                            🥉
+                        <% } else { %>
+                            #<%= index + 1 %>
+                        <% } %>
+                    </div>
+
+                    <div class="leader-avatar">
+                        <%= user.userId ? user.userId.toString().charAt(0).toUpperCase() : "?" %>
+                    </div>
+
+                    <div class="leader-info">
+                        <h3>User <%= index + 1 %></h3>
+                        <p>Discord ID: <%= user.userId %></p>
+                    </div>
+
+                    <div class="leader-points">
+                        <strong><%= user.points || 0 %></strong>
+                        <span>Punkte</span>
+                    </div>
+
+                    <div class="leader-status">
+                        <% if (Number(user.points || 0) >= 5) { %>
+                            <span class="badge success">Ziel erreicht</span>
+                        <% } else { %>
+                            <span class="badge warning">Noch offen</span>
+                        <% } %>
+                    </div>
+                </div>
+            <% }) %>
+        </div>
 
     <% } %>
 </section>
