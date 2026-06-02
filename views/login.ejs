@@ -20,13 +20,12 @@
             <div class="error"><%= error %></div>
         <% } %>
 
-        <form action="/login" method="POST" class="form">
-            <input type="password" name="password" placeholder="Leitungs-Passwort" required>
-            <button type="submit">Einloggen</button>
-        </form>
+        <a href="/auth/discord" class="discord-login">
+            Mit Discord einloggen
+        </a>
 
         <div class="login-hint">
-            Zugriff nur für berechtigte Leitung.
+            Zugriff nur mit Prakti-Sani oder Admin Rolle.
         </div>
     </div>
 </div>

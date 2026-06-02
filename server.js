@@ -4,6 +4,8 @@ const express = require("express");
 const expressLayouts = require("express-ejs-layouts");
 const session = require("express-session");
 const { MongoClient, ObjectId } = require("mongodb");
+const passport = require("passport");
+const DiscordStrategy = require("passport-discord").Strategy;
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -32,6 +34,60 @@ app.use(session({
     secret: process.env.SESSION_SECRET || "lsmd-dashboard-secret",
     resave: false,
     saveUninitialized: false
+}));
+
+app.use(passport.initialize());
+app.use(passport.session());
+
+passport.serializeUser((user, done) => {
+    done(null, user);
+});
+
+passport.deserializeUser((user, done) => {
+    done(null, user);
+});
+
+passport.use(new DiscordStrategy({
+    clientID: process.env.DISCORD_CLIENT_ID,
+    clientSecret: process.env.DISCORD_CLIENT_SECRET,
+    callbackURL: process.env.DISCORD_CALLBACK_URL,
+    scope: ["identify"]
+}, async (accessToken, refreshToken, profile, done) => {
+    try {
+        const response = await fetch(
+            `https://discord.com/api/v10/guilds/${process.env.DISCORD_GUILD_ID}/members/${profile.id}`,
+            {
+                headers: {
+                    Authorization: `Bot ${process.env.DISCORD_BOT_TOKEN}`
+                }
+            }
+        );
+
+        if (!response.ok) {
+            return done(null, false);
+        }
+
+        const member = await response.json();
+        const roles = member.roles || [];
+
+        const isAdmin = roles.includes(ADMIN_ROLE_ID);
+        const isPraktiSani = roles.includes(PRAKTI_SANI_ROLE_ID);
+
+        if (!isAdmin && !isPraktiSani) {
+            return done(null, false);
+        }
+
+        return done(null, {
+            id: profile.id,
+            username: profile.username,
+            avatar: profile.avatar,
+            roles,
+            isAdmin,
+            role: isAdmin ? "Admin" : "Prakti-Sani"
+        });
+    } catch (error) {
+        return done(error, null);
+    }
 }));
 
 function requireLogin(req, res, next) {
@@ -81,23 +137,31 @@ app.get("/login", (req, res) => {
     });
 });
 
-app.post("/login", (req, res) => {
-    const { password } = req.body;
+app.get("/auth/discord", passport.authenticate("discord"));
 
-    if (password === process.env.WEB_ADMIN_PASSWORD) {
+app.get(
+    "/auth/discord/callback",
+    passport.authenticate("discord", {
+        failureRedirect: "/login"
+    }),
+    (req, res) => {
         req.session.loggedIn = true;
-        req.session.isAdmin = true;
+        req.session.isAdmin = req.user.isAdmin;
         req.session.user = {
-            username: "Leitung",
-            role: "Admin"
+            username: req.user.username,
+            discordId: req.user.id,
+            role: req.user.role
         };
 
-        return res.redirect("/dashboard");
+        res.redirect("/dashboard");
     }
+);
 
-    res.render("login", {
-        layout: false,
-        error: "Falsches Passwort"
+app.get("/logout", (req, res) => {
+    req.logout(() => {
+        req.session.destroy(() => {
+            res.redirect("/login");
+        });
     });
 });
 

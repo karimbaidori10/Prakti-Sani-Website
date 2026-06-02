@@ -832,3 +832,20 @@ a {
     color: #94a3b8;
     font-size: 13px;
 }
+
+.discord-login {
+    display: block;
+    width: 100%;
+    padding: 14px 18px;
+    border-radius: 14px;
+    background: linear-gradient(135deg, #5865f2, #2563eb);
+    color: white;
+    text-decoration: none;
+    font-weight: 900;
+    box-shadow: 0 0 28px rgba(88,101,242,.35);
+    margin-top: 12px;
+}
+
+.discord-login:hover {
+    opacity: .92;
+}
