@@ -10,7 +10,41 @@
             <span class="chip blue">Planung</span>
         </div>
 
+        <form method="POST" action="/termine/create" class="form">
+            <input name="name" placeholder="Name des Teilnehmers" required>
+
+            <input name="discordId" placeholder="Discord ID optional">
+
+            <select name="examType" required>
+                <option value="">Pruefungsart waehlen</option>
+                <option>Prakti-Pruefung</option>
+                <option>Darf alleine fahren</option>
+                <option>Sanitaeter-Pruefung</option>
+                <option>Theorie-Pruefung</option>
+                <option>Regelwerk</option>
+                <option>Blaues Blatt</option>
+                <option>Funkleitfaden</option>
+            </select>
+
+            <div class="form-row">
+                <input type="date" name="date" required>
+                <input type="time" name="time" required>
             </div>
+
+            <input name="examiner" placeholder="Pruefer / Ausbilder">
+
+            <select name="status">
+                <option value="offen">Offen</option>
+                <option value="bestanden">Bestanden</option>
+                <option value="nicht bestanden">Nicht bestanden</option>
+                <option value="verschoben">Verschoben</option>
+            </select>
+
+            <textarea name="notes" placeholder="Notizen"></textarea>
+
+            <button type="submit">Termin speichern</button>
+        </form>
+    </div>
 
     <div class="card">
         <div class="card-header">
@@ -73,10 +107,10 @@
                     </div>
 
                     <div class="termin-main">
-                        <h3><%= t.examType %></h3>
+                        <h3><%= t.examType || "Termin" %></h3>
 
                         <p>
-                            Teilnehmer: <%= t.name %>
+                            Teilnehmer: <%= t.name || "Unbekannt" %>
                             <% if (t.discordId) { %>
                                 - Discord ID: <%= t.discordId %>
                             <% } %>
@@ -103,24 +137,11 @@
                             <span class="badge warning">Offen</span>
                         <% } %>
 
-<% if (isAdmin) { %>
-    <a href="/termine/edit/<%= t._id %>" class="open-doc-btn">
-        Bearbeiten
-    </a>
-<% } %>
-
-                        <form method="POST" action="/termine/status/<%= t._id %>" class="mini-form">
-                            <select name="status">
-                                <option value="offen" <%= t.status === "offen" ? "selected" : "" %>>Offen</option>
-                                <option value="bestanden" <%= t.status === "bestanden" ? "selected" : "" %>>Bestanden</option>
-                                <option value="nicht bestanden" <%= t.status === "nicht bestanden" ? "selected" : "" %>>Nicht bestanden</option>
-                                <option value="verschoben" <%= t.status === "verschoben" ? "selected" : "" %>>Verschoben</option>
-                            </select>
-
-                            <button type="submit">Aendern</button>
-                        </form>
-
                         <% if (isAdmin) { %>
+                            <a href="/termine/edit/<%= t._id %>" class="open-doc-btn">
+                                Bearbeiten
+                            </a>
+
                             <form method="POST" action="/termine/delete/<%= t._id %>">
                                 <button type="submit" class="danger-btn" onclick="return confirm('Termin wirklich loeschen?');">
                                     Loeschen
