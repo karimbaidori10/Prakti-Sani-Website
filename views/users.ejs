@@ -1,0 +1,37 @@
+<h1>Mitglieder</h1>
+
+<section class="card">
+    <h2>Mitgliederübersicht</h2>
+
+    <% if (users.length === 0) { %>
+        <p>Keine Mitglieder mit Punkten vorhanden.</p>
+    <% } else { %>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>User ID</th>
+                    <th>Punkte</th>
+                    <th>Wochenziel</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                <% users.forEach(user => { %>
+                    <tr>
+                        <td><%= user.userId %></td>
+                        <td><strong><%= user.points %></strong></td>
+                        <td>
+                            <% if (user.points >= 5) { %>
+                                Erreicht
+                            <% } else { %>
+                                Offen
+                            <% } %>
+                        </td>
+                    </tr>
+                <% }) %>
+            </tbody>
+        </table>
+
+    <% } %>
+</section>
