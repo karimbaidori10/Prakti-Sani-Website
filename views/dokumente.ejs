@@ -1,15 +1,14 @@
-cd C:\Users\kbaid\Desktop\Website
-
+﻿
 <div class="page-header">
-    <h1>📁 Dokumente</h1>
-    <p>Leitfäden, Formulare, SOPs und wichtige Unterlagen zentral verwalten.</p>
+    <h1>ðŸ“ Dokumente</h1>
+    <p>LeitfÃ¤den, Formulare, SOPs und wichtige Unterlagen zentral verwalten.</p>
 </div>
 
 <section class="dashboard-grid">
     <% if (isAdmin) { %>
         <div class="card">
             <div class="card-header">
-                <h2>➕ Dokument hinzufügen</h2>
+                <h2>âž• Dokument hinzufÃ¼gen</h2>
                 <span class="chip blue">Admin</span>
             </div>
 
@@ -17,11 +16,11 @@ cd C:\Users\kbaid\Desktop\Website
                 <input type="text" name="title" placeholder="Titel des Dokuments" required>
 
                 <select name="type" required>
-                    <option value="">Kategorie auswählen</option>
+                    <option value="">Kategorie auswÃ¤hlen</option>
                     <option value="Leitfaden">Leitfaden</option>
                     <option value="Formular">Formular</option>
                     <option value="SOP">SOP</option>
-                    <option value="Prüfung">Prüfung</option>
+                    <option value="PrÃ¼fung">PrÃ¼fung</option>
                     <option value="Google Docs">Google Docs</option>
                     <option value="Sonstiges">Sonstiges</option>
                 </select>
@@ -37,7 +36,7 @@ cd C:\Users\kbaid\Desktop\Website
 
     <div class="card">
         <div class="card-header">
-            <h2>📊 Dokumentenstatus</h2>
+            <h2>ðŸ“Š Dokumentenstatus</h2>
             <span class="chip green">Live</span>
         </div>
 
@@ -49,7 +48,7 @@ cd C:\Users\kbaid\Desktop\Website
 
             <div class="mini-stat">
                 <strong><%= docs ? docs.filter(d => d.type === "Leitfaden").length : 0 %></strong>
-                <span>Leitfäden</span>
+                <span>LeitfÃ¤den</span>
             </div>
 
             <div class="mini-stat">
@@ -66,23 +65,23 @@ cd C:\Users\kbaid\Desktop\Website
         <div class="clean-divider"></div>
 
         <p style="color: var(--muted);">
-            Hier kannst du Google Docs, Leitfäden und wichtige Unterlagen sammeln.
-            Später können wir automatische Google-Docs-Synchronisation einbauen.
+            Hier kannst du Google Docs, LeitfÃ¤den und wichtige Unterlagen sammeln.
+            SpÃ¤ter kÃ¶nnen wir automatische Google-Docs-Synchronisation einbauen.
         </p>
     </div>
 </section>
 
 <section class="card">
     <div class="card-header">
-        <h2>📚 Gespeicherte Dokumente</h2>
+        <h2>ðŸ“š Gespeicherte Dokumente</h2>
         <span class="chip blue"><%= docs ? docs.length : 0 %> Dokumente</span>
     </div>
 
     <% if (!docs || docs.length === 0) { %>
         <div class="empty-state">
-            <div>📭</div>
+            <div>ðŸ“­</div>
             <h3>Keine Dokumente gespeichert</h3>
-            <p>Füge oben dein erstes Dokument oder einen Google Docs Link hinzu.</p>
+            <p>FÃ¼ge oben dein erstes Dokument oder einen Google Docs Link hinzu.</p>
         </div>
     <% } else { %>
 
@@ -92,17 +91,17 @@ cd C:\Users\kbaid\Desktop\Website
                     <div class="doc-top">
                         <div class="doc-icon">
                             <% if (doc.type === "Leitfaden") { %>
-                                📘
+                                ðŸ“˜
                             <% } else if (doc.type === "Formular") { %>
-                                📝
+                                ðŸ“
                             <% } else if (doc.type === "SOP") { %>
-                                📕
-                            <% } else if (doc.type === "Prüfung") { %>
-                                📋
+                                ðŸ“•
+                            <% } else if (doc.type === "PrÃ¼fung") { %>
+                                ðŸ“‹
                             <% } else if (doc.type === "Google Docs") { %>
-                                🌐
+                                ðŸŒ
                             <% } else { %>
-                                📄
+                                ðŸ“„
                             <% } %>
                         </div>
 
@@ -117,7 +116,7 @@ cd C:\Users\kbaid\Desktop\Website
 
                     <div class="doc-actions">
                         <a href="<%= doc.url %>" target="_blank" class="open-doc-btn">
-                            Öffnen
+                            Ã–ffnen
                         </a>
 
                         <% if (isAdmin) { %>
@@ -129,9 +128,9 @@ cd C:\Users\kbaid\Desktop\Website
                                 <button
                                     type="submit"
                                     class="danger-btn"
-                                    onclick="return confirm('Dokument wirklich löschen?');"
+                                    onclick="return confirm('Dokument wirklich lÃ¶schen?');"
                                 >
-                                    Löschen
+                                    LÃ¶schen
                                 </button>
                             </form>
                         <% } %>
