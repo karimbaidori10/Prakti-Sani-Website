@@ -1,86 +1,183 @@
 <div class="page-header">
-    <h1>Admin</h1>
-    <p>Verwaltung für Leitung und Admins.</p>
+    <h1>🛡️ Admin</h1>
+    <p>Leitungsbereich für Punkte, Mitglieder, Logs und Schnellzugriff.</p>
 </div>
 
-<div class="card">
-    <h2>Statistiken</h2>
-    <p>Mitglieder: <%= users ? users.length : 0 %></p>
-    <p>Logs: <%= logs ? logs.length : 0 %></p>
-</div>
+<section class="stats-grid">
+    <div class="stat-card stat-blue">
+        <div class="stat-icon">👥</div>
+        <div>
+            <h2><%= users ? users.length : 0 %></h2>
+            <strong>Mitglieder</strong>
+            <p>Mit Punkte-Eintrag</p>
+        </div>
+    </div>
 
-<div class="card">
-    <h2>Punkte verwalten</h2>
+    <div class="stat-card stat-green">
+        <div class="stat-icon">✅</div>
+        <div>
+            <h2><%= users ? users.filter(u => Number(u.points || 0) >= 5).length : 0 %></h2>
+            <strong>Wochenziel</strong>
+            <p>Erreicht</p>
+        </div>
+    </div>
 
-    <form action="/points/set" method="POST" class="form">
-        <input type="text" name="userId" placeholder="Discord User ID" required>
-        <input type="number" name="points" placeholder="Punkte" required>
-        <button type="submit">Punkte setzen</button>
-    </form>
+    <div class="stat-card stat-yellow">
+        <div class="stat-icon">📜</div>
+        <div>
+            <h2><%= logs ? logs.length : 0 %></h2>
+            <strong>Logs</strong>
+            <p>Letzte Aktionen</p>
+        </div>
+    </div>
 
-    <form action="/points/add" method="POST" class="form">
-        <input type="text" name="userId" placeholder="Discord User ID" required>
-        <input type="number" name="points" placeholder="Punkte hinzufügen" required>
-        <button type="submit">Punkte hinzufügen</button>
-    </form>
+    <div class="stat-card stat-red">
+        <div class="stat-icon">⚙️</div>
+        <div>
+            <h2>Admin</h2>
+            <strong>Modus</strong>
+            <p>Leitung aktiv</p>
+        </div>
+    </div>
+</section>
 
-    <form action="/points/remove" method="POST" class="form">
-        <input type="text" name="userId" placeholder="Discord User ID" required>
-        <input type="number" name="points" placeholder="Punkte entfernen" required>
-        <button type="submit">Punkte entfernen</button>
-    </form>
-</div>
+<section class="dashboard-grid">
+    <div class="card admin-glow">
+        <div class="card-header">
+            <h2>🎯 Punkte verwalten</h2>
+            <span class="chip red">Admin Tool</span>
+        </div>
 
-<div class="card">
-    <h2>Aktuelle Mitglieder / Punkte</h2>
+        <div class="points-admin-grid">
+            <form action="/points/set" method="POST" class="points-box">
+                <h3>Wert setzen</h3>
+                <p>Punkte eines Users direkt auf einen Wert setzen.</p>
 
-    <table class="table">
-        <thead>
-            <tr>
-                <th>User ID</th>
-                <th>Punkte</th>
-            </tr>
-        </thead>
-        <tbody>
-            <% if (users && users.length > 0) { %>
-                <% users.forEach(user => { %>
-                    <tr>
-                        <td><%= user.userId %></td>
-                        <td><%= user.points %></td>
-                    </tr>
+                <input type="text" name="userId" placeholder="Discord User ID" required>
+                <input type="number" name="points" placeholder="Punkte" required>
+
+                <button type="submit">Punkte setzen</button>
+            </form>
+
+            <form action="/points/add" method="POST" class="points-box">
+                <h3>Punkte hinzufügen</h3>
+                <p>Zusätzliche Punkte auf den aktuellen Stand addieren.</p>
+
+                <input type="text" name="userId" placeholder="Discord User ID" required>
+                <input type="number" name="points" placeholder="Punkte hinzufügen" required>
+
+                <button type="submit">Hinzufügen</button>
+            </form>
+
+            <form action="/points/remove" method="POST" class="points-box danger-box">
+                <h3>Punkte entfernen</h3>
+                <p>Punkte abziehen, ohne unter 0 zu fallen.</p>
+
+                <input type="text" name="userId" placeholder="Discord User ID" required>
+                <input type="number" name="points" placeholder="Punkte entfernen" required>
+
+                <button type="submit" class="danger-btn">Entfernen</button>
+            </form>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header">
+            <h2>⚡ Schnellzugriff</h2>
+            <span class="chip blue">Navigation</span>
+        </div>
+
+        <div class="quick-grid">
+            <a href="/users" class="quick-card red">
+                <h3>👥 Mitglieder</h3>
+                <p>Benutzerübersicht öffnen</p>
+            </a>
+
+            <a href="/termine" class="quick-card blue">
+                <h3>📅 Termine</h3>
+                <p>Prüfungstermine verwalten</p>
+            </a>
+
+            <a href="/pruefungen" class="quick-card green">
+                <h3>📋 Prüfungen</h3>
+                <p>Prüfungsverlauf öffnen</p>
+            </a>
+
+            <a href="/dokumente" class="quick-card yellow">
+                <h3>📁 Dokumente</h3>
+                <p>Unterlagen verwalten</p>
+            </a>
+        </div>
+    </div>
+</section>
+
+<section class="dashboard-grid">
+    <div class="card">
+        <div class="card-header">
+            <h2>👥 Aktuelle Mitglieder / Punkte</h2>
+            <span class="chip blue"><%= users ? users.length : 0 %> User</span>
+        </div>
+
+        <% if (!users || users.length === 0) { %>
+            <div class="empty-state">
+                <div>📭</div>
+                <h3>Keine Mitglieder vorhanden</h3>
+                <p>Sobald Punkte vergeben werden, erscheinen User hier.</p>
+            </div>
+        <% } else { %>
+            <div class="admin-member-list">
+                <% users.forEach((user, index) => { %>
+                    <div class="admin-member-row">
+                        <div class="rank-number">
+                            #<%= index + 1 %>
+                        </div>
+
+                        <div class="leader-avatar">
+                            <%= user.userId ? user.userId.toString().charAt(0).toUpperCase() : "?" %>
+                        </div>
+
+                        <div>
+                            <h3>User <%= index + 1 %></h3>
+                            <p>Discord ID: <%= user.userId %></p>
+                        </div>
+
+                        <div class="leader-points">
+                            <strong><%= user.points || 0 %></strong>
+                            <span>Punkte</span>
+                        </div>
+                    </div>
                 <% }) %>
-            <% } else { %>
-                <tr>
-                    <td colspan="2">Noch keine Mitglieder vorhanden.</td>
-                </tr>
-            <% } %>
-        </tbody>
-    </table>
-</div>
+            </div>
+        <% } %>
+    </div>
 
-<div class="card">
-    <h2>Admin Logs</h2>
+    <div class="card">
+        <div class="card-header">
+            <h2>📜 Admin Logs</h2>
+            <span class="chip green"><%= logs ? logs.length : 0 %> Logs</span>
+        </div>
 
-    <table class="table">
-        <thead>
-            <tr>
-                <th>Aktion</th>
-                <th>Datum</th>
-            </tr>
-        </thead>
-        <tbody>
-            <% if (logs && logs.length > 0) { %>
+        <% if (!logs || logs.length === 0) { %>
+            <div class="empty-state">
+                <div>📭</div>
+                <h3>Keine Logs vorhanden</h3>
+                <p>Admin-Aktionen werden hier automatisch gespeichert.</p>
+            </div>
+        <% } else { %>
+            <div class="log-timeline">
                 <% logs.forEach(log => { %>
-                    <tr>
-                        <td><%= log.action %></td>
-                        <td><%= new Date(log.createdAt).toLocaleString("de-DE") %></td>
-                    </tr>
+                    <div class="log-item">
+                        <div class="log-dot"></div>
+
+                        <div>
+                            <h3><%= log.action %></h3>
+                            <p>
+                                <%= log.createdAt ? new Date(log.createdAt).toLocaleString("de-DE") : "Kein Datum" %>
+                            </p>
+                        </div>
+                    </div>
                 <% }) %>
-            <% } else { %>
-                <tr>
-                    <td colspan="2">Noch keine Logs vorhanden.</td>
-                </tr>
-            <% } %>
-        </tbody>
-    </table>
-</div>
+            </div>
+        <% } %>
+    </div>
+</section>
