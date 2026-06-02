@@ -237,7 +237,9 @@ app.get("/dokumente", requireLogin, async (req, res) => {
 // Dokument bearbeiten anzeigen
 app.get('/dokumente/edit/:id', requireLogin, requireAdmin, async (req, res) => {
     try {
-        const doc = await Dokument.findById(req.params.id);
+        const doc = await docsCollection.findOne({
+            _id: new ObjectId(req.params.id)
+        });
 
         if (!doc) {
             return res.status(404).send('Dokument nicht gefunden');
@@ -258,12 +260,17 @@ app.post('/dokumente/edit/:id', requireLogin, requireAdmin, async (req, res) => 
     try {
         const { title, type, url, notes } = req.body;
 
-        await Dokument.findByIdAndUpdate(req.params.id, {
-            title,
-            type,
-            url,
-            notes
-        });
+        await docsCollection.updateOne(
+            { _id: new ObjectId(req.params.id) },
+            {
+                $set: {
+                    title,
+                    type,
+                    url,
+                    notes
+                }
+            }
+        );
 
         res.redirect('/dokumente');
     } catch (err) {
@@ -275,7 +282,10 @@ app.post('/dokumente/edit/:id', requireLogin, requireAdmin, async (req, res) => 
 // Dokument löschen
 app.post('/dokumente/delete/:id', requireLogin, requireAdmin, async (req, res) => {
     try {
-        await Dokument.findByIdAndDelete(req.params.id);
+        await docsCollection.deleteOne({
+            _id: new ObjectId(req.params.id)
+        });
+
         res.redirect('/dokumente');
     } catch (err) {
         console.error('Fehler beim Löschen des Dokuments:', err);
