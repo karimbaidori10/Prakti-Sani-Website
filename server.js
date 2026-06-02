@@ -1,4 +1,6 @@
-﻿require("dotenv").config();
+﻿
+@'
+require("dotenv").config();
 
 const express = require("express");
 const expressLayouts = require("express-ejs-layouts");
@@ -100,7 +102,7 @@ function requireLogin(req, res, next) {
 
 function requireAdmin(req, res, next) {
     if (!req.session.isAdmin) {
-        return res.status(403).send("âŒ Kein Zugriff auf diesen Bereich.");
+        return res.status(403).send("Kein Zugriff auf diesen Bereich.");
     }
 
     next();
@@ -130,6 +132,7 @@ async function getAllPoints() {
 // =====================
 // LOGIN
 // =====================
+
 app.get("/login", (req, res) => {
     res.render("login", {
         layout: false,
@@ -170,8 +173,9 @@ app.get("/logout", (req, res) => {
 });
 
 // =====================
-// ROUTES
+// SEITEN
 // =====================
+
 app.get("/", requireLogin, (req, res) => {
     res.redirect("/dashboard");
 });
@@ -234,65 +238,6 @@ app.get("/dokumente", requireLogin, async (req, res) => {
     }));
 });
 
-// Dokument bearbeiten anzeigen
-app.get('/dokumente/edit/:id', requireLogin, requireAdmin, async (req, res) => {
-    try {
-        const doc = await docsCollection.findOne({
-            _id: new ObjectId(req.params.id)
-        });
-
-        if (!doc) {
-            return res.status(404).send('Dokument nicht gefunden');
-        }
-
-        res.render('dokument-edit', viewData(req, {
-            active: 'dokumente',
-            doc
-        }));
-    } catch (err) {
-        console.error('Fehler beim Laden des Dokuments:', err);
-        res.status(500).send('Serverfehler');
-    }
-});
-
-// Dokument bearbeiten speichern
-app.post('/dokumente/edit/:id', requireLogin, requireAdmin, async (req, res) => {
-    try {
-        const { title, type, url, notes } = req.body;
-
-        await docsCollection.updateOne(
-            { _id: new ObjectId(req.params.id) },
-            {
-                $set: {
-                    title,
-                    type,
-                    url,
-                    notes
-                }
-            }
-        );
-
-        res.redirect('/dokumente');
-    } catch (err) {
-        console.error('Fehler beim Speichern des Dokuments:', err);
-        res.status(500).send('Serverfehler');
-    }
-});
-
-// Dokument löschen
-app.post('/dokumente/delete/:id', requireLogin, requireAdmin, async (req, res) => {
-    try {
-        await docsCollection.deleteOne({
-            _id: new ObjectId(req.params.id)
-        });
-
-        res.redirect('/dokumente');
-    } catch (err) {
-        console.error('Fehler beim Löschen des Dokuments:', err);
-        res.status(500).send('Serverfehler');
-    }
-});
-
 app.get("/admin", requireLogin, requireAdmin, async (req, res) => {
     const users = await getAllPoints();
     const logs = await logsCollection.find({}).sort({ createdAt: -1 }).limit(50).toArray();
@@ -307,11 +252,14 @@ app.get("/admin", requireLogin, requireAdmin, async (req, res) => {
 // =====================
 // POINTS
 // =====================
+
 app.post("/points/add", requireLogin, requireAdmin, async (req, res) => {
     const { userId, points } = req.body;
     const amount = Number(points);
 
-    if (!userId || isNaN(amount)) return res.redirect("/admin");
+    if (!userId || isNaN(amount)) {
+        return res.redirect("/admin");
+    }
 
     await pointsCollection.updateOne(
         { userId },
@@ -319,7 +267,7 @@ app.post("/points/add", requireLogin, requireAdmin, async (req, res) => {
         { upsert: true }
     );
 
-    await addLog("Punkte hinzugefÃ¼gt", { userId, amount });
+    await addLog("Punkte hinzugefuegt", { userId, amount });
 
     res.redirect("/admin");
 });
@@ -328,7 +276,9 @@ app.post("/points/remove", requireLogin, requireAdmin, async (req, res) => {
     const { userId, points } = req.body;
     const amount = Number(points);
 
-    if (!userId || isNaN(amount)) return res.redirect("/admin");
+    if (!userId || isNaN(amount)) {
+        return res.redirect("/admin");
+    }
 
     const user = await pointsCollection.findOne({ userId });
     const current = user?.points || 0;
@@ -349,7 +299,9 @@ app.post("/points/set", requireLogin, requireAdmin, async (req, res) => {
     const { userId, points } = req.body;
     const amount = Math.max(0, Number(points));
 
-    if (!userId || isNaN(amount)) return res.redirect("/admin");
+    if (!userId || isNaN(amount)) {
+        return res.redirect("/admin");
+    }
 
     await pointsCollection.updateOne(
         { userId },
@@ -365,6 +317,7 @@ app.post("/points/set", requireLogin, requireAdmin, async (req, res) => {
 // =====================
 // TERMINE
 // =====================
+
 app.post("/termine/create", requireLogin, async (req, res) => {
     const {
         name,
@@ -402,7 +355,7 @@ app.post("/termine/status/:id", requireLogin, async (req, res) => {
         { $set: { status } }
     );
 
-    await addLog("Termin Status geÃ¤ndert", { id: req.params.id, status });
+    await addLog("Termin Status geaendert", { id: req.params.id, status });
 
     res.redirect("/termine");
 });
@@ -412,13 +365,13 @@ app.post("/termine/delete/:id", requireLogin, requireAdmin, async (req, res) => 
         _id: new ObjectId(req.params.id)
     });
 
-    await addLog("Termin gelÃ¶scht", { id: req.params.id });
+    await addLog("Termin geloescht", { id: req.params.id });
 
     res.redirect("/termine");
 });
 
 // =====================
-// PRÃœFUNGEN
+// PRUEFUNGEN
 // =====================
 
 app.get("/pruefungen/edit/:id", requireLogin, async (req, res) => {
@@ -460,7 +413,7 @@ app.post("/pruefungen/edit/:id", requireLogin, async (req, res) => {
         }
     );
 
-    await addLog("PrÃ¼fung bearbeitet", { id: req.params.id, name, examType, result });
+    await addLog("Pruefung bearbeitet", { id: req.params.id, name, examType, result });
 
     res.redirect("/pruefungen");
 });
@@ -485,7 +438,7 @@ app.post("/pruefungen/create", requireLogin, async (req, res) => {
         createdAt: new Date()
     });
 
-    await addLog("PrÃ¼fung gespeichert", { name, examType, result });
+    await addLog("Pruefung gespeichert", { name, examType, result });
 
     res.redirect("/pruefungen");
 });
@@ -495,7 +448,7 @@ app.post("/pruefungen/delete/:id", requireLogin, requireAdmin, async (req, res) 
         _id: new ObjectId(req.params.id)
     });
 
-    await addLog("PrÃ¼fung gelÃ¶scht", { id: req.params.id });
+    await addLog("Pruefung geloescht", { id: req.params.id });
 
     res.redirect("/pruefungen");
 });
@@ -503,6 +456,7 @@ app.post("/pruefungen/delete/:id", requireLogin, requireAdmin, async (req, res) 
 // =====================
 // DOKUMENTE
 // =====================
+
 app.post("/dokumente/create", requireLogin, requireAdmin, async (req, res) => {
     const { title, type, url, notes } = req.body;
 
@@ -514,24 +468,75 @@ app.post("/dokumente/create", requireLogin, requireAdmin, async (req, res) => {
         createdAt: new Date()
     });
 
-    await addLog("Dokument hinzugefÃ¼gt", { title, type });
+    await addLog("Dokument hinzugefuegt", { title, type });
 
     res.redirect("/dokumente");
 });
 
+app.get("/dokumente/edit/:id", requireLogin, requireAdmin, async (req, res) => {
+    try {
+        const doc = await docsCollection.findOne({
+            _id: new ObjectId(req.params.id)
+        });
+
+        if (!doc) {
+            return res.status(404).send("Dokument nicht gefunden");
+        }
+
+        res.render("dokument-edit", viewData(req, {
+            active: "dokumente",
+            doc
+        }));
+    } catch (err) {
+        console.error("Fehler beim Laden des Dokuments:", err);
+        res.status(500).send("Serverfehler");
+    }
+});
+
+app.post("/dokumente/edit/:id", requireLogin, requireAdmin, async (req, res) => {
+    try {
+        const { title, type, url, notes } = req.body;
+
+        await docsCollection.updateOne(
+            { _id: new ObjectId(req.params.id) },
+            {
+                $set: {
+                    title,
+                    type,
+                    url,
+                    notes
+                }
+            }
+        );
+
+        await addLog("Dokument bearbeitet", { id: req.params.id, title, type });
+
+        res.redirect("/dokumente");
+    } catch (err) {
+        console.error("Fehler beim Speichern des Dokuments:", err);
+        res.status(500).send("Serverfehler");
+    }
+});
+
 app.post("/dokumente/delete/:id", requireLogin, requireAdmin, async (req, res) => {
-    await docsCollection.deleteOne({
-        _id: new ObjectId(req.params.id)
-    });
+    try {
+        await docsCollection.deleteOne({
+            _id: new ObjectId(req.params.id)
+        });
 
-    await addLog("Dokument gelÃ¶scht", { id: req.params.id });
+        await addLog("Dokument geloescht", { id: req.params.id });
 
-    res.redirect("/dokumente");
+        res.redirect("/dokumente");
+    } catch (err) {
+        console.error("Fehler beim Loeschen des Dokuments:", err);
+        res.status(500).send("Serverfehler");
+    }
 });
 
 // =====================
 // START
 // =====================
+
 async function start() {
     await mongo.connect();
 
@@ -544,8 +549,9 @@ async function start() {
     logsCollection = db.collection("dashboardLogs");
 
     app.listen(PORT, () => {
-        console.log(`âœ… LSMD Website lÃ¤uft auf Port ${PORT}`);
+        console.log(`LSMD Website laeuft auf Port ${PORT}`);
     });
 }
 
 start().catch(console.error);
+'@ | Set-Content -Encoding UTF8 server.js
