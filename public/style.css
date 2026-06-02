@@ -1350,3 +1350,110 @@ a {
 .doc-actions button {
     padding: 12px;
 }
+
+.members-grid {
+    display: grid;
+    gap: 14px;
+}
+
+.member-card {
+    display: grid;
+    grid-template-columns: 70px 60px 1fr 110px 190px;
+    gap: 16px;
+    align-items: center;
+    padding: 18px;
+    border-radius: 18px;
+    background: rgba(2,6,23,.36);
+    border: 1px solid var(--border);
+    transition: .2s;
+}
+
+.member-card:hover {
+    transform: translateY(-3px);
+    border-color: rgba(37,99,235,.45);
+    box-shadow: 0 14px 40px rgba(0,0,0,.24);
+}
+
+.member-card.top-member {
+    border-color: rgba(234,179,8,.55);
+    background: linear-gradient(135deg, rgba(234,179,8,.12), rgba(2,6,23,.38));
+}
+
+.member-rank {
+    font-size: 24px;
+    font-weight: 900;
+    text-align: center;
+}
+
+.member-avatar {
+    width: 52px;
+    height: 52px;
+    border-radius: 16px;
+    display: grid;
+    place-items: center;
+    background: linear-gradient(135deg, rgba(37,99,235,.5), rgba(2,6,23,.9));
+    border: 1px solid rgba(37,99,235,.55);
+    font-weight: 900;
+    box-shadow: 0 0 22px rgba(37,99,235,.22);
+}
+
+.member-info h3 {
+    margin-bottom: 5px;
+}
+
+.member-info p {
+    color: var(--muted);
+    font-size: 13px;
+    word-break: break-all;
+}
+
+.member-points {
+    text-align: center;
+}
+
+.member-points strong {
+    display: block;
+    font-size: 28px;
+    color: white;
+}
+
+.member-points span {
+    color: var(--muted);
+    font-size: 12px;
+}
+
+.member-goal {
+    text-align: right;
+}
+
+@media (max-width: 1000px) {
+    .member-card {
+        grid-template-columns: 60px 52px 1fr;
+    }
+
+    .member-points,
+    .member-goal {
+        grid-column: 1 / -1;
+        text-align: left;
+    }
+}
+
+@media (max-width: 600px) {
+    .member-card {
+        grid-template-columns: 1fr;
+        text-align: center;
+    }
+@media (max-width: 600px) {
+    .member-card {
+        grid-template-columns: 1fr;
+        text-align: center;
+    }
+
+    .member-avatar {
+        margin: 0 auto;
+    }
+
+    .member-goal {
+        text-align: center;
+    }
+}
