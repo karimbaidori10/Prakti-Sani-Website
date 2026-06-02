@@ -10,41 +10,7 @@
             <span class="chip blue">Planung</span>
         </div>
 
-        <form method="POST" action="/termine/create" class="form">
-            <input name="name" placeholder="Name des Teilnehmers" required>
-
-            <input name="discordId" placeholder="Discord ID optional">
-
-            <select name="examType" required>
-                <option value="">Pruefungsart waehlen</option>
-                <option>Prakti-Pruefung</option>
-                <option>Darf alleine fahren</option>
-                <option>Sanitaeter-Pruefung</option>
-                <option>Theorie-Pruefung</option>
-                <option>Regelwerk</option>
-                <option>Blaues Blatt</option>
-                <option>Funkleitfaden</option>
-            </select>
-
-            <div class="form-row">
-                <input type="date" name="date" required>
-                <input type="time" name="time" required>
             </div>
-
-            <input name="examiner" placeholder="Pruefer / Ausbilder">
-
-            <select name="status">
-                <option value="offen">Offen</option>
-                <option value="bestanden">Bestanden</option>
-                <option value="nicht bestanden">Nicht bestanden</option>
-                <option value="verschoben">Verschoben</option>
-            </select>
-
-            <textarea name="notes" placeholder="Notizen"></textarea>
-
-            <button type="submit">Termin speichern</button>
-        </form>
-    </div>
 
     <div class="card">
         <div class="card-header">
