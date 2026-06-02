@@ -346,6 +346,70 @@ app.post("/termine/create", requireLogin, async (req, res) => {
     res.redirect("/termine");
 });
 
+app.get("/termine/edit/:id", requireLogin, requireAdmin, async (req, res) => {
+    try {
+        const termin = await termineCollection.findOne({
+            _id: new ObjectId(req.params.id)
+        });
+
+        if (!termin) {
+            return res.redirect("/termine");
+        }
+
+        res.render("termin-edit", viewData(req, {
+            active: "termine",
+            termin
+        }));
+    } catch (err) {
+        console.error("Fehler beim Laden des Termins:", err);
+        res.status(500).send("Serverfehler");
+    }
+});
+
+app.post("/termine/edit/:id", requireLogin, requireAdmin, async (req, res) => {
+    try {
+        const {
+            name,
+            discordId,
+            examType,
+            date,
+            time,
+            examiner,
+            status,
+            notes
+        } = req.body;
+
+        await termineCollection.updateOne(
+            { _id: new ObjectId(req.params.id) },
+            {
+                $set: {
+                    name,
+                    discordId,
+                    examType,
+                    date,
+                    time,
+                    examiner,
+                    status,
+                    notes
+                }
+            }
+        );
+
+        await addLog("Termin bearbeitet", {
+            id: req.params.id,
+            name,
+            examType,
+            date,
+            time
+        });
+
+        res.redirect("/termine");
+    } catch (err) {
+        console.error("Fehler beim Speichern des Termins:", err);
+        res.status(500).send("Serverfehler");
+    }
+});
+
 app.post("/termine/status/:id", requireLogin, async (req, res) => {
     const { status } = req.body;
 
