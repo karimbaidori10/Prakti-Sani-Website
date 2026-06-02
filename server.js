@@ -210,10 +210,6 @@ async function getAllPoints() {
     const users = await pointsCollection.find({}).sort({ points: -1 }).toArray();
 
     const enrichedUsers = await Promise.all(users.map(async (user) => {
-        if (user.displayName && user.rank && user.avatarUrl) {
-            return user;
-        }
-
         const discordInfo = await getDiscordMemberInfo(user.userId);
 
         if (!discordInfo) {
