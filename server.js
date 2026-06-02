@@ -96,8 +96,9 @@ app.post("/login", (req, res) => {
     }
 
     res.render("login", {
-    layout: false,
-    error: "Falsches Passwort"
+        layout: false,
+        error: "Falsches Passwort"
+    });
 });
 
 app.get("/logout", (req, res) => {
