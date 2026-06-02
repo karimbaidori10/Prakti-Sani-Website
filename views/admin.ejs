@@ -1,11 +1,14 @@
+cd C:\Users\kbaid\Desktop\Website
+
+@'
 <div class="page-header">
-    <h1>🛡️ Admin</h1>
-    <p>Leitungsbereich für Punkte, Mitglieder, Logs und Schnellzugriff.</p>
+    <h1>Admin</h1>
+    <p>Leitungsbereich fuer Punkte, Mitglieder, Logs und Schnellzugriff.</p>
 </div>
 
 <section class="stats-grid">
     <div class="stat-card stat-blue">
-        <div class="stat-icon">👥</div>
+        <div class="stat-icon">User</div>
         <div>
             <h2><%= users ? users.length : 0 %></h2>
             <strong>Mitglieder</strong>
@@ -14,7 +17,7 @@
     </div>
 
     <div class="stat-card stat-green">
-        <div class="stat-icon">✅</div>
+        <div class="stat-icon">OK</div>
         <div>
             <h2><%= users ? users.filter(u => Number(u.points || 0) >= 5).length : 0 %></h2>
             <strong>Wochenziel</strong>
@@ -23,7 +26,7 @@
     </div>
 
     <div class="stat-card stat-yellow">
-        <div class="stat-icon">📜</div>
+        <div class="stat-icon">Log</div>
         <div>
             <h2><%= logs ? logs.length : 0 %></h2>
             <strong>Logs</strong>
@@ -32,7 +35,7 @@
     </div>
 
     <div class="stat-card stat-red">
-        <div class="stat-icon">⚙️</div>
+        <div class="stat-icon">Admin</div>
         <div>
             <h2>Admin</h2>
             <strong>Modus</strong>
@@ -44,7 +47,7 @@
 <section class="dashboard-grid">
     <div class="card admin-glow">
         <div class="card-header">
-            <h2>🎯 Punkte verwalten</h2>
+            <h2>Punkte verwalten</h2>
             <span class="chip red">Admin Tool</span>
         </div>
 
@@ -60,13 +63,13 @@
             </form>
 
             <form action="/points/add" method="POST" class="points-box">
-                <h3>Punkte hinzufügen</h3>
-                <p>Zusätzliche Punkte auf den aktuellen Stand addieren.</p>
+                <h3>Punkte hinzufuegen</h3>
+                <p>Zusaetzliche Punkte auf den aktuellen Stand addieren.</p>
 
                 <input type="text" name="userId" placeholder="Discord User ID" required>
-                <input type="number" name="points" placeholder="Punkte hinzufügen" required>
+                <input type="number" name="points" placeholder="Punkte hinzufuegen" required>
 
-                <button type="submit">Hinzufügen</button>
+                <button type="submit">Hinzufuegen</button>
             </form>
 
             <form action="/points/remove" method="POST" class="points-box danger-box">
@@ -83,28 +86,28 @@
 
     <div class="card">
         <div class="card-header">
-            <h2>⚡ Schnellzugriff</h2>
+            <h2>Schnellzugriff</h2>
             <span class="chip blue">Navigation</span>
         </div>
 
         <div class="quick-grid">
             <a href="/users" class="quick-card red">
-                <h3>👥 Mitglieder</h3>
-                <p>Benutzerübersicht öffnen</p>
+                <h3>Mitglieder</h3>
+                <p>Benutzeruebersicht oeffnen</p>
             </a>
 
             <a href="/termine" class="quick-card blue">
-                <h3>📅 Termine</h3>
-                <p>Prüfungstermine verwalten</p>
+                <h3>Termine</h3>
+                <p>Pruefungstermine verwalten</p>
             </a>
 
             <a href="/pruefungen" class="quick-card green">
-                <h3>📋 Prüfungen</h3>
-                <p>Prüfungsverlauf öffnen</p>
+                <h3>Pruefungen</h3>
+                <p>Pruefungsverlauf oeffnen</p>
             </a>
 
             <a href="/dokumente" class="quick-card yellow">
-                <h3>📁 Dokumente</h3>
+                <h3>Dokumente</h3>
                 <p>Unterlagen verwalten</p>
             </a>
         </div>
@@ -114,13 +117,13 @@
 <section class="dashboard-grid">
     <div class="card">
         <div class="card-header">
-            <h2>👥 Aktuelle Mitglieder / Punkte</h2>
+            <h2>Aktuelle Mitglieder / Punkte</h2>
             <span class="chip blue"><%= users ? users.length : 0 %> User</span>
         </div>
 
         <% if (!users || users.length === 0) { %>
             <div class="empty-state">
-                <div>📭</div>
+                <div>Keine Daten</div>
                 <h3>Keine Mitglieder vorhanden</h3>
                 <p>Sobald Punkte vergeben werden, erscheinen User hier.</p>
             </div>
@@ -145,6 +148,26 @@
                             <strong><%= user.points || 0 %></strong>
                             <span>Punkte</span>
                         </div>
+
+                        <div class="points-actions">
+                            <form action="/points/add" method="POST" style="display:inline;">
+                                <input type="hidden" name="userId" value="<%= user.userId %>">
+                                <input type="hidden" name="points" value="10">
+                                <button type="submit">+10</button>
+                            </form>
+
+                            <form action="/points/remove" method="POST" style="display:inline;">
+                                <input type="hidden" name="userId" value="<%= user.userId %>">
+                                <input type="hidden" name="points" value="10">
+                                <button type="submit" class="danger-btn">-10</button>
+                            </form>
+
+                            <form action="/points/set" method="POST" style="display:inline;">
+                                <input type="hidden" name="userId" value="<%= user.userId %>">
+                                <input type="number" name="points" value="<%= user.points || 0 %>" min="0" style="width:80px;">
+                                <button type="submit">Setzen</button>
+                            </form>
+                        </div>
                     </div>
                 <% }) %>
             </div>
@@ -153,13 +176,13 @@
 
     <div class="card">
         <div class="card-header">
-            <h2>📜 Admin Logs</h2>
+            <h2>Admin Logs</h2>
             <span class="chip green"><%= logs ? logs.length : 0 %> Logs</span>
         </div>
 
         <% if (!logs || logs.length === 0) { %>
             <div class="empty-state">
-                <div>📭</div>
+                <div>Keine Logs</div>
                 <h3>Keine Logs vorhanden</h3>
                 <p>Admin-Aktionen werden hier automatisch gespeichert.</p>
             </div>
@@ -181,3 +204,4 @@
         <% } %>
     </div>
 </section>
+'@ | Set-Content -Encoding UTF8 views\admin.ejs
