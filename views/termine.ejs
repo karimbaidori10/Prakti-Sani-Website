@@ -3,6 +3,92 @@
     <p>Prüfungstermine planen, verwalten und Status aktuell halten.</p>
 </div>
 
+<section class="card">
+    <div class="card-header">
+        <h2>🗓️ Kalenderübersicht</h2>
+        <span class="chip blue">Monatsansicht</span>
+    </div>
+
+    <% 
+        const today = new Date();
+        const year = today.getFullYear();
+        const month = today.getMonth();
+
+        const monthName = today.toLocaleString("de-DE", { month: "long", year: "numeric" });
+
+        const firstDay = new Date(year, month, 1);
+        const lastDay = new Date(year, month + 1, 0);
+
+        let startDay = firstDay.getDay();
+        startDay = startDay === 0 ? 6 : startDay - 1;
+
+        const daysInMonth = lastDay.getDate();
+        const calendarDays = [];
+
+        for (let i = 0; i < startDay; i++) {
+            calendarDays.push(null);
+        }
+
+        for (let day = 1; day <= daysInMonth; day++) {
+            calendarDays.push(day);
+        }
+
+        function getTermineForDay(day) {
+            if (!day || !termine) return [];
+
+            return termine.filter(t => {
+                if (!t.date) return false;
+
+                const d = new Date(t.date);
+                return d.getFullYear() === year &&
+                       d.getMonth() === month &&
+                       d.getDate() === day;
+            });
+        }
+    %>
+
+    <div class="calendar-title">
+        <h3><%= monthName %></h3>
+    </div>
+
+    <div class="calendar-grid calendar-head">
+        <div>Mo</div>
+        <div>Di</div>
+        <div>Mi</div>
+        <div>Do</div>
+        <div>Fr</div>
+        <div>Sa</div>
+        <div>So</div>
+    </div>
+
+    <div class="calendar-grid">
+        <% calendarDays.forEach(day => { %>
+            <div class="calendar-day <%= day === today.getDate() ? 'today' : '' %>">
+                <% if (day) { %>
+                    <strong><%= day %></strong>
+
+                    <% const dayTermine = getTermineForDay(day); %>
+
+                    <% if (dayTermine.length > 0) { %>
+                        <div class="calendar-events">
+                            <% dayTermine.slice(0, 2).forEach(t => { %>
+                                <div class="calendar-event <%= t.status === 'bestanden' ? 'success-event' : t.status === 'nicht bestanden' ? 'danger-event' : t.status === 'verschoben' ? 'warning-event' : 'blue-event' %>">
+                                    <span><%= t.time || "--:--" %></span>
+                                    <p><%= t.examType || "Termin" %></p>
+                                </div>
+                            <% }) %>
+
+                            <% if (dayTermine.length > 2) { %>
+                                <small>+ <%= dayTermine.length - 2 %> weitere</small>
+                            <% } %>
+                        </div>
+                    <% } %>
+                <% } %>
+            </div>
+        <% }) %>
+    </div>
+</section>
+
 <section class="dashboard-grid">
     <div class="card">
         <div class="card-header">

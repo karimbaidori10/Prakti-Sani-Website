@@ -1873,3 +1873,139 @@ a {
         font-size: 30px;
     }
 }
+
+.calendar-title {
+    margin-bottom: 16px;
+}
+
+.calendar-title h3 {
+    font-size: 24px;
+    text-transform: capitalize;
+}
+
+.calendar-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 10px;
+}
+
+.calendar-head {
+    margin-bottom: 10px;
+}
+
+.calendar-head div {
+    text-align: center;
+    color: var(--muted);
+    font-size: 13px;
+    font-weight: 900;
+    padding: 8px;
+}
+
+.calendar-day {
+    min-height: 130px;
+    padding: 12px;
+    border-radius: 16px;
+    background: rgba(2,6,23,.34);
+    border: 1px solid var(--border);
+    transition: .2s;
+}
+
+.calendar-day:hover {
+    transform: translateY(-3px);
+    border-color: rgba(37,99,235,.45);
+}
+
+.calendar-day.today {
+    border-color: rgba(239,35,60,.7);
+    box-shadow: 0 0 28px rgba(239,35,60,.14);
+}
+
+.calendar-day strong {
+    display: inline-flex;
+    width: 30px;
+    height: 30px;
+    border-radius: 10px;
+    align-items: center;
+    justify-content: center;
+    background: rgba(15,23,42,.75);
+    margin-bottom: 8px;
+}
+
+.calendar-day.today strong {
+    background: rgba(239,35,60,.2);
+    color: #fca5a5;
+}
+
+.calendar-events {
+    display: grid;
+    gap: 6px;
+}
+
+.calendar-event {
+    padding: 7px;
+    border-radius: 10px;
+    font-size: 12px;
+    overflow: hidden;
+}
+
+.calendar-event span {
+    display: block;
+    font-weight: 900;
+    margin-bottom: 2px;
+}
+
+.calendar-event p {
+    margin: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.calendar-event.blue-event {
+    background: rgba(37,99,235,.16);
+    color: #93c5fd;
+    border: 1px solid rgba(37,99,235,.28);
+}
+
+.calendar-event.success-event {
+    background: rgba(34,197,94,.16);
+    color: #86efac;
+    border: 1px solid rgba(34,197,94,.28);
+}
+
+.calendar-event.danger-event {
+    background: rgba(239,35,60,.16);
+    color: #fca5a5;
+    border: 1px solid rgba(239,35,60,.28);
+}
+
+.calendar-event.warning-event {
+    background: rgba(234,179,8,.16);
+    color: #fde047;
+    border: 1px solid rgba(234,179,8,.28);
+}
+
+.calendar-events small {
+    color: var(--muted);
+    font-size: 11px;
+}
+
+@media (max-width: 1000px) {
+    .calendar-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .calendar-head {
+        display: none;
+    }
+}
+
+@media (max-width: 600px) {
+    .calendar-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .calendar-day {
+        min-height: auto;
+    }
+}
