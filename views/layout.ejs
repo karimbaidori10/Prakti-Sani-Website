@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-<meta charset="UTF-8">
-<title>LSMD Dashboard</title>
-<link rel="stylesheet" href="/style.css">
+    <meta charset="UTF-8">
+    <title>LSMD Dashboard</title>
+    <link rel="stylesheet" href="/style.css">
 </head>
 <body>
 
@@ -11,27 +11,71 @@
 
     <aside class="sidebar">
         <div class="brand">
-            <h2>LSMD</h2>
-            <p>Prakti-Sani</p>
+            <div class="brand-icon">✚</div>
+            <div>
+                <h2>LSMD</h2>
+                <p>Prakti-Sani</p>
+            </div>
         </div>
 
-        <nav>
-            <a class="<%= (typeof active !== 'undefined' && active === 'dashboard') ? 'active' : '' %>" href="/dashboard">Dashboard</a>
-<a class="<%= (typeof active !== 'undefined' && active === 'leaderboard') ? 'active' : '' %>" href="/leaderboard">Leaderboard</a>
-<a class="<%= (typeof active !== 'undefined' && active === 'users') ? 'active' : '' %>" href="/users">Mitglieder</a>
-<a class="<%= (typeof active !== 'undefined' && active === 'termine') ? 'active' : '' %>" href="/termine">Termine</a>
-<a class="<%= (typeof active !== 'undefined' && active === 'pruefungen') ? 'active' : '' %>" href="/pruefungen">Prüfungen</a>
-<a class="<%= (typeof active !== 'undefined' && active === 'dokumente') ? 'active' : '' %>" href="/dokumente">Dokumente</a>
+        <nav class="nav">
+            <a class="<%= (typeof active !== 'undefined' && active === 'dashboard') ? 'active' : '' %>" href="/dashboard">
+                <span>🏠</span> Dashboard
+            </a>
 
-<% if (typeof isAdmin !== 'undefined' && isAdmin) { %>
-    <a class="<%= (typeof active !== 'undefined' && active === 'admin') ? 'active' : '' %>" href="/admin">Admin</a>
-<% } %>
+            <a class="<%= (typeof active !== 'undefined' && active === 'leaderboard') ? 'active' : '' %>" href="/leaderboard">
+                <span>🏆</span> Leaderboard
+            </a>
+
+            <a class="<%= (typeof active !== 'undefined' && active === 'users') ? 'active' : '' %>" href="/users">
+                <span>👥</span> Mitglieder
+            </a>
+
+            <a class="<%= (typeof active !== 'undefined' && active === 'termine') ? 'active' : '' %>" href="/termine">
+                <span>📅</span> Termine
+            </a>
+
+            <a class="<%= (typeof active !== 'undefined' && active === 'pruefungen') ? 'active' : '' %>" href="/pruefungen">
+                <span>📋</span> Prüfungen
+            </a>
+
+            <a class="<%= (typeof active !== 'undefined' && active === 'dokumente') ? 'active' : '' %>" href="/dokumente">
+                <span>📁</span> Dokumente
+            </a>
+
+            <% if (typeof isAdmin !== 'undefined' && isAdmin) { %>
+                <a class="<%= (typeof active !== 'undefined' && active === 'admin') ? 'active' : '' %>" href="/admin">
+                    <span>🛡️</span> Admin
+                </a>
+            <% } %>
         </nav>
 
-        <a class="logout" href="/logout">Logout</a>
+        <div class="sidebar-bottom">
+            <div class="user-card">
+                <div class="avatar">✚</div>
+                <div>
+                    <strong><%= user && user.username ? user.username : "Leitung" %></strong>
+                    <p><span class="online-dot"></span> Online</p>
+                </div>
+            </div>
+
+            <a class="logout" href="/logout">↪ Logout</a>
+        </div>
     </aside>
 
-    <main class="content">
+    <main class="main">
+        <div class="topbar">
+            <button class="menu-btn">☰</button>
+
+            <div class="topbar-right">
+                <div class="search-box">🔍 Suchen...</div>
+                <div class="bell">🔔<span>3</span></div>
+                <div class="profile-circle">
+                    <%= user && user.username ? user.username.charAt(0).toUpperCase() : "L" %>
+                </div>
+            </div>
+        </div>
+
         <%- body %>
     </main>
 

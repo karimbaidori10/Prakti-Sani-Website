@@ -1,139 +1,172 @@
-<!DOCTYPE html>
-<html lang="de">
-<head>
-    <meta charset="UTF-8">
-    <title>LSMD Dashboard</title>
-    <link rel="stylesheet" href="/style.css">
-</head>
-<body>
+<section class="hero">
+    <small>Willkommen zurück,</small>
+    <h1><%= user && user.username ? user.username : "Leitung" %> 👋</h1>
+    <p>Gut, dass du wieder da bist. Hier ist die aktuelle Lage deiner Prakti-Sani Verwaltung.</p>
 
-<header>
-    <h1>🚑 LSMD Leitungs-Dashboard</h1>
-    <a href="/logout">Logout</a>
-</header>
+    <div class="status-pill">
+        <span class="online-dot"></span>
+        Alle Systeme online
+    </div>
+</section>
 
-<main>
+<section class="stats-grid">
+    <div class="stat-card stat-red">
+        <div class="stat-icon">👥</div>
+        <div>
+            <h2><%= users ? users.length : 0 %></h2>
+            <strong>Mitglieder</strong>
+            <p>Aktive Mitglieder</p>
+        </div>
+    </div>
 
-    <section class="card">
-        <h2>📊 Punkteverwaltung</h2>
+    <div class="stat-card stat-blue">
+        <div class="stat-icon">📅</div>
+        <div>
+            <h2><%= termine ? termine.length : 0 %></h2>
+            <strong>Termine</strong>
+            <p>Nächste Termine</p>
+        </div>
+    </div>
 
-        <form method="POST" action="/points/add" class="grid">
-            <input name="userId" placeholder="Discord User ID" required>
-            <input name="points" type="number" placeholder="Punkte" required>
-            <button>➕ Hinzufügen</button>
-        </form>
+    <div class="stat-card stat-green">
+        <div class="stat-icon">📋</div>
+        <div>
+            <h2><%= exams ? exams.length : 0 %></h2>
+            <strong>Prüfungen</strong>
+            <p>Gesamt Prüfungen</p>
+        </div>
+    </div>
 
-        <form method="POST" action="/points/remove" class="grid">
-            <input name="userId" placeholder="Discord User ID" required>
-            <input name="points" type="number" placeholder="Punkte" required>
-            <button>➖ Entfernen</button>
-        </form>
+    <div class="stat-card stat-yellow">
+        <div class="stat-icon">📁</div>
+        <div>
+            <h2>0</h2>
+            <strong>Dokumente</strong>
+            <p>Gespeicherte Dateien</p>
+        </div>
+    </div>
+</section>
 
-        <form method="POST" action="/points/set" class="grid">
-            <input name="userId" placeholder="Discord User ID" required>
-            <input name="points" type="number" placeholder="Punkte setzen" required>
-            <button>✏️ Setzen</button>
-        </form>
-    </section>
+<section class="dashboard-grid">
+    <div class="card">
+        <div class="card-header">
+            <h2>📅 Nächste Termine</h2>
+            <a href="/termine" class="mini-btn">Alle anzeigen</a>
+        </div>
 
-    <section class="card">
-        <h2>🏆 Leaderboard</h2>
+        <div class="event-list">
+            <% if (termine && termine.length > 0) { %>
+                <% termine.forEach(termin => { %>
+                    <div class="event-item">
+                        <div class="date-box">
+                            <strong><%= termin.date ? new Date(termin.date).getDate() : "--" %></strong>
+                            <span>
+                                <%= termin.date ? new Date(termin.date).toLocaleString("de-DE", { month: "short" }).toUpperCase() : "DAT" %>
+                            </span>
+                        </div>
 
-        <table>
-            <tr>
-                <th>#</th>
-                <th>User ID</th>
-                <th>Punkte</th>
-            </tr>
+                        <div>
+                            <h3><%= termin.examType || termin.name || "Termin" %></h3>
+                            <p>🕒 <%= termin.time || "--:--" %> Uhr · 📍 LSMD Base</p>
+                        </div>
 
-            <% users.forEach((user, index) => { %>
-                <tr>
-                    <td><%= index + 1 %></td>
-                    <td><%= user.userId %></td>
-                    <td><%= user.points %></td>
-                </tr>
-            <% }) %>
-        </table>
-    </section>
+                        <span class="chip blue"><%= termin.status || "Offen" %></span>
+                    </div>
+                <% }) %>
+            <% } else { %>
+                <div class="event-item">
+                    <div class="date-box">
+                        <strong>--</strong>
+                        <span>---</span>
+                    </div>
 
-    <section class="card">
-        <h2>📅 Prüfungstermin erstellen</h2>
+                    <div>
+                        <h3>Keine Termine vorhanden</h3>
+                        <p>Lege neue Termine im Bereich Termine an.</p>
+                    </div>
 
-        <form method="POST" action="/termine/create" class="form">
-            <input name="name" placeholder="Name" required>
-            <input name="discordId" placeholder="Discord ID">
-            
-            <select name="examType" required>
-                <option value="">Prüfungsart wählen</option>
-                <option>Prakti-Prüfung</option>
-                <option>Darf alleine fahren</option>
-                <option>Sanitäter-Prüfung</option>
-                <option>Theorie-Prüfung</option>
-                <option>Regelwerk</option>
-                <option>Blaues Blatt</option>
-                <option>Funkleitfaden</option>
-            </select>
+                    <span class="chip yellow">Leer</span>
+                </div>
+            <% } %>
+        </div>
+    </div>
 
-            <input type="date" name="date" required>
-            <input type="time" name="time" required>
-            <input name="examiner" placeholder="Prüfer">
-            
-            <select name="status">
-                <option value="offen">Offen</option>
-                <option value="bestanden">Bestanden</option>
-                <option value="nicht bestanden">Nicht bestanden</option>
-                <option value="verschoben">Verschoben</option>
-            </select>
+    <div class="card">
+        <div class="card-header">
+            <h2>⚡ Schnellzugriff</h2>
+        </div>
 
-            <textarea name="notes" placeholder="Notizen"></textarea>
+        <div class="quick-grid">
+            <a href="/users" class="quick-card red">
+                <h3>👥 Mitglieder</h3>
+                <p>Benutzer verwalten</p>
+            </a>
 
-            <button>📌 Termin speichern</button>
-        </form>
-    </section>
+            <a href="/termine" class="quick-card blue">
+                <h3>📅 Termine</h3>
+                <p>Termine verwalten</p>
+            </a>
 
-    <section class="card">
-        <h2>📋 Termine</h2>
+            <a href="/pruefungen" class="quick-card green">
+                <h3>📋 Prüfungen</h3>
+                <p>Prüfungen verwalten</p>
+            </a>
 
-        <table>
-            <tr>
-                <th>Name</th>
-                <th>Prüfung</th>
-                <th>Datum</th>
-                <th>Uhrzeit</th>
-                <th>Prüfer</th>
-                <th>Status</th>
-                <th>Aktion</th>
-            </tr>
+            <a href="/dokumente" class="quick-card yellow">
+                <h3>📁 Dokumente</h3>
+                <p>Dokumente verwalten</p>
+            </a>
+        </div>
+    </div>
+</section>
 
-            <% termine.forEach(t => { %>
-                <tr>
-                    <td><%= t.name %></td>
-                    <td><%= t.examType %></td>
-                    <td><%= t.date %></td>
-                    <td><%= t.time %></td>
-                    <td><%= t.examiner %></td>
-                    <td><%= t.status %></td>
-                    <td>
-                        <form method="POST" action="/termine/status/<%= t._id %>">
-                            <select name="status">
-                                <option value="offen">Offen</option>
-                                <option value="bestanden">Bestanden</option>
-                                <option value="nicht bestanden">Nicht bestanden</option>
-                                <option value="verschoben">Verschoben</option>
-                            </select>
-                            <button>Ändern</button>
-                        </form>
+<section class="dashboard-grid">
+    <div class="card">
+        <div class="card-header">
+            <h2>📈 Letzte Prüfungen</h2>
+            <a href="/pruefungen" class="mini-btn">Alle anzeigen</a>
+        </div>
 
-                        <form method="POST" action="/termine/delete/<%= t._id %>">
-                            <button class="danger">Löschen</button>
-                        </form>
-                    </td>
-                </tr>
-            <% }) %>
-        </table>
-    </section>
+        <div class="activity-list">
+            <% if (exams && exams.length > 0) { %>
+                <% exams.forEach(exam => { %>
+                    <div class="activity-item">
+                        <span>📋 Prüfung erstellt: <strong><%= exam.examType %></strong> für <%= exam.name %></span>
+                        <small><%= exam.result || "Offen" %></small>
+                    </div>
+                <% }) %>
+            <% } else { %>
+                <div class="activity-item">
+                    <span>Keine Prüfungen vorhanden</span>
+                    <small>--</small>
+                </div>
+            <% } %>
+        </div>
+    </div>
 
-</main>
+    <div class="card">
+        <div class="card-header">
+            <h2>🟢 System Status</h2>
+            <span class="chip green">Online</span>
+        </div>
 
-</body>
-</html>
+        <p>Alle Systeme funktionieren einwandfrei.</p>
+
+        <div class="activity-list" style="margin-top: 18px;">
+            <div class="activity-item">
+                <span><span class="online-dot"></span> Datenbank</span>
+                <small>Online</small>
+            </div>
+
+            <div class="activity-item">
+                <span><span class="online-dot"></span> Web Server</span>
+                <small>Online</small>
+            </div>
+
+            <div class="activity-item">
+                <span><span class="online-dot"></span> MongoDB</span>
+                <small>Online</small>
+            </div>
+        </div>
+    </div>
+</section>
