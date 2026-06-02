@@ -1,5 +1,4 @@
 ﻿
-@'
 require("dotenv").config();
 
 const express = require("express");
@@ -554,4 +553,3 @@ async function start() {
 }
 
 start().catch(console.error);
-'@ | Set-Content -Encoding UTF8 server.js
