@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="de">
 <head>
     <meta charset="UTF-8">
@@ -11,7 +11,7 @@
 
     <aside class="sidebar">
         <div class="brand">
-            <div class="brand-icon">âœš</div>
+            <div class="brand-icon">+</div>
             <div>
                 <h2>LSMD</h2>
                 <p>Prakti-Sani</p>
@@ -20,32 +20,32 @@
 
         <nav class="nav">
             <a class="<%= (typeof active !== 'undefined' && active === 'dashboard') ? 'active' : '' %>" href="/dashboard">
-                <span>ðŸ </span> Dashboard
+                <span>DB</span> Dashboard
             </a>
 
             <a class="<%= (typeof active !== 'undefined' && active === 'leaderboard') ? 'active' : '' %>" href="/leaderboard">
-                <span>ðŸ†</span> Leaderboard
+                <span>LB</span> Leaderboard
             </a>
 
             <a class="<%= (typeof active !== 'undefined' && active === 'users') ? 'active' : '' %>" href="/users">
-                <span>ðŸ‘¥</span> Mitglieder
+                <span>US</span> Mitglieder
             </a>
 
             <a class="<%= (typeof active !== 'undefined' && active === 'termine') ? 'active' : '' %>" href="/termine">
-                <span>ðŸ“…</span> Termine
+                <span>TE</span> Termine
             </a>
 
             <a class="<%= (typeof active !== 'undefined' && active === 'pruefungen') ? 'active' : '' %>" href="/pruefungen">
-                <span>ðŸ“‹</span> PrÃ¼fungen
+                <span>PR</span> Pruefungen
             </a>
 
             <a class="<%= (typeof active !== 'undefined' && active === 'dokumente') ? 'active' : '' %>" href="/dokumente">
-                <span>ðŸ“</span> Dokumente
+                <span>DO</span> Dokumente
             </a>
 
             <% if (typeof isAdmin !== 'undefined' && isAdmin) { %>
                 <a class="<%= (typeof active !== 'undefined' && active === 'admin') ? 'active' : '' %>" href="/admin">
-                    <span>ðŸ›¡ï¸</span> Admin
+                    <span>AD</span> Admin
                 </a>
             <% } %>
         </nav>
@@ -56,7 +56,7 @@
                     <% if (typeof user !== "undefined" && user && user.avatar) { %>
                         <img src="<%= user.avatar %>" alt="Avatar">
                     <% } else { %>
-                        âœš
+                        +
                     <% } %>
                 </div>
 
@@ -69,19 +69,19 @@
                 </div>
             </div>
 
-            <a class="logout" href="/logout">â†ª Logout</a>
+            <a class="logout" href="/logout">Logout</a>
         </div>
     </aside>
 
     <main class="main">
         <div class="topbar">
-            <button class="menu-btn">â˜°</button>
+            <button class="menu-btn">Menu</button>
 
             <div class="topbar-right">
-                <div class="search-box">ðŸ” Suchen...</div>
+                <div class="search-box">Suchen...</div>
 
                 <div class="bell">
-                    ðŸ””
+                    Info
                     <span>3</span>
                 </div>
 
