@@ -1064,3 +1064,65 @@ a {
         padding: 18px !important;
     }
 }
+
+/* FINAL FIX: Sidebar links, Inhalt direkt oben rechts */
+.layout {
+    display: flex !important;
+    align-items: flex-start !important;
+    min-height: 100vh !important;
+}
+
+.sidebar {
+    position: sticky !important;
+    top: 0 !important;
+    left: auto !important;
+    bottom: auto !important;
+    width: 280px !important;
+    height: 100vh !important;
+    min-height: 100vh !important;
+    flex: 0 0 280px !important;
+}
+
+.main {
+    position: relative !important;
+    margin-left: 0 !important;
+    width: auto !important;
+    flex: 1 !important;
+    min-height: 100vh !important;
+    padding: 22px 28px 40px !important;
+    display: block !important;
+    top: 0 !important;
+    transform: none !important;
+}
+
+.topbar {
+    margin-top: 0 !important;
+    margin-bottom: 24px !important;
+}
+
+.page-content {
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+.hero {
+    margin-top: 0 !important;
+}
+
+@media (max-width: 780px) {
+    .layout {
+        display: block !important;
+    }
+
+    .sidebar {
+        position: relative !important;
+        width: 100% !important;
+        height: auto !important;
+        min-height: auto !important;
+    }
+
+    .main {
+        width: 100% !important;
+        padding: 18px !important;
+    }
+}
