@@ -1,5 +1,5 @@
-<div class="page-header">
-    <h1>🏆 Leaderboard</h1>
+﻿<div class="page-header">
+    <h1>ðŸ† Leaderboard</h1>
     <p>Ranking der aktivsten Mitglieder nach Punkten und Wochenziel.</p>
 </div>
 
@@ -11,7 +11,7 @@
     <% if (!users || users.length === 0) { %>
         <div class="card">
             <div class="empty-state">
-                <div>📭</div>
+                <div>ðŸ“­</div>
                 <h3>Keine Punkte vorhanden</h3>
                 <p>Sobald Punkte vergeben werden, erscheint hier das Leaderboard.</p>
             </div>
@@ -21,7 +21,7 @@
         <div class="podium-grid">
             <% if (secondUser) { %>
                 <div class="podium-card second">
-                    <div class="podium-medal">🥈</div>
+                    <div class="podium-medal">ðŸ¥ˆ</div>
                     <h3>Platz 2</h3>
                     <p><%= secondUser.userId %></p>
                     <strong><%= secondUser.points || 0 %> Punkte</strong>
@@ -30,7 +30,7 @@
 
             <% if (topUser) { %>
                 <div class="podium-card first">
-                    <div class="podium-medal">🥇</div>
+                    <div class="podium-medal">ðŸ¥‡</div>
                     <h3>Platz 1</h3>
                     <p><%= topUser.userId %></p>
                     <strong><%= topUser.points || 0 %> Punkte</strong>
@@ -40,7 +40,7 @@
 
             <% if (thirdUser) { %>
                 <div class="podium-card third">
-                    <div class="podium-medal">🥉</div>
+                    <div class="podium-medal">ðŸ¥‰</div>
                     <h3>Platz 3</h3>
                     <p><%= thirdUser.userId %></p>
                     <strong><%= thirdUser.points || 0 %> Punkte</strong>
@@ -53,16 +53,16 @@
 
 <section class="stats-grid">
     <div class="stat-card stat-yellow">
-        <div class="stat-icon">🏆</div>
+        <div class="stat-icon">ðŸ†</div>
         <div>
             <h2><%= users && users.length > 0 ? users[0].points : 0 %></h2>
             <strong>Top Punkte</strong>
-            <p>Aktueller Höchstwert</p>
+            <p>Aktueller HÃ¶chstwert</p>
         </div>
     </div>
 
     <div class="stat-card stat-blue">
-        <div class="stat-icon">👥</div>
+        <div class="stat-icon">ðŸ‘¥</div>
         <div>
             <h2><%= users ? users.length : 0 %></h2>
             <strong>Teilnehmer</strong>
@@ -71,7 +71,7 @@
     </div>
 
     <div class="stat-card stat-green">
-        <div class="stat-icon">✅</div>
+        <div class="stat-icon">âœ…</div>
         <div>
             <h2><%= users ? users.filter(u => Number(u.points || 0) >= 5).length : 0 %></h2>
             <strong>Ziel erreicht</strong>
@@ -80,7 +80,7 @@
     </div>
 
     <div class="stat-card stat-red">
-        <div class="stat-icon">🔥</div>
+        <div class="stat-icon">ðŸ”¥</div>
         <div>
             <h2>
                 <%= users && users.length > 0
@@ -88,7 +88,7 @@
                     : 0
                 %>
             </h2>
-            <strong>Ø Punkte</strong>
+            <strong>Ã˜ Punkte</strong>
             <p>Durchschnitt</p>
         </div>
     </div>
@@ -96,13 +96,13 @@
 
 <section class="card">
     <div class="card-header">
-        <h2>📊 Vollständiges Ranking</h2>
-        <span class="chip blue"><%= users ? users.length : 0 %> Einträge</span>
+        <h2>ðŸ“Š VollstÃ¤ndiges Ranking</h2>
+        <span class="chip blue"><%= users ? users.length : 0 %> EintrÃ¤ge</span>
     </div>
 
     <% if (!users || users.length === 0) { %>
         <div class="empty-state">
-            <div>📭</div>
+            <div>ðŸ“­</div>
             <h3>Keine Daten vorhanden</h3>
             <p>Vergib Punkte im Adminbereich, damit das Ranking startet.</p>
         </div>
@@ -113,11 +113,11 @@
                 <div class="leaderboard-row <%= index < 3 ? 'top-rank' : '' %>">
                     <div class="rank-number">
                         <% if (index === 0) { %>
-                            🥇
+                            ðŸ¥‡
                         <% } else if (index === 1) { %>
-                            🥈
+                            ðŸ¥ˆ
                         <% } else if (index === 2) { %>
-                            🥉
+                            ðŸ¥‰
                         <% } else { %>
                             #<%= index + 1 %>
                         <% } %>
