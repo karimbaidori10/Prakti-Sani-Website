@@ -197,39 +197,6 @@ async function getDiscordMemberInfo(userId) {
         return null;
     }
 }
-        const response = await fetch(
-            `https://discord.com/api/v10/guilds/${process.env.DISCORD_GUILD_ID}/members/${userId}`,
-            {
-                headers: {
-                    Authorization: `Bot ${process.env.DISCORD_BOT_TOKEN}`
-                }
-            }
-        );
-
-        if (!response.ok) {
-            return null;
-        }
-
-        const member = await response.json();
-
-        const displayName =
-            member.nick ||
-            member.user?.global_name ||
-            member.user?.username ||
-            userId;
-
-        const roles = member.roles || [];
-        const rank = getRankFromRoles(roles);
-
-        return {
-            displayName,
-            rank
-        };
-    } catch (err) {
-        console.error("Fehler beim Laden des Discord Users:", err);
-        return null;
-    }
-}
 
 async function addLog(action, data = {}) {
     await logsCollection.insertOne({
@@ -274,27 +241,6 @@ async function getAllPoints() {
 
     return enrichedUsers;
 }
-
-        await pointsCollection.updateOne(
-            { userId: user.userId },
-            {
-                $set: {
-                    displayName: discordInfo.displayName,
-                    rank: discordInfo.rank
-                }
-            }
-        );
-
-        return {
-            ...user,
-            displayName: discordInfo.displayName,
-            rank: discordInfo.rank
-        };
-    }));
-
-    return enrichedUsers;
-}
-
 // =====================
 // LOGIN
 // =====================
