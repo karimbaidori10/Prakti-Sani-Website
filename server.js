@@ -21,6 +21,12 @@ let logsCollection;
 
 const ADMIN_ROLE_ID = process.env.ADMIN_ROLE_ID;
 const PRAKTI_SANI_ROLE_ID = process.env.PRAKTI_SANI_ROLE_ID;
+const ROLE_TESTPHASE = process.env.PRAKTI_SANI_ROLE_ID;
+const ROLE_FESTES_MITGLIED = process.env.ROLE_FESTES_MITGLIED;
+const ROLE_SENIOR = process.env.ROLE_SENIOR;
+const ROLE_UNTERE_LEITUNG = process.env.ROLE_UNTERE_LEITUNG;
+const ROLE_STV_LEITUNG = process.env.ROLE_STV_LEITUNG;
+const ROLE_LEITUNG = process.env.ROLE_LEITUNG;
 
 app.set("view engine", "ejs");
 
@@ -73,19 +79,22 @@ passport.use(new DiscordStrategy({
 
         const isAdmin = roles.includes(ADMIN_ROLE_ID);
         const isPraktiSani = roles.includes(PRAKTI_SANI_ROLE_ID);
+        const rank = getRankFromRoles(roles);
+
 
         if (!isAdmin && !isPraktiSani) {
             return done(null, false);
         }
 
         return done(null, {
-            id: profile.id,
-            username: profile.username,
-            avatar: profile.avatar,
-            roles,
-            isAdmin,
-            role: isAdmin ? "Admin" : "Prakti-Sani"
-        });
+    id: profile.id,
+    username: profile.username,
+    avatar: profile.avatar,
+    roles,
+    isAdmin,
+    role: isAdmin ? "Admin" : "Prakti-Sani",
+    rank
+});
     } catch (error) {
         return done(error, null);
     }
@@ -114,6 +123,34 @@ function viewData(req, extra = {}) {
         active: "",
         ...extra
     };
+}
+
+function getRankFromRoles(roles = []) {
+    if (roles.includes(ROLE_LEITUNG)) {
+        return "Leitung";
+    }
+
+    if (roles.includes(ROLE_STV_LEITUNG)) {
+        return "Stv Leitung";
+    }
+
+    if (roles.includes(ROLE_UNTERE_LEITUNG)) {
+        return "Untere Leitung";
+    }
+
+    if (roles.includes(ROLE_SENIOR)) {
+        return "Senior Prakti-Sani";
+    }
+
+    if (roles.includes(ROLE_FESTES_MITGLIED)) {
+        return "Prakti-Sani Festes Mitglied";
+    }
+
+    if (roles.includes(ROLE_TESTPHASE)) {
+        return "Prakti-Sani Testphase";
+    }
+
+    return "Kein Rang";
 }
 
 async function addLog(action, data = {}) {
@@ -146,7 +183,7 @@ app.get(
     passport.authenticate("discord", {
         failureRedirect: "/login"
     }),
-    (req, res) => {
+    async (req, res) => {
         req.session.loggedIn = true;
         req.session.isAdmin = req.user.isAdmin;
 
@@ -154,10 +191,26 @@ app.get(
             username: req.user.username,
             discordId: req.user.id,
             role: req.user.role,
+            rank: req.user.rank,
             avatar: req.user.avatar
                 ? `https://cdn.discordapp.com/avatars/${req.user.id}/${req.user.avatar}.png`
                 : null
         };
+
+        await pointsCollection.updateOne(
+            { userId: req.user.id },
+            {
+                $set: {
+                    userId: req.user.id,
+                    displayName: req.user.username,
+                    rank: req.user.rank
+                },
+                $setOnInsert: {
+                    points: 0
+                }
+            },
+            { upsert: true }
+        );
 
         res.redirect("/dashboard");
     }
