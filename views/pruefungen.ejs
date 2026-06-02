@@ -1,50 +1,50 @@
 ﻿<div class="page-header">
-    <h1>ðŸ“‹ PrÃ¼fungen</h1>
-    <p>PrÃ¼fungen eintragen, Ergebnisse speichern und Verlauf verwalten.</p>
+    <h1>📋 Prüfungen</h1>
+    <p>Prüfungsergebnisse eintragen, verwalten und auswerten.</p>
 </div>
 
 <section class="dashboard-grid">
     <div class="card">
         <div class="card-header">
-            <h2>âž• PrÃ¼fung eintragen</h2>
-            <span class="chip blue">Neue PrÃ¼fung</span>
+            <h2>➕ Prüfung eintragen</h2>
+            <span class="chip blue">Neu</span>
         </div>
 
         <form action="/pruefungen/create" method="POST" class="form">
-            <input type="text" name="name" placeholder="Name des PrÃ¼flings" required>
+            <input type="text" name="name" placeholder="Name des Prüflings" required>
 
-            <input type="text" name="discordId" placeholder="Discord ID" required>
+            <input type="text" name="discordId" placeholder="Discord ID optional">
 
             <select name="examType" required>
-                <option value="">PrÃ¼fungsart auswÃ¤hlen</option>
-                <option value="Prakti-Sani">Prakti-Sani</option>
-                <option value="Sani">Sani</option>
-                <option value="Ausbilder">Ausbilder</option>
-                <option value="NachprÃ¼fung">NachprÃ¼fung</option>
-                <option value="Theorie">Theorie</option>
-                <option value="Praxis">Praxis</option>
-                <option value="Regelwerk">Regelwerk</option>
-                <option value="Funkleitfaden">Funkleitfaden</option>
+                <option value="">Prüfungsart auswählen</option>
+                <option>Prakti-Sani</option>
+                <option>Sani</option>
+                <option>Ausbilder</option>
+                <option>Nachprüfung</option>
+                <option>Theorie</option>
+                <option>Praxis</option>
+                <option>Regelwerk</option>
+                <option>Funkleitfaden</option>
             </select>
 
             <select name="result" required>
-                <option value="">Ergebnis auswÃ¤hlen</option>
+                <option value="">Ergebnis auswählen</option>
                 <option value="Bestanden">Bestanden</option>
                 <option value="Nicht bestanden">Nicht bestanden</option>
                 <option value="Offen">Offen</option>
             </select>
 
-            <input type="text" name="examiner" placeholder="PrÃ¼fer / Ausbilder" required>
+            <input type="text" name="examiner" placeholder="Prüfer / Ausbilder">
 
-            <textarea name="notes" placeholder="Notizen zur PrÃ¼fung"></textarea>
+            <textarea name="notes" placeholder="Notizen zur Prüfung"></textarea>
 
-            <button type="submit">PrÃ¼fung speichern</button>
+            <button type="submit">Prüfung speichern</button>
         </form>
     </div>
 
     <div class="card">
         <div class="card-header">
-            <h2>ðŸ“Š PrÃ¼fungsstatus</h2>
+            <h2>📊 Prüfungsstatus</h2>
             <span class="chip green">Live</span>
         </div>
 
@@ -73,81 +73,75 @@
         <div class="clean-divider"></div>
 
         <p style="color: var(--muted);">
-            Hier siehst du den aktuellen Ãœberblick Ã¼ber alle gespeicherten PrÃ¼fungen.
-            SpÃ¤ter kÃ¶nnen wir daraus automatisch Punkte, RÃ¤nge und PrÃ¼fungsfreigaben ableiten.
+            Alle gespeicherten Prüfungen werden unten chronologisch angezeigt.
         </p>
     </div>
 </section>
 
 <section class="card">
     <div class="card-header">
-        <h2>ðŸ“š PrÃ¼fungsverlauf</h2>
-        <span class="chip blue"><%= exams ? exams.length : 0 %> EintrÃ¤ge</span>
+        <h2>📋 Prüfungsübersicht</h2>
+        <span class="chip blue"><%= exams ? exams.length : 0 %> Prüfungen</span>
     </div>
 
     <% if (!exams || exams.length === 0) { %>
         <div class="empty-state">
-            <div>ðŸ“­</div>
-            <h3>Keine PrÃ¼fungen gespeichert</h3>
-            <p>Trage oben die erste PrÃ¼fung ein.</p>
+            <div>📭</div>
+            <h3>Keine Prüfungen vorhanden</h3>
+            <p>Trage oben die erste Prüfung ein.</p>
         </div>
     <% } else { %>
-
         <div class="exam-list">
             <% exams.forEach(exam => { %>
                 <div class="exam-card">
-                    <div class="exam-icon">
-                        <% if (exam.result === "Bestanden") { %>
-                            âœ…
-                        <% } else if (exam.result === "Nicht bestanden") { %>
-                            âŒ
-                        <% } else { %>
-                            â³
-                        <% } %>
-                    </div>
-
                     <div class="exam-main">
-                        <div class="exam-title-row">
-                            <h3><%= exam.examType %></h3>
+                        <h3><%= exam.examType || "Prüfung" %></h3>
 
-                            <% if (exam.result === "Bestanden") { %>
-                                <span class="badge success">Bestanden</span>
-                            <% } else if (exam.result === "Nicht bestanden") { %>
-                                <span class="badge danger">Nicht bestanden</span>
-                            <% } else { %>
-                                <span class="badge warning">Offen</span>
+                        <p>
+                            👤 <%= exam.name || "Unbekannt" %>
+                            <% if (exam.discordId) { %>
+                                · 🆔 <%= exam.discordId %>
                             <% } %>
-                        </div>
-
-                        <p>
-                            ðŸ‘¤ <strong><%= exam.name %></strong>
-                            Â· ðŸ†” <%= exam.discordId %>
                         </p>
 
                         <p>
-                            ðŸ§‘â€ðŸ« PrÃ¼fer:
-                            <%= exam.examiner || "Nicht eingetragen" %>
-                        </p>
-
-                        <p>
-                            ðŸ—“ï¸
-                            <%= exam.createdAt ? new Date(exam.createdAt).toLocaleString("de-DE") : "Kein Datum" %>
+                            🧑‍🏫 <%= exam.examiner || "Kein Prüfer eingetragen" %>
                         </p>
 
                         <% if (exam.notes) { %>
-                            <p class="exam-note">ðŸ“ <%= exam.notes %></p>
+                            <p class="termin-note">📝 <%= exam.notes %></p>
+                        <% } %>
+
+                        <% if (exam.createdAt) { %>
+                            <p style="color: var(--muted); font-size: 13px;">
+                                Eingetragen am <%= new Date(exam.createdAt).toLocaleDateString("de-DE") %>
+                            </p>
                         <% } %>
                     </div>
 
-                    <% if (isAdmin) { %>
-                        <div class="exam-actions">
-    <a href="/pruefungen/edit/<%= exam._id %>" class="open-doc-btn">
-        Bearbeiten
-    </a>
+                    <div class="exam-status">
+                        <% if (exam.result === "Bestanden") { %>
+                            <span class="badge success">Bestanden</span>
+                        <% } else if (exam.result === "Nicht bestanden") { %>
+                            <span class="badge danger">Nicht bestanden</span>
+                        <% } else { %>
+                            <span class="badge warning">Offen</span>
+                        <% } %>
 
-    <% if (isAdmin) { %>
-        <form action="/pruefungen/delete/<%= exam._id %>" method="POST">
-            <button type="submit" class="danger-btn">LÃ¶schen</button>
-        </form>
+                        <div class="exam-actions">
+                            <a href="/pruefungen/edit/<%= exam._id %>" class="open-doc-btn">
+                                Bearbeiten
+                            </a>
+
+                            <% if (isAdmin) { %>
+                                <form action="/pruefungen/delete/<%= exam._id %>" method="POST">
+                                    <button type="submit" class="danger-btn">Löschen</button>
+                                </form>
+                            <% } %>
+                        </div>
+                    </div>
+                </div>
+            <% }) %>
+        </div>
     <% } %>
-</div>
+</section>
