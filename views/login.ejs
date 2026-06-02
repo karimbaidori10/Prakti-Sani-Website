@@ -8,24 +8,41 @@
 <body class="login-page">
 
 <div class="login-shell">
-    <div class="login-glow"></div>
+    <div class="login-bg-orb orb-red"></div>
+    <div class="login-bg-orb orb-blue"></div>
 
-    <div class="login-card">
+    <div class="login-card pro-login">
         <div class="login-logo">✚</div>
 
-        <h1>LSMD Dashboard</h1>
-        <p>Prakti-Sani Verwaltung</p>
+        <div class="login-title">
+            <span>LSMD ACCESS</span>
+            <h1>Prakti-Sani Dashboard</h1>
+            <p>Einloggen mit Discord-Rollenprüfung</p>
+        </div>
 
         <% if (error) { %>
             <div class="error"><%= error %></div>
         <% } %>
 
         <a href="/auth/discord" class="discord-login">
+            <span>💬</span>
             Mit Discord einloggen
         </a>
 
+        <div class="login-access-box">
+            <div>
+                <strong>🛡️ Admin</strong>
+                <p>Voller Zugriff</p>
+            </div>
+
+            <div>
+                <strong>🚑 Prakti-Sani</strong>
+                <p>Dashboard Zugriff</p>
+            </div>
+        </div>
+
         <div class="login-hint">
-            Zugriff nur mit Prakti-Sani oder Admin Rolle.
+            Zugriff nur mit gültiger Discord-Rolle.
         </div>
     </div>
 </div>
