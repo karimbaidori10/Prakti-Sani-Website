@@ -180,6 +180,44 @@ async function getDiscordMemberInfo(userId) {
             member.user?.username ||
             userId;
 
+        const avatarUrl = member.user?.avatar
+            ? `https://cdn.discordapp.com/avatars/${member.user.id}/${member.user.avatar}.png`
+            : null;
+
+        const roles = member.roles || [];
+        const rank = getRankFromRoles(roles);
+
+        return {
+            displayName,
+            rank,
+            avatarUrl
+        };
+    } catch (err) {
+        console.error("Fehler beim Laden des Discord Users:", err);
+        return null;
+    }
+}
+        const response = await fetch(
+            `https://discord.com/api/v10/guilds/${process.env.DISCORD_GUILD_ID}/members/${userId}`,
+            {
+                headers: {
+                    Authorization: `Bot ${process.env.DISCORD_BOT_TOKEN}`
+                }
+            }
+        );
+
+        if (!response.ok) {
+            return null;
+        }
+
+        const member = await response.json();
+
+        const displayName =
+            member.nick ||
+            member.user?.global_name ||
+            member.user?.username ||
+            userId;
+
         const roles = member.roles || [];
         const rank = getRankFromRoles(roles);
 
@@ -205,7 +243,7 @@ async function getAllPoints() {
     const users = await pointsCollection.find({}).sort({ points: -1 }).toArray();
 
     const enrichedUsers = await Promise.all(users.map(async (user) => {
-        if (user.displayName && user.rank) {
+        if (user.displayName && user.rank && user.avatarUrl) {
             return user;
         }
 
@@ -214,6 +252,28 @@ async function getAllPoints() {
         if (!discordInfo) {
             return user;
         }
+
+        await pointsCollection.updateOne(
+            { userId: user.userId },
+            {
+                $set: {
+                    displayName: discordInfo.displayName,
+                    rank: discordInfo.rank,
+                    avatarUrl: discordInfo.avatarUrl
+                }
+            }
+        );
+
+        return {
+            ...user,
+            displayName: discordInfo.displayName,
+            rank: discordInfo.rank,
+            avatarUrl: discordInfo.avatarUrl
+        };
+    }));
+
+    return enrichedUsers;
+}
 
         await pointsCollection.updateOne(
             { userId: user.userId },
