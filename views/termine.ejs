@@ -14,7 +14,10 @@
         const year = today.getFullYear();
         const month = today.getMonth();
 
-        const monthName = today.toLocaleString("de-DE", { month: "long", year: "numeric" });
+        const monthName = today.toLocaleString("de-DE", {
+            month: "long",
+            year: "numeric"
+        });
 
         const firstDay = new Date(year, month, 1);
         const lastDay = new Date(year, month + 1, 0);
@@ -33,6 +36,10 @@
             calendarDays.push(day);
         }
 
+        while (calendarDays.length % 7 !== 0) {
+            calendarDays.push(null);
+        }
+
         function getTermineForDay(day) {
             if (!day || !termine) return [];
 
@@ -47,11 +54,11 @@
         }
     %>
 
-    <div class="calendar-title">
+    <div class="lsmd-calendar-title">
         <h3><%= monthName %></h3>
     </div>
 
-    <div class="calendar-grid calendar-head">
+    <div class="lsmd-calendar-weekdays">
         <div>Mo</div>
         <div>Di</div>
         <div>Mi</div>
@@ -61,20 +68,20 @@
         <div>So</div>
     </div>
 
-    <div class="calendar-grid">
+    <div class="lsmd-calendar">
         <% calendarDays.forEach(day => { %>
-            <div class="calendar-day <%= day === today.getDate() ? 'today' : '' %>">
+            <div class="lsmd-calendar-day <%= day === today.getDate() ? 'is-today' : '' %> <%= !day ? 'is-empty' : '' %>">
                 <% if (day) { %>
-                    <strong><%= day %></strong>
+                    <div class="lsmd-calendar-number"><%= day %></div>
 
                     <% const dayTermine = getTermineForDay(day); %>
 
                     <% if (dayTermine.length > 0) { %>
-                        <div class="calendar-events">
+                        <div class="lsmd-calendar-events">
                             <% dayTermine.slice(0, 2).forEach(t => { %>
-                                <div class="calendar-event <%= t.status === 'bestanden' ? 'success-event' : t.status === 'nicht bestanden' ? 'danger-event' : t.status === 'verschoben' ? 'warning-event' : 'blue-event' %>">
-                                    <span><%= t.time || "--:--" %></span>
-                                    <p><%= t.examType || "Termin" %></p>
+                                <div class="lsmd-calendar-event <%= t.status === 'bestanden' ? 'event-success' : t.status === 'nicht bestanden' ? 'event-danger' : t.status === 'verschoben' ? 'event-warning' : 'event-blue' %>">
+                                    <strong><%= t.time || "--:--" %></strong>
+                                    <span><%= t.examType || "Termin" %></span>
                                 </div>
                             <% }) %>
 
@@ -88,7 +95,6 @@
         <% }) %>
     </div>
 </section>
-
 <section class="dashboard-grid">
     <div class="card">
         <div class="card-header">
