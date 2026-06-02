@@ -1,11 +1,25 @@
 <section class="hero">
     <small>Willkommen zurück,</small>
-    <h1><%= user && user.username ? user.username : "Leitung" %> 👋</h1>
-    <p>Gut, dass du wieder da bist. Hier ist die aktuelle Lage deiner Prakti-Sani Verwaltung.</p>
 
-    <div class="status-pill">
-        <span class="online-dot"></span>
-        Alle Systeme online
+    <h1>
+        <%= user && user.username ? user.username : "Leitung" %>
+        <span class="wave">👋</span>
+    </h1>
+
+    <p>
+        Hier ist deine moderne Prakti-Sani Zentrale. Termine, Prüfungen,
+        Mitglieder und Dokumente auf einen Blick.
+    </p>
+
+    <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:20px;">
+        <div class="status-pill">
+            <span class="online-dot"></span>
+            Alle Systeme online
+        </div>
+
+        <div class="role-pill">
+            🛡️ <%= user && user.role ? user.role : "Leitung" %>
+        </div>
     </div>
 </section>
 

@@ -50,14 +50,23 @@
             <% } %>
         </nav>
 
-        <div class="sidebar-bottom">
-            <div class="user-card">
-                <div class="avatar">✚</div>
-                <div>
-                    <strong><%= (typeof user !== "undefined" && user && user.username) ? user.username : "Leitung" %></strong>
-                    <p><span class="online-dot"></span> Online</p>
-                </div>
-            </div>
+        <div class="user-card">
+    <div class="avatar">
+        <% if (typeof user !== "undefined" && user && user.avatar) { %>
+            <img src="<%= user.avatar %>" alt="Avatar">
+        <% } else { %>
+            ✚
+        <% } %>
+    </div>
+
+    <div>
+        <strong><%= (typeof user !== "undefined" && user && user.username) ? user.username : "Leitung" %></strong>
+        <p>
+            <span class="online-dot"></span>
+            <%= (typeof user !== "undefined" && user && user.role) ? user.role : "Online" %>
+        </p>
+    </div>
+</div>
 
             <a class="logout" href="/logout">↪ Logout</a>
         </div>
@@ -71,8 +80,12 @@
                 <div class="search-box">🔍 Suchen...</div>
                 <div class="bell">🔔<span>3</span></div>
                 <div class="profile-circle">
-                    <%= (typeof user !== "undefined" && user && user.username) ? user.username.charAt(0).toUpperCase() : "L" %>
-                </div>
+    <% if (typeof user !== "undefined" && user && user.avatar) { %>
+        <img src="<%= user.avatar %>" alt="Avatar">
+    <% } else { %>
+        <%= (typeof user !== "undefined" && user && user.username) ? user.username.charAt(0).toUpperCase() : "L" %>
+    <% } %>
+</div>
             </div>
         </div>
 
