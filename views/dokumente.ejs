@@ -1,53 +1,74 @@
 <div class="page-header">
     <h1>Dokumente</h1>
-    <p>Alle wichtigen Unterlagen für Prakti-Sanis.</p>
+    <p>Dokumente, Links und Unterlagen verwalten.</p>
 </div>
 
+<% if (isAdmin) { %>
 <div class="card">
-    <h2>Leitfäden</h2>
+    <h2>Dokument hinzufügen</h2>
+
+    <form action="/dokumente/create" method="POST" class="form">
+        <input type="text" name="title" placeholder="Titel" required>
+
+        <select name="type" required>
+            <option value="">Kategorie auswählen</option>
+            <option value="Leitfaden">Leitfaden</option>
+            <option value="Formular">Formular</option>
+            <option value="SOP">SOP</option>
+            <option value="Prüfung">Prüfung</option>
+            <option value="Sonstiges">Sonstiges</option>
+        </select>
+
+        <input type="url" name="url" placeholder="Dokument-Link / Google Docs Link" required>
+
+        <textarea name="notes" placeholder="Notizen"></textarea>
+
+        <button type="submit">Dokument speichern</button>
+    </form>
+</div>
+<% } %>
+
+<div class="card">
+    <h2>Gespeicherte Dokumente</h2>
 
     <table class="table">
         <thead>
             <tr>
-                <th>Dokument</th>
-                <th>Aktion</th>
+                <th>Titel</th>
+                <th>Kategorie</th>
+                <th>Notizen</th>
+                <th>Link</th>
+                <% if (isAdmin) { %>
+                    <th>Aktion</th>
+                <% } %>
             </tr>
         </thead>
 
         <tbody>
-            <tr>
-                <td>Leitfaden folgt</td>
-                <td>
-                    <button disabled>Download</button>
-                </td>
-            </tr>
+            <% if (docs && docs.length > 0) { %>
+                <% docs.forEach(doc => { %>
+                    <tr>
+                        <td><%= doc.title %></td>
+                        <td><span class="badge warning"><%= doc.type %></span></td>
+                        <td><%= doc.notes || "-" %></td>
+                        <td>
+                            <a href="<%= doc.url %>" target="_blank">Öffnen</a>
+                        </td>
+
+                        <% if (isAdmin) { %>
+                            <td>
+                                <form action="/dokumente/delete/<%= doc._id %>" method="POST">
+                                    <button type="submit" class="danger-btn">Löschen</button>
+                                </form>
+                            </td>
+                        <% } %>
+                    </tr>
+                <% }) %>
+            <% } else { %>
+                <tr>
+                    <td colspan="<%= isAdmin ? 5 : 4 %>">Noch keine Dokumente gespeichert.</td>
+                </tr>
+            <% } %>
         </tbody>
     </table>
-</div>
-
-<div class="card">
-    <h2>Formulare</h2>
-
-    <table class="table">
-        <thead>
-            <tr>
-                <th>Dokument</th>
-                <th>Aktion</th>
-            </tr>
-        </thead>
-
-        <tbody>
-            <tr>
-                <td>Formular folgt</td>
-                <td>
-                    <button disabled>Download</button>
-                </td>
-            </tr>
-        </tbody>
-    </table>
-</div>
-
-<div class="card">
-    <h2>Google Docs Integration</h2>
-    <p>Wird in einer späteren Phase integriert.</p>
 </div>
