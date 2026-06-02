@@ -1,50 +1,51 @@
-﻿<%- include('layout', { title: 'Dokument bearbeiten', active: 'dokumente' }) %>
-
-<div class="page-head">
-  <div>
-    <h1>Dokument bearbeiten</h1>
-    <p>Ändere Titel, Beschreibung oder Kategorie des Dokuments.</p>
-  </div>
-
-  <a class="btn secondary" href="/dokumente">Zurück</a>
+﻿@'
+<div class="page-header">
+    <h1>✏️ Dokument bearbeiten</h1>
+    <p>Bearbeite Titel, Kategorie, Link und Hinweise des Dokuments.</p>
 </div>
 
-<div class="card">
-  <form method="POST" action="/dokumente/edit/<%= dokument._id %>" class="form-grid">
-
-    <div class="form-group">
-      <label>Titel</label>
-      <input 
-        type="text" 
-        name="title" 
-        value="<%= dokument.title || '' %>" 
-        required
-      >
+<section class="card">
+    <div class="card-header">
+        <h2>📄 Dokumentdaten</h2>
+        <span class="chip blue">Admin</span>
     </div>
 
-    <div class="form-group">
-      <label>Kategorie</label>
-      <input 
-        type="text" 
-        name="category" 
-        value="<%= dokument.category || '' %>"
-        placeholder="z.B. Ausbildung, Allgemein, Verwaltung"
-      >
-    </div>
+    <form action="/dokumente/edit/<%= doc._id %>" method="POST" class="form">
+        <input
+            type="text"
+            name="title"
+            placeholder="Titel des Dokuments"
+            value="<%= doc.title || '' %>"
+            required
+        >
 
-    <div class="form-group full">
-      <label>Beschreibung</label>
-      <textarea 
-        name="description" 
-        rows="5"
-        placeholder="Kurze Beschreibung..."
-      ><%= dokument.description || '' %></textarea>
-    </div>
+        <select name="type" required>
+            <option value="">Kategorie auswählen</option>
+            <option value="Leitfaden" <%= doc.type === "Leitfaden" ? "selected" : "" %>>Leitfaden</option>
+            <option value="Formular" <%= doc.type === "Formular" ? "selected" : "" %>>Formular</option>
+            <option value="SOP" <%= doc.type === "SOP" ? "selected" : "" %>>SOP</option>
+            <option value="Prüfung" <%= doc.type === "Prüfung" ? "selected" : "" %>>Prüfung</option>
+            <option value="Google Docs" <%= doc.type === "Google Docs" ? "selected" : "" %>>Google Docs</option>
+            <option value="Sonstiges" <%= doc.type === "Sonstiges" ? "selected" : "" %>>Sonstiges</option>
+        </select>
 
-    <div class="form-actions full">
-      <button class="btn" type="submit">Speichern</button>
-      <a class="btn secondary" href="/dokumente">Abbrechen</a>
-    </div>
+        <input
+            type="url"
+            name="url"
+            placeholder="Dokument-Link / Google Docs Link"
+            value="<%= doc.url || '' %>"
+            required
+        >
 
-  </form>
-</div>
+        <textarea name="notes" placeholder="Kurze Beschreibung oder Hinweise"><%= doc.notes || '' %></textarea>
+
+        <div class="doc-actions">
+            <button type="submit">Änderungen speichern</button>
+
+            <a href="/dokumente" class="open-doc-btn">
+                Abbrechen
+            </a>
+        </div>
+    </form>
+</section>
+'@ | Set-Content -Encoding UTF8 views\dokument-edit.ejs

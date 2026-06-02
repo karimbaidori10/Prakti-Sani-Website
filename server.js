@@ -236,41 +236,51 @@ app.get("/dokumente", requireLogin, async (req, res) => {
 
 // Dokument bearbeiten anzeigen
 app.get('/dokumente/edit/:id', requireLogin, requireAdmin, async (req, res) => {
-  try {
-    const dokument = await Dokument.findById(req.params.id);
+    try {
+        const doc = await Dokument.findById(req.params.id);
 
-    if (!dokument) {
-      return res.status(404).send('Dokument nicht gefunden');
+        if (!doc) {
+            return res.status(404).send('Dokument nicht gefunden');
+        }
+
+        res.render('dokument-edit', viewData(req, {
+            active: 'dokumente',
+            doc
+        }));
+    } catch (err) {
+        console.error('Fehler beim Laden des Dokuments:', err);
+        res.status(500).send('Serverfehler');
     }
-
-    res.render('dokument-edit', {
-      title: 'Dokument bearbeiten',
-      active: 'dokumente',
-      user: req.user,
-      dokument
-    });
-  } catch (err) {
-    console.error('Fehler beim Laden des Dokuments:', err);
-    res.status(500).send('Serverfehler');
-  }
 });
 
 // Dokument bearbeiten speichern
 app.post('/dokumente/edit/:id', requireLogin, requireAdmin, async (req, res) => {
-  try {
-    const { title, category, description } = req.body;
+    try {
+        const { title, type, url, notes } = req.body;
 
-    await Dokument.findByIdAndUpdate(req.params.id, {
-      title,
-      category,
-      description
-    });
+        await Dokument.findByIdAndUpdate(req.params.id, {
+            title,
+            type,
+            url,
+            notes
+        });
 
-    res.redirect('/dokumente');
-  } catch (err) {
-    console.error('Fehler beim Speichern des Dokuments:', err);
-    res.status(500).send('Serverfehler');
-  }
+        res.redirect('/dokumente');
+    } catch (err) {
+        console.error('Fehler beim Speichern des Dokuments:', err);
+        res.status(500).send('Serverfehler');
+    }
+});
+
+// Dokument löschen
+app.post('/dokumente/delete/:id', requireLogin, requireAdmin, async (req, res) => {
+    try {
+        await Dokument.findByIdAndDelete(req.params.id);
+        res.redirect('/dokumente');
+    } catch (err) {
+        console.error('Fehler beim Löschen des Dokuments:', err);
+        res.status(500).send('Serverfehler');
+    }
 });
 
 app.get("/admin", requireLogin, requireAdmin, async (req, res) => {

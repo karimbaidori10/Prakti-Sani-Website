@@ -1,3 +1,6 @@
+cd C:\Users\kbaid\Desktop\Website
+
+@'
 <div class="page-header">
     <h1>📁 Dokumente</h1>
     <p>Leitfäden, Formulare, SOPs und wichtige Unterlagen zentral verwalten.</p>
@@ -119,8 +122,18 @@
                         </a>
 
                         <% if (isAdmin) { %>
+                            <a href="/dokumente/edit/<%= doc._id %>" class="open-doc-btn">
+                                Bearbeiten
+                            </a>
+
                             <form action="/dokumente/delete/<%= doc._id %>" method="POST">
-                                <button type="submit" class="danger-btn">Löschen</button>
+                                <button
+                                    type="submit"
+                                    class="danger-btn"
+                                    onclick="return confirm('Dokument wirklich löschen?');"
+                                >
+                                    Löschen
+                                </button>
                             </form>
                         <% } %>
                     </div>
@@ -130,3 +143,4 @@
 
     <% } %>
 </section>
+'@ | Set-Content -Encoding UTF8 views\dokumente.ejs
