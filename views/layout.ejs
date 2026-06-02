@@ -73,24 +73,31 @@
     </aside>
 
     <main class="main">
-        <div class="topbar">
-            <button class="menu-btn">☰</button>
+    <div class="topbar">
+        <button class="menu-btn">☰</button>
 
-            <div class="topbar-right">
-                <div class="search-box">🔍 Suchen...</div>
-                <div class="bell">🔔<span>3</span></div>
-                <div class="profile-circle">
-    <% if (typeof user !== "undefined" && user && user.avatar) { %>
-        <img src="<%= user.avatar %>" alt="Avatar">
-    <% } else { %>
-        <%= (typeof user !== "undefined" && user && user.username) ? user.username.charAt(0).toUpperCase() : "L" %>
-    <% } %>
-</div>
+        <div class="topbar-right">
+            <div class="search-box">🔍 Suchen...</div>
+
+            <div class="bell">
+                🔔
+                <span>3</span>
+            </div>
+
+            <div class="profile-circle">
+                <% if (typeof user !== "undefined" && user && user.avatar) { %>
+                    <img src="<%= user.avatar %>" alt="Avatar">
+                <% } else { %>
+                    <%= (typeof user !== "undefined" && user && user.username) ? user.username.charAt(0).toUpperCase() : "L" %>
+                <% } %>
             </div>
         </div>
+    </div>
 
+    <div class="page-content">
         <%- body %>
-    </main>
+    </div>
+</main>
 
 </div>
 

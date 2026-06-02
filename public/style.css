@@ -955,3 +955,53 @@ a {
     75% { transform: rotate(8deg); }
     100% { transform: rotate(0deg); }
 }
+
+.main {
+    min-height: 100vh;
+    padding-top: 22px !important;
+    align-content: start;
+}
+
+.topbar {
+    margin-top: 0 !important;
+}
+
+.hero {
+    margin-top: 0 !important;
+}
+
+.dashboard-grid,
+.stats-grid {
+    align-items: start;
+}
+
+.main {
+    flex: 1 !important;
+    min-height: 100vh !important;
+    padding: 22px 28px 40px !important;
+    display: block !important;
+    align-content: start !important;
+}
+
+.page-content {
+    display: block;
+    margin-top: 0 !important;
+}
+
+.topbar {
+    height: 54px !important;
+    margin-top: 0 !important;
+    margin-bottom: 24px !important;
+}
+
+.hero {
+    margin-top: 0 !important;
+}
+
+.stats-grid {
+    margin-top: 20px !important;
+}
+
+.dashboard-grid {
+    margin-top: 18px !important;
+}
