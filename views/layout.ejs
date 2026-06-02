@@ -7,8 +7,34 @@
 </head>
 <body>
 
-<div class="app">
-    <%- body %>
+<div class="layout">
+
+    <aside class="sidebar">
+        <div class="brand">
+            <h2>LSMD</h2>
+            <p>Prakti-Sani</p>
+        </div>
+
+        <nav>
+            <a class="<%= active === 'dashboard' ? 'active' : '' %>" href="/dashboard">Dashboard</a>
+            <a class="<%= active === 'leaderboard' ? 'active' : '' %>" href="/leaderboard">Leaderboard</a>
+            <a class="<%= active === 'users' ? 'active' : '' %>" href="/users">Mitglieder</a>
+            <a class="<%= active === 'termine' ? 'active' : '' %>" href="/termine">Termine</a>
+            <a class="<%= active === 'pruefungen' ? 'active' : '' %>" href="/pruefungen">Prüfungen</a>
+            <a class="<%= active === 'dokumente' ? 'active' : '' %>" href="/dokumente">Dokumente</a>
+
+            <% if (isAdmin) { %>
+                <a class="<%= active === 'admin' ? 'active' : '' %>" href="/admin">Admin</a>
+            <% } %>
+        </nav>
+
+        <a class="logout" href="/logout">Logout</a>
+    </aside>
+
+    <main class="content">
+        <%- body %>
+    </main>
+
 </div>
 
 </body>
