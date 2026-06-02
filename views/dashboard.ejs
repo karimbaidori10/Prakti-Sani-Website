@@ -1,13 +1,13 @@
-﻿<section class="hero">
-    <small>Willkommen zurÃ¼ck,</small>
+<section class="hero">
+    <small>Willkommen zurueck,</small>
 
     <h1>
         <%= user && user.username ? user.username : "Leitung" %>
-        <span class="wave">ðŸ‘‹</span>
+        <span class="wave">Hallo</span>
     </h1>
 
     <p>
-        Hier ist deine moderne Prakti-Sani Zentrale. Termine, PrÃ¼fungen,
+        Hier ist deine moderne Prakti-Sani Zentrale. Termine, Pruefungen,
         Mitglieder und Dokumente auf einen Blick.
     </p>
 
@@ -18,14 +18,14 @@
         </div>
 
         <div class="role-pill">
-            ðŸ›¡ï¸ <%= user && user.role ? user.role : "Leitung" %>
+            <%= user && user.role ? user.role : "Leitung" %>
         </div>
     </div>
 </section>
 
 <section class="stats-grid">
     <div class="stat-card stat-red">
-        <div class="stat-icon">ðŸ‘¥</div>
+        <div class="stat-icon">User</div>
         <div>
             <h2><%= users ? users.length : 0 %></h2>
             <strong>Mitglieder</strong>
@@ -34,25 +34,25 @@
     </div>
 
     <div class="stat-card stat-blue">
-        <div class="stat-icon">ðŸ“…</div>
+        <div class="stat-icon">Termin</div>
         <div>
             <h2><%= termine ? termine.length : 0 %></h2>
             <strong>Termine</strong>
-            <p>NÃ¤chste Termine</p>
+            <p>Naechste Termine</p>
         </div>
     </div>
 
     <div class="stat-card stat-green">
-        <div class="stat-icon">ðŸ“‹</div>
+        <div class="stat-icon">Test</div>
         <div>
             <h2><%= exams ? exams.length : 0 %></h2>
-            <strong>PrÃ¼fungen</strong>
-            <p>Gesamt PrÃ¼fungen</p>
+            <strong>Pruefungen</strong>
+            <p>Gesamt Pruefungen</p>
         </div>
     </div>
 
     <div class="stat-card stat-yellow">
-        <div class="stat-icon">ðŸ“</div>
+        <div class="stat-icon">Docs</div>
         <div>
             <h2>0</h2>
             <strong>Dokumente</strong>
@@ -64,7 +64,7 @@
 <section class="dashboard-grid">
     <div class="card">
         <div class="card-header">
-            <h2>ðŸ“… NÃ¤chste Termine</h2>
+            <h2>Naechste Termine</h2>
             <a href="/termine" class="mini-btn">Alle anzeigen</a>
         </div>
 
@@ -81,7 +81,7 @@
 
                         <div>
                             <h3><%= termin.examType || termin.name || "Termin" %></h3>
-                            <p>ðŸ•’ <%= termin.time || "--:--" %> Uhr Â· ðŸ“ LSMD Base</p>
+                            <p><%= termin.time || "--:--" %> Uhr - LSMD Base</p>
                         </div>
 
                         <span class="chip blue"><%= termin.status || "Offen" %></span>
@@ -107,27 +107,27 @@
 
     <div class="card">
         <div class="card-header">
-            <h2>âš¡ Schnellzugriff</h2>
+            <h2>Schnellzugriff</h2>
         </div>
 
         <div class="quick-grid">
             <a href="/users" class="quick-card red">
-                <h3>ðŸ‘¥ Mitglieder</h3>
+                <h3>Mitglieder</h3>
                 <p>Benutzer verwalten</p>
             </a>
 
             <a href="/termine" class="quick-card blue">
-                <h3>ðŸ“… Termine</h3>
+                <h3>Termine</h3>
                 <p>Termine verwalten</p>
             </a>
 
             <a href="/pruefungen" class="quick-card green">
-                <h3>ðŸ“‹ PrÃ¼fungen</h3>
-                <p>PrÃ¼fungen verwalten</p>
+                <h3>Pruefungen</h3>
+                <p>Pruefungen verwalten</p>
             </a>
 
             <a href="/dokumente" class="quick-card yellow">
-                <h3>ðŸ“ Dokumente</h3>
+                <h3>Dokumente</h3>
                 <p>Dokumente verwalten</p>
             </a>
         </div>
@@ -137,7 +137,7 @@
 <section class="dashboard-grid">
     <div class="card">
         <div class="card-header">
-            <h2>ðŸ“ˆ Letzte PrÃ¼fungen</h2>
+            <h2>Letzte Pruefungen</h2>
             <a href="/pruefungen" class="mini-btn">Alle anzeigen</a>
         </div>
 
@@ -145,13 +145,13 @@
             <% if (exams && exams.length > 0) { %>
                 <% exams.forEach(exam => { %>
                     <div class="activity-item">
-                        <span>ðŸ“‹ PrÃ¼fung erstellt: <strong><%= exam.examType %></strong> fÃ¼r <%= exam.name %></span>
+                        <span>Pruefung erstellt: <strong><%= exam.examType %></strong> fuer <%= exam.name %></span>
                         <small><%= exam.result || "Offen" %></small>
                     </div>
                 <% }) %>
             <% } else { %>
                 <div class="activity-item">
-                    <span>Keine PrÃ¼fungen vorhanden</span>
+                    <span>Keine Pruefungen vorhanden</span>
                     <small>--</small>
                 </div>
             <% } %>
@@ -160,7 +160,7 @@
 
     <div class="card">
         <div class="card-header">
-            <h2>ðŸŸ¢ System Status</h2>
+            <h2>System Status</h2>
             <span class="chip green">Online</span>
         </div>
 
