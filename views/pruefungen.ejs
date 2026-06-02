@@ -1,30 +1,94 @@
 <div class="page-header">
-  <h1>Prüfungen</h1>
-  <p>Übersicht über anstehende und vergangene Prüfungen.</p>
+    <h1>Prüfungen</h1>
+    <p>Prüfungen anlegen, speichern und verwalten.</p>
 </div>
 
 <div class="card">
-  <h2>Anstehende Prüfungen</h2>
+    <h2>Prüfung eintragen</h2>
 
-  <table class="table">
-    <thead>
-      <tr>
-        <th>Datum</th>
-        <th>Thema</th>
-        <th>Status</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td>Noch keine Prüfung</td>
-        <td>-</td>
-        <td>Offen</td>
-      </tr>
-    </tbody>
-  </table>
+    <form action="/pruefungen/create" method="POST" class="form">
+        <input type="text" name="name" placeholder="Name des Prüflings" required>
+
+        <input type="text" name="discordId" placeholder="Discord ID" required>
+
+        <select name="examType" required>
+            <option value="">Prüfungsart auswählen</option>
+            <option value="Prakti-Sani">Prakti-Sani</option>
+            <option value="Sani">Sani</option>
+            <option value="Ausbilder">Ausbilder</option>
+            <option value="Nachprüfung">Nachprüfung</option>
+        </select>
+
+        <select name="result" required>
+            <option value="">Ergebnis auswählen</option>
+            <option value="Bestanden">Bestanden</option>
+            <option value="Nicht bestanden">Nicht bestanden</option>
+            <option value="Offen">Offen</option>
+        </select>
+
+        <input type="text" name="examiner" placeholder="Prüfer" required>
+
+        <textarea name="notes" placeholder="Notizen"></textarea>
+
+        <button type="submit">Prüfung speichern</button>
+    </form>
 </div>
 
 <div class="card">
-  <h2>Prüfungsverwaltung</h2>
-  <p>Hier wird später die komplette Verwaltung eingebaut.</p>
+    <h2>Gespeicherte Prüfungen</h2>
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Datum</th>
+                <th>Name</th>
+                <th>Discord ID</th>
+                <th>Art</th>
+                <th>Ergebnis</th>
+                <th>Prüfer</th>
+                <th>Notizen</th>
+                <% if (isAdmin) { %>
+                    <th>Aktion</th>
+                <% } %>
+            </tr>
+        </thead>
+
+        <tbody>
+            <% if (exams && exams.length > 0) { %>
+                <% exams.forEach(exam => { %>
+                    <tr>
+                        <td><%= new Date(exam.createdAt).toLocaleString("de-DE") %></td>
+                        <td><%= exam.name %></td>
+                        <td><%= exam.discordId %></td>
+                        <td><%= exam.examType %></td>
+
+                        <td>
+                            <% if (exam.result === "Bestanden") { %>
+                                <span class="badge success">Bestanden</span>
+                            <% } else if (exam.result === "Nicht bestanden") { %>
+                                <span class="badge danger">Nicht bestanden</span>
+                            <% } else { %>
+                                <span class="badge warning">Offen</span>
+                            <% } %>
+                        </td>
+
+                        <td><%= exam.examiner %></td>
+                        <td><%= exam.notes || "-" %></td>
+
+                        <% if (isAdmin) { %>
+                            <td>
+                                <form action="/pruefungen/delete/<%= exam._id %>" method="POST">
+                                    <button type="submit" class="danger-btn">Löschen</button>
+                                </form>
+                            </td>
+                        <% } %>
+                    </tr>
+                <% }) %>
+            <% } else { %>
+                <tr>
+                    <td colspan="<%= isAdmin ? 8 : 7 %>">Noch keine Prüfungen gespeichert.</td>
+                </tr>
+            <% } %>
+        </tbody>
+    </table>
 </div>
