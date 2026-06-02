@@ -141,14 +141,13 @@
 
                     <% if (isAdmin) { %>
                         <div class="exam-actions">
-                            <form action="/pruefungen/delete/<%= exam._id %>" method="POST">
-                                <button type="submit" class="danger-btn">Löschen</button>
-                            </form>
-                        </div>
-                    <% } %>
-                </div>
-            <% }) %>
-        </div>
+    <a href="/pruefungen/edit/<%= exam._id %>" class="open-doc-btn">
+        Bearbeiten
+    </a>
 
+    <% if (isAdmin) { %>
+        <form action="/pruefungen/delete/<%= exam._id %>" method="POST">
+            <button type="submit" class="danger-btn">Löschen</button>
+        </form>
     <% } %>
-</section>
+</div>

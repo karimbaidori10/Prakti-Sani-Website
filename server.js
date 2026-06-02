@@ -361,6 +361,51 @@ app.post("/termine/delete/:id", requireLogin, requireAdmin, async (req, res) => 
 // =====================
 // PRÜFUNGEN
 // =====================
+
+app.get("/pruefungen/edit/:id", requireLogin, async (req, res) => {
+    const exam = await examsCollection.findOne({
+        _id: new ObjectId(req.params.id)
+    });
+
+    if (!exam) {
+        return res.redirect("/pruefungen");
+    }
+
+    res.render("pruefung-edit", viewData(req, {
+        active: "pruefungen",
+        exam
+    }));
+});
+
+app.post("/pruefungen/edit/:id", requireLogin, async (req, res) => {
+    const {
+        name,
+        discordId,
+        examType,
+        result,
+        examiner,
+        notes
+    } = req.body;
+
+    await examsCollection.updateOne(
+        { _id: new ObjectId(req.params.id) },
+        {
+            $set: {
+                name,
+                discordId,
+                examType,
+                result,
+                examiner,
+                notes
+            }
+        }
+    );
+
+    await addLog("Prüfung bearbeitet", { id: req.params.id, name, examType, result });
+
+    res.redirect("/pruefungen");
+});
+
 app.post("/pruefungen/create", requireLogin, async (req, res) => {
     const {
         name,

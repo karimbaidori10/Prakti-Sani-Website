@@ -1,0 +1,48 @@
+﻿<div class="page-header">
+    <h1>✏️ Prüfung bearbeiten</h1>
+    <p>Ändere Ergebnis, Prüfer oder Notizen dieser Prüfung.</p>
+</div>
+
+<section class="card">
+    <div class="card-header">
+        <h2>📋 Prüfungsdaten</h2>
+        <a href="/pruefungen" class="mini-btn">Zurück</a>
+    </div>
+
+    <form action="/pruefungen/edit/<%= exam._id %>" method="POST" class="form">
+        <input type="text" name="name" placeholder="Name des Prüflings" value="<%= exam.name || '' %>" required>
+
+        <input type="text" name="discordId" placeholder="Discord ID" value="<%= exam.discordId || '' %>" required>
+
+        <select name="examType" required>
+            <option value="">Prüfungsart auswählen</option>
+
+            <% [
+                "Prakti-Sani",
+                "Sani",
+                "Ausbilder",
+                "Nachprüfung",
+                "Theorie",
+                "Praxis",
+                "Regelwerk",
+                "Funkleitfaden"
+            ].forEach(type => { %>
+                <option value="<%= type %>" <%= exam.examType === type ? "selected" : "" %>>
+                    <%= type %>
+                </option>
+            <% }) %>
+        </select>
+
+        <select name="result" required>
+            <option value="Bestanden" <%= exam.result === "Bestanden" ? "selected" : "" %>>Bestanden</option>
+            <option value="Nicht bestanden" <%= exam.result === "Nicht bestanden" ? "selected" : "" %>>Nicht bestanden</option>
+            <option value="Offen" <%= exam.result === "Offen" ? "selected" : "" %>>Offen</option>
+        </select>
+
+        <input type="text" name="examiner" placeholder="Prüfer / Ausbilder" value="<%= exam.examiner || '' %>" required>
+
+        <textarea name="notes" placeholder="Notizen zur Prüfung"><%= exam.notes || '' %></textarea>
+
+        <button type="submit">Änderungen speichern</button>
+    </form>
+</section>
