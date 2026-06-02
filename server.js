@@ -75,7 +75,10 @@ async function getAllPoints() {
 // LOGIN
 // =====================
 app.get("/login", (req, res) => {
-    res.render("login", { error: null });
+    res.render("login", {
+        layout: false,
+        error: null
+    });
 });
 
 app.post("/login", (req, res) => {
@@ -92,7 +95,9 @@ app.post("/login", (req, res) => {
         return res.redirect("/dashboard");
     }
 
-    res.render("login", { error: "Falsches Passwort" });
+    res.render("login", {
+    layout: false,
+    error: "Falsches Passwort"
 });
 
 app.get("/logout", (req, res) => {

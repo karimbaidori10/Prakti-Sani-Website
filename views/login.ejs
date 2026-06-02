@@ -5,20 +5,30 @@
     <title>LSMD Login</title>
     <link rel="stylesheet" href="/style.css">
 </head>
-<body class="login-body">
+<body class="login-page">
 
-<div class="login-box">
-    <h1>🚑 LSMD Dashboard</h1>
-    <p>Leitungs-Login</p>
+<div class="login-shell">
+    <div class="login-glow"></div>
 
-    <% if (error) { %>
-        <div class="error"><%= error %></div>
-    <% } %>
+    <div class="login-card">
+        <div class="login-logo">✚</div>
 
-    <form method="POST" action="/login">
-        <input type="password" name="password" placeholder="Passwort" required>
-        <button type="submit">Einloggen</button>
-    </form>
+        <h1>LSMD Dashboard</h1>
+        <p>Prakti-Sani Verwaltung</p>
+
+        <% if (error) { %>
+            <div class="error"><%= error %></div>
+        <% } %>
+
+        <form action="/login" method="POST" class="form">
+            <input type="password" name="password" placeholder="Leitungs-Passwort" required>
+            <button type="submit">Einloggen</button>
+        </form>
+
+        <div class="login-hint">
+            Zugriff nur für berechtigte Leitung.
+        </div>
+    </div>
 </div>
 
 </body>

@@ -739,3 +739,96 @@ a {
         font-size: 34px;
     }
 }
+
+.login-page {
+    min-height: 100vh;
+    overflow: hidden;
+    background:
+        radial-gradient(circle at 70% 15%, rgba(37,99,235,.35), transparent 32%),
+        radial-gradient(circle at 20% 25%, rgba(239,35,60,.28), transparent 34%),
+        linear-gradient(135deg, #020617, #050914 55%, #08111f);
+}
+
+.login-shell {
+    min-height: 100vh;
+    display: grid;
+    place-items: center;
+    position: relative;
+    padding: 20px;
+}
+
+.login-shell::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-image:
+        linear-gradient(rgba(255,255,255,.035) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,.035) 1px, transparent 1px);
+    background-size: 44px 44px;
+    opacity: .45;
+}
+
+.login-glow {
+    position: absolute;
+    width: 520px;
+    height: 520px;
+    border-radius: 50%;
+    background: rgba(239,35,60,.18);
+    filter: blur(90px);
+}
+
+.login-card {
+    position: relative;
+    z-index: 2;
+    width: 440px;
+    padding: 38px;
+    border-radius: 28px;
+    background: rgba(15,23,42,.78);
+    border: 1px solid rgba(148,163,184,.22);
+    backdrop-filter: blur(26px);
+    box-shadow:
+        0 30px 100px rgba(0,0,0,.55),
+        0 0 60px rgba(37,99,235,.18);
+    text-align: center;
+}
+
+.login-logo {
+    width: 72px;
+    height: 72px;
+    margin: 0 auto 18px;
+    display: grid;
+    place-items: center;
+    border-radius: 22px;
+    background: linear-gradient(135deg, #ef233c, #7f1d1d);
+    color: white;
+    font-size: 40px;
+    box-shadow: 0 0 40px rgba(239,35,60,.45);
+}
+
+.login-card h1 {
+    font-size: 34px;
+    letter-spacing: .5px;
+    margin-bottom: 8px;
+}
+
+.login-card p {
+    color: #94a3b8;
+    margin-bottom: 24px;
+}
+
+.login-card input {
+    text-align: center;
+    font-size: 15px;
+}
+
+.login-card button {
+    margin-top: 4px;
+    background: linear-gradient(135deg, #ef233c, #2563eb);
+    box-shadow: 0 0 28px rgba(37,99,235,.28);
+}
+
+.login-hint {
+    margin-top: 18px;
+    color: #94a3b8;
+    font-size: 13px;
+}
