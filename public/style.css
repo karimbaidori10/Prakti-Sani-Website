@@ -1186,3 +1186,89 @@ a {
         grid-template-columns: 1fr;
     }
 }
+
+.exam-list {
+    display: grid;
+    gap: 14px;
+}
+
+.exam-card {
+    display: grid;
+    grid-template-columns: 70px 1fr 130px;
+    gap: 18px;
+    align-items: center;
+    padding: 18px;
+    border-radius: 18px;
+    background: rgba(2,6,23,.36);
+    border: 1px solid var(--border);
+    transition: .2s;
+}
+
+.exam-card:hover {
+    transform: translateY(-3px);
+    border-color: rgba(37,99,235,.45);
+    box-shadow: 0 14px 40px rgba(0,0,0,.22);
+}
+
+.exam-icon {
+    width: 58px;
+    height: 58px;
+    border-radius: 18px;
+    display: grid;
+    place-items: center;
+    font-size: 28px;
+    background: rgba(15,23,42,.8);
+    border: 1px solid var(--border);
+}
+
+.exam-title-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-bottom: 8px;
+}
+
+.exam-main h3 {
+    margin-bottom: 0;
+}
+
+.exam-main p {
+    color: var(--muted);
+    margin-top: 6px;
+}
+
+.exam-note {
+    color: #cbd5e1 !important;
+    padding-top: 6px;
+}
+
+.exam-actions {
+    display: grid;
+    gap: 10px;
+}
+
+.exam-actions button {
+    padding: 10px;
+    font-size: 13px;
+}
+
+@media (max-width: 900px) {
+    .exam-card {
+        grid-template-columns: 60px 1fr;
+    }
+
+    .exam-actions {
+        grid-column: 1 / -1;
+    }
+}
+
+@media (max-width: 600px) {
+    .exam-card {
+        grid-template-columns: 1fr;
+    }
+
+    .exam-icon {
+        width: 100%;
+    }
+}
