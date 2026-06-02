@@ -1,12 +1,12 @@
-﻿<div class="page-header">
-    <h1>ðŸ“… Termine</h1>
-    <p>PrÃ¼fungstermine planen, verwalten und Status aktuell halten.</p>
+<div class="page-header">
+    <h1>Termine</h1>
+    <p>Pruefungstermine planen, verwalten und Status aktuell halten.</p>
 </div>
 
 <section class="dashboard-grid">
     <div class="card">
         <div class="card-header">
-            <h2>âž• Neuen Termin erstellen</h2>
+            <h2>Neuen Termin erstellen</h2>
             <span class="chip blue">Planung</span>
         </div>
 
@@ -16,11 +16,11 @@
             <input name="discordId" placeholder="Discord ID optional">
 
             <select name="examType" required>
-                <option value="">PrÃ¼fungsart wÃ¤hlen</option>
-                <option>Prakti-PrÃ¼fung</option>
+                <option value="">Pruefungsart waehlen</option>
+                <option>Prakti-Pruefung</option>
                 <option>Darf alleine fahren</option>
-                <option>SanitÃ¤ter-PrÃ¼fung</option>
-                <option>Theorie-PrÃ¼fung</option>
+                <option>Sanitaeter-Pruefung</option>
+                <option>Theorie-Pruefung</option>
                 <option>Regelwerk</option>
                 <option>Blaues Blatt</option>
                 <option>Funkleitfaden</option>
@@ -31,7 +31,7 @@
                 <input type="time" name="time" required>
             </div>
 
-            <input name="examiner" placeholder="PrÃ¼fer / Ausbilder">
+            <input name="examiner" placeholder="Pruefer / Ausbilder">
 
             <select name="status">
                 <option value="offen">Offen</option>
@@ -48,7 +48,7 @@
 
     <div class="card">
         <div class="card-header">
-            <h2>âš¡ Termin-Status</h2>
+            <h2>Termin-Status</h2>
             <span class="chip green">Live</span>
         </div>
 
@@ -77,22 +77,22 @@
         <div class="clean-divider"></div>
 
         <p style="color: var(--muted);">
-            Hier siehst du den aktuellen Stand deiner PrÃ¼fungstermine.
+            Hier siehst du den aktuellen Stand deiner Pruefungstermine.
         </p>
     </div>
 </section>
 
 <section class="card">
     <div class="card-header">
-        <h2>ðŸ“‹ TerminÃ¼bersicht</h2>
+        <h2>Terminuebersicht</h2>
         <span class="chip blue"><%= termine ? termine.length : 0 %> Termine</span>
     </div>
 
     <% if (!termine || termine.length === 0) { %>
         <div class="empty-state">
-            <div>ðŸ“­</div>
+            <div>Keine Daten</div>
             <h3>Keine Termine vorhanden</h3>
-            <p>Erstelle oben deinen ersten PrÃ¼fungstermin.</p>
+            <p>Erstelle oben deinen ersten Pruefungstermin.</p>
         </div>
     <% } else { %>
 
@@ -110,19 +110,19 @@
                         <h3><%= t.examType %></h3>
 
                         <p>
-                            ðŸ‘¤ <%= t.name %>
+                            Teilnehmer: <%= t.name %>
                             <% if (t.discordId) { %>
-                                Â· ðŸ†” <%= t.discordId %>
+                                - Discord ID: <%= t.discordId %>
                             <% } %>
                         </p>
 
                         <p>
-                            ðŸ•’ <%= t.time || "--:--" %> Uhr
-                            Â· ðŸ§‘â€ðŸ« <%= t.examiner || "Kein PrÃ¼fer eingetragen" %>
+                            Zeit: <%= t.time || "--:--" %> Uhr
+                            - Pruefer: <%= t.examiner || "Kein Pruefer eingetragen" %>
                         </p>
 
                         <% if (t.notes) { %>
-                            <p class="termin-note">ðŸ“ <%= t.notes %></p>
+                            <p class="termin-note">Notiz: <%= t.notes %></p>
                         <% } %>
                     </div>
 
@@ -137,10 +137,6 @@
                             <span class="badge warning">Offen</span>
                         <% } %>
 
-                        <a href="/termine/edit/<%= t._id %>" class="open-doc-btn">
-                            Bearbeiten
-                        </a>
-
                         <form method="POST" action="/termine/status/<%= t._id %>" class="mini-form">
                             <select name="status">
                                 <option value="offen" <%= t.status === "offen" ? "selected" : "" %>>Offen</option>
@@ -149,12 +145,14 @@
                                 <option value="verschoben" <%= t.status === "verschoben" ? "selected" : "" %>>Verschoben</option>
                             </select>
 
-                            <button type="submit">Ã„ndern</button>
+                            <button type="submit">Aendern</button>
                         </form>
 
                         <% if (isAdmin) { %>
                             <form method="POST" action="/termine/delete/<%= t._id %>">
-                                <button type="submit" class="danger-btn">LÃ¶schen</button>
+                                <button type="submit" class="danger-btn" onclick="return confirm('Termin wirklich loeschen?');">
+                                    Loeschen
+                                </button>
                             </form>
                         <% } %>
                     </div>
