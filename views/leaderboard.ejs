@@ -1,0 +1,54 @@
+<h1>Leaderboard</h1>
+
+<section class="card">
+    <h2>Top Ausbilder</h2>
+
+    <% if (users.length === 0) { %>
+        <p>Keine Punkte vorhanden.</p>
+    <% } else { %>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Platz</th>
+                    <th>User ID</th>
+                    <th>Punkte</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                <% users.forEach((user, index) => { %>
+                    <tr>
+                        <td>
+                            <% if (index === 0) { %>
+                                Platz 1
+                            <% } else if (index === 1) { %>
+                                Platz 2
+                            <% } else if (index === 2) { %>
+                                Platz 3
+                            <% } else { %>
+                                Platz <%= index + 1 %>
+                            <% } %>
+                        </td>
+
+                        <td><%= user.userId %></td>
+
+                        <td>
+                            <strong><%= user.points %></strong>
+                        </td>
+
+                        <td>
+                            <% if (user.points >= 5) { %>
+                                Ziel erreicht
+                            <% } else { %>
+                                Noch offen
+                            <% } %>
+                        </td>
+                    </tr>
+                <% }) %>
+            </tbody>
+        </table>
+
+    <% } %>
+</section>
