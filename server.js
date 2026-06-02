@@ -147,14 +147,14 @@ app.get(
     (req, res) => {
         req.session.loggedIn = true;
         req.session.isAdmin = req.user.isAdmin;
+
         req.session.user = {
-    username: req.user.username,
-    discordId: req.user.id,
-    role: req.user.role,
-    avatar: req.user.avatar
-        ? `https://cdn.discordapp.com/avatars/${req.user.id}/${req.user.avatar}.png`
-        : null
-};
+            username: req.user.username,
+            discordId: req.user.id,
+            role: req.user.role,
+            avatar: req.user.avatar
+                ? `https://cdn.discordapp.com/avatars/${req.user.id}/${req.user.avatar}.png`
+                : null
         };
 
         res.redirect("/dashboard");
@@ -166,12 +166,6 @@ app.get("/logout", (req, res) => {
         req.session.destroy(() => {
             res.redirect("/login");
         });
-    });
-});
-
-app.get("/logout", (req, res) => {
-    req.session.destroy(() => {
-        res.redirect("/login");
     });
 });
 
