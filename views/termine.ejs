@@ -3,6 +3,85 @@
     <p>Prüfungstermine planen, verwalten und Status aktuell halten.</p>
 </div>
 
+<section class="dashboard-grid">
+    <div class="card">
+        <div class="card-header">
+            <h2>➕ Neuen Termin erstellen</h2>
+            <span class="chip blue">Planung</span>
+        </div>
+
+        <form method="POST" action="/termine/create" class="form">
+            <input name="name" placeholder="Name des Teilnehmers" required>
+
+            <input name="discordId" placeholder="Discord ID optional">
+
+            <select name="examType" required>
+                <option value="">Prüfungsart wählen</option>
+                <option>Prakti-Prüfung</option>
+                <option>Darf alleine fahren</option>
+                <option>Sanitäter-Prüfung</option>
+                <option>Theorie-Prüfung</option>
+                <option>Regelwerk</option>
+                <option>Blaues Blatt</option>
+                <option>Funkleitfaden</option>
+            </select>
+
+            <div class="form-row">
+                <input type="date" name="date" required>
+                <input type="time" name="time" required>
+            </div>
+
+            <input name="examiner" placeholder="Prüfer / Ausbilder">
+
+            <select name="status">
+                <option value="offen">Offen</option>
+                <option value="bestanden">Bestanden</option>
+                <option value="nicht bestanden">Nicht bestanden</option>
+                <option value="verschoben">Verschoben</option>
+            </select>
+
+            <textarea name="notes" placeholder="Notizen"></textarea>
+
+            <button type="submit">Termin speichern</button>
+        </form>
+    </div>
+
+    <div class="card">
+        <div class="card-header">
+            <h2>⚡ Termin-Status</h2>
+            <span class="chip green">Live</span>
+        </div>
+
+        <div class="mini-stats">
+            <div class="mini-stat">
+                <strong><%= termine ? termine.length : 0 %></strong>
+                <span>Gesamt</span>
+            </div>
+
+            <div class="mini-stat">
+                <strong><%= termine ? termine.filter(t => t.status === "offen").length : 0 %></strong>
+                <span>Offen</span>
+            </div>
+
+            <div class="mini-stat">
+                <strong><%= termine ? termine.filter(t => t.status === "bestanden").length : 0 %></strong>
+                <span>Bestanden</span>
+            </div>
+
+            <div class="mini-stat">
+                <strong><%= termine ? termine.filter(t => t.status === "verschoben").length : 0 %></strong>
+                <span>Verschoben</span>
+            </div>
+        </div>
+
+        <div class="clean-divider"></div>
+
+        <p style="color: var(--muted);">
+            Hier siehst du den aktuellen Stand deiner Prüfungstermine.
+        </p>
+    </div>
+</section>
+
 <section class="card">
     <div class="card-header">
         <h2>📋 Terminübersicht</h2>
@@ -13,7 +92,7 @@
         <div class="empty-state">
             <div>📭</div>
             <h3>Keine Termine vorhanden</h3>
-            <p>Erstelle links deinen ersten Prüfungstermin.</p>
+            <p>Erstelle oben deinen ersten Prüfungstermin.</p>
         </div>
     <% } else { %>
 
@@ -29,6 +108,7 @@
 
                     <div class="termin-main">
                         <h3><%= t.examType %></h3>
+
                         <p>
                             👤 <%= t.name %>
                             <% if (t.discordId) { %>
@@ -56,6 +136,10 @@
                         <% } else { %>
                             <span class="badge warning">Offen</span>
                         <% } %>
+
+                        <a href="/termine/edit/<%= t._id %>" class="open-doc-btn">
+                            Bearbeiten
+                        </a>
 
                         <form method="POST" action="/termine/status/<%= t._id %>" class="mini-form">
                             <select name="status">
