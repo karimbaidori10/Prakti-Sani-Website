@@ -1,0 +1,92 @@
+<h1>Termine</h1>
+
+<section class="card">
+    <h2>Neuen Prüfungstermin erstellen</h2>
+
+    <form method="POST" action="/termine/create" class="form">
+        <input name="name" placeholder="Name des Teilnehmers" required>
+
+        <input name="discordId" placeholder="Discord ID optional">
+
+        <select name="examType" required>
+            <option value="">Prüfungsart wählen</option>
+            <option>Prakti-Prüfung</option>
+            <option>Darf alleine fahren</option>
+            <option>Sanitäter-Prüfung</option>
+            <option>Theorie-Prüfung</option>
+            <option>Regelwerk</option>
+            <option>Blaues Blatt</option>
+            <option>Funkleitfaden</option>
+        </select>
+
+        <input type="date" name="date" required>
+        <input type="time" name="time" required>
+
+        <input name="examiner" placeholder="Prüfer / Ausbilder">
+
+        <select name="status">
+            <option value="offen">Offen</option>
+            <option value="bestanden">Bestanden</option>
+            <option value="nicht bestanden">Nicht bestanden</option>
+            <option value="verschoben">Verschoben</option>
+        </select>
+
+        <textarea name="notes" placeholder="Notizen"></textarea>
+
+        <button type="submit">Termin speichern</button>
+    </form>
+</section>
+
+<section class="card">
+    <h2>Terminübersicht</h2>
+
+    <% if (termine.length === 0) { %>
+        <p>Keine Termine vorhanden.</p>
+    <% } else { %>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Prüfung</th>
+                    <th>Datum</th>
+                    <th>Uhrzeit</th>
+                    <th>Prüfer</th>
+                    <th>Status</th>
+                    <th>Aktion</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                <% termine.forEach(t => { %>
+                    <tr>
+                        <td><%= t.name %></td>
+                        <td><%= t.examType %></td>
+                        <td><%= t.date %></td>
+                        <td><%= t.time %></td>
+                        <td><%= t.examiner || "-" %></td>
+                        <td><%= t.status %></td>
+                        <td>
+                            <form method="POST" action="/termine/status/<%= t._id %>">
+                                <select name="status">
+                                    <option value="offen">Offen</option>
+                                    <option value="bestanden">Bestanden</option>
+                                    <option value="nicht bestanden">Nicht bestanden</option>
+                                    <option value="verschoben">Verschoben</option>
+                                </select>
+                                <button type="submit">Ändern</button>
+                            </form>
+
+                            <% if (isAdmin) { %>
+                                <form method="POST" action="/termine/delete/<%= t._id %>">
+                                    <button type="submit" class="danger">Löschen</button>
+                                </form>
+                            <% } %>
+                        </td>
+                    </tr>
+                <% }) %>
+            </tbody>
+        </table>
+
+    <% } %>
+</section>
