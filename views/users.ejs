@@ -1,11 +1,14 @@
+cd C:\Users\kbaid\Desktop\Website
+
+@'
 <div class="page-header">
-    <h1>👥 Mitglieder</h1>
-    <p>Alle Mitglieder mit Punkten, Wochenziel und Rangübersicht.</p>
+    <h1>Mitglieder</h1>
+    <p>Alle Mitglieder mit Punkten, Wochenziel und Ranguebersicht.</p>
 </div>
 
 <section class="stats-grid">
     <div class="stat-card stat-blue">
-        <div class="stat-icon">👥</div>
+        <div class="stat-icon">User</div>
         <div>
             <h2><%= users ? users.length : 0 %></h2>
             <strong>Mitglieder</strong>
@@ -14,7 +17,7 @@
     </div>
 
     <div class="stat-card stat-green">
-        <div class="stat-icon">✅</div>
+        <div class="stat-icon">OK</div>
         <div>
             <h2><%= users ? users.filter(u => Number(u.points || 0) >= 5).length : 0 %></h2>
             <strong>Wochenziel</strong>
@@ -23,7 +26,7 @@
     </div>
 
     <div class="stat-card stat-yellow">
-        <div class="stat-icon">⏳</div>
+        <div class="stat-icon">Offen</div>
         <div>
             <h2><%= users ? users.filter(u => Number(u.points || 0) < 5).length : 0 %></h2>
             <strong>Offen</strong>
@@ -32,7 +35,7 @@
     </div>
 
     <div class="stat-card stat-red">
-        <div class="stat-icon">🔥</div>
+        <div class="stat-icon">Top</div>
         <div>
             <h2><%= users && users.length > 0 ? users[0].points : 0 %></h2>
             <strong>Top Punkte</strong>
@@ -43,13 +46,13 @@
 
 <section class="card">
     <div class="card-header">
-        <h2>🏅 Mitgliederübersicht</h2>
+        <h2>Mitgliederuebersicht</h2>
         <span class="chip blue"><%= users ? users.length : 0 %> Mitglieder</span>
     </div>
 
     <% if (!users || users.length === 0) { %>
         <div class="empty-state">
-            <div>📭</div>
+            <div>Keine Daten</div>
             <h3>Keine Mitglieder vorhanden</h3>
             <p>Sobald Punkte vergeben werden, erscheinen Mitglieder hier automatisch.</p>
         </div>
@@ -60,11 +63,11 @@
                 <div class="member-card <%= index === 0 ? 'top-member' : '' %>">
                     <div class="member-rank">
                         <% if (index === 0) { %>
-                            🥇
+                            Platz 1
                         <% } else if (index === 1) { %>
-                            🥈
+                            Platz 2
                         <% } else if (index === 2) { %>
-                            🥉
+                            Platz 3
                         <% } else { %>
                             #<%= index + 1 %>
                         <% } %>
@@ -97,3 +100,4 @@
 
     <% } %>
 </section>
+'@ | Set-Content -Encoding UTF8 views\users.ejs
