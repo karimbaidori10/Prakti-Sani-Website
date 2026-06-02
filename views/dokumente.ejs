@@ -1,14 +1,13 @@
-﻿
-<div class="page-header">
-    <h1>ðŸ“ Dokumente</h1>
-    <p>LeitfÃ¤den, Formulare, SOPs und wichtige Unterlagen zentral verwalten.</p>
+﻿<div class="page-header">
+    <h1>Dokumente</h1>
+    <p>Leitfaeden, Formulare, SOPs und wichtige Unterlagen zentral verwalten.</p>
 </div>
 
 <section class="dashboard-grid">
     <% if (isAdmin) { %>
         <div class="card">
             <div class="card-header">
-                <h2>âž• Dokument hinzufÃ¼gen</h2>
+                <h2>Dokument hinzufuegen</h2>
                 <span class="chip blue">Admin</span>
             </div>
 
@@ -16,11 +15,11 @@
                 <input type="text" name="title" placeholder="Titel des Dokuments" required>
 
                 <select name="type" required>
-                    <option value="">Kategorie auswÃ¤hlen</option>
+                    <option value="">Kategorie auswaehlen</option>
                     <option value="Leitfaden">Leitfaden</option>
                     <option value="Formular">Formular</option>
                     <option value="SOP">SOP</option>
-                    <option value="PrÃ¼fung">PrÃ¼fung</option>
+                    <option value="Pruefung">Pruefung</option>
                     <option value="Google Docs">Google Docs</option>
                     <option value="Sonstiges">Sonstiges</option>
                 </select>
@@ -36,7 +35,7 @@
 
     <div class="card">
         <div class="card-header">
-            <h2>ðŸ“Š Dokumentenstatus</h2>
+            <h2>Dokumentenstatus</h2>
             <span class="chip green">Live</span>
         </div>
 
@@ -48,7 +47,7 @@
 
             <div class="mini-stat">
                 <strong><%= docs ? docs.filter(d => d.type === "Leitfaden").length : 0 %></strong>
-                <span>LeitfÃ¤den</span>
+                <span>Leitfaeden</span>
             </div>
 
             <div class="mini-stat">
@@ -65,23 +64,23 @@
         <div class="clean-divider"></div>
 
         <p style="color: var(--muted);">
-            Hier kannst du Google Docs, LeitfÃ¤den und wichtige Unterlagen sammeln.
-            SpÃ¤ter kÃ¶nnen wir automatische Google-Docs-Synchronisation einbauen.
+            Hier kannst du Google Docs, Leitfaeden und wichtige Unterlagen sammeln.
+            Spaeter koennen wir automatische Google-Docs-Synchronisation einbauen.
         </p>
     </div>
 </section>
 
 <section class="card">
     <div class="card-header">
-        <h2>ðŸ“š Gespeicherte Dokumente</h2>
+        <h2>Gespeicherte Dokumente</h2>
         <span class="chip blue"><%= docs ? docs.length : 0 %> Dokumente</span>
     </div>
 
     <% if (!docs || docs.length === 0) { %>
         <div class="empty-state">
-            <div>ðŸ“­</div>
+            <div style="font-size: 42px;">Keine Dateien</div>
             <h3>Keine Dokumente gespeichert</h3>
-            <p>FÃ¼ge oben dein erstes Dokument oder einen Google Docs Link hinzu.</p>
+            <p>Fuege oben dein erstes Dokument oder einen Google Docs Link hinzu.</p>
         </div>
     <% } else { %>
 
@@ -90,19 +89,7 @@
                 <div class="doc-card">
                     <div class="doc-top">
                         <div class="doc-icon">
-                            <% if (doc.type === "Leitfaden") { %>
-                                ðŸ“˜
-                            <% } else if (doc.type === "Formular") { %>
-                                ðŸ“
-                            <% } else if (doc.type === "SOP") { %>
-                                ðŸ“•
-                            <% } else if (doc.type === "PrÃ¼fung") { %>
-                                ðŸ“‹
-                            <% } else if (doc.type === "Google Docs") { %>
-                                ðŸŒ
-                            <% } else { %>
-                                ðŸ“„
-                            <% } %>
+                            Datei
                         </div>
 
                         <span class="badge warning"><%= doc.type || "Dokument" %></span>
@@ -116,7 +103,7 @@
 
                     <div class="doc-actions">
                         <a href="<%= doc.url %>" target="_blank" class="open-doc-btn">
-                            Ã–ffnen
+                            Oeffnen
                         </a>
 
                         <% if (isAdmin) { %>
@@ -128,9 +115,9 @@
                                 <button
                                     type="submit"
                                     class="danger-btn"
-                                    onclick="return confirm('Dokument wirklich lÃ¶schen?');"
+                                    onclick="return confirm('Dokument wirklich loeschen?');"
                                 >
-                                    LÃ¶schen
+                                    Loeschen
                                 </button>
                             </form>
                         <% } %>
