@@ -1,13 +1,13 @@
 ﻿<div class="page-header">
     <h1>Dokumente</h1>
-    <p>Leitfaeden, Formulare, SOPs und wichtige Unterlagen zentral verwalten.</p>
+    <p>Leitf&auml;den, Formulare, SOPs und wichtige Unterlagen zentral verwalten.</p>
 </div>
 
 <section class="dashboard-grid">
     <% if (isAdmin) { %>
         <div class="card">
             <div class="card-header">
-                <h2>Dokument hinzufuegen</h2>
+                <h2>Dokument hinzuf&uuml;gen</h2>
                 <span class="chip blue">Admin</span>
             </div>
 
@@ -23,7 +23,6 @@
     <option value="Sanitaeter Theorie">Sanit&auml;ter Theorie</option>
     <option value="Dienstvorschrift LSMD">Dienstvorschrift LSMD</option>
     <option value="Prakti Sani Regelwerk">Prakti Sani Regelwerk</option>
-    <option value="Google Docs">Google Docs</option>
 </select>
 
                 <input type="url" name="url" placeholder="Dokument-Link / Google Docs Link" required>
@@ -35,37 +34,31 @@
         </div>
     <% } %>
 
-    <div class="card">
-        <div class="card-header">
-            <h2>Dokumentenstatus</h2>
-            <span class="chip green">Live</span>
-        </div>
+    <div class="mini-stats">
+    <div class="mini-stat">
+        <strong><%= docs ? docs.length : 0 %></strong>
+        <span>Gesamt</span>
+    </div>
 
-        <div class="mini-stats">
-            <div class="mini-stat">
-                <strong><%= docs ? docs.length : 0 %></strong>
-                <span>Gesamt</span>
-            </div>
+    <div class="mini-stat">
+        <strong><%= docs ? docs.filter(d => d.type === "Sani Leitfaden").length : 0 %></strong>
+        <span>Leitf&auml;den</span>
+    </div>
 
-            <div class="mini-stat">
-                <strong><%= docs ? docs.filter(d => d.type === "Leitfaden").length : 0 %></strong>
-                <span>Leitfaeden</span>
-            </div>
+    <div class="mini-stat">
+        <strong><%= docs ? docs.filter(d => d.type === "Einstellungs-Checkliste").length : 0 %></strong>
+        <span>Checklisten</span>
+    </div>
 
-            <div class="mini-stat">
-                <strong><%= docs ? docs.filter(d => d.type === "Formular").length : 0 %></strong>
-                <span>Formulare</span>
-            </div>
+    <div class="mini-stat">
+        <strong><%= docs ? docs.filter(d => d.type === "Dienstvorschrift LSMD" || d.type === "Prakti Sani Regelwerk").length : 0 %></strong>
+        <span>Regelwerke</span>
+    </div>
+</div>
 
-            <div class="mini-stat">
-                <strong><%= docs ? docs.filter(d => d.type === "SOP" || d.type === "Google Docs").length : 0 %></strong>
-                <span>SOP / Docs</span>
-            </div>
-        </div>
+<div class="clean-divider"></div>
 
-        <div class="clean-divider"></div>
-
-        <p style="color: var(--muted);">
+<p style="color: var(--muted);">
     Hier kannst du LSMD-Dokumente, Google-Docs-Links, Leitf&auml;den, Regelwerke und Checklisten sammeln.
 </p>
 
@@ -105,7 +98,7 @@
 
                     <div class="doc-actions">
                         <a href="<%= doc.url %>" target="_blank" class="open-doc-btn">
-                            Oeffnen
+                            &Ouml;ffnen
                         </a>
 
                         <% if (isAdmin) { %>
@@ -117,9 +110,9 @@
                                 <button
                                     type="submit"
                                     class="danger-btn"
-                                    onclick="return confirm('Dokument wirklich loeschen?');"
+                                    onclick="return confirm('Dokument wirklich L&ouml;schen?');"
                                 >
-                                    Loeschen
+                                    L&ouml;schen
                                 </button>
                             </form>
                         <% } %>

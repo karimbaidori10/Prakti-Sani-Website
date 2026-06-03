@@ -18,7 +18,7 @@
             required
         >
 
-        <select name="type" required>
+<select name="type" required>
     <option value="">Kategorie ausw&auml;hlen</option>
 
     <option value="LSMD Dienstblatt" <%= doc.type === "LSMD Dienstblatt" ? "selected" : "" %>>
@@ -47,10 +47,6 @@
 
     <option value="Prakti Sani Regelwerk" <%= doc.type === "Prakti Sani Regelwerk" ? "selected" : "" %>>
         Prakti Sani Regelwerk
-    </option>
-
-    <option value="Google Docs" <%= doc.type === "Google Docs" ? "selected" : "" %>>
-        Google Docs
     </option>
 </select>
 
