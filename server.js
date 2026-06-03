@@ -323,12 +323,22 @@ app.get("/dashboard", requireLogin, async (req, res) => {
         .limit(5)
         .toArray();
 
+    const discordInfo = await getDiscordMemberInfo(req.session.user?.discordId);
+
+    if (discordInfo) {
+        req.session.user.username = discordInfo.displayName;
+        req.session.user.displayName = discordInfo.displayName;
+        req.session.user.rank = discordInfo.rank;
+        req.session.user.avatar = discordInfo.avatarUrl;
+    }
+
     res.render("dashboard", viewData(req, {
         active: "dashboard",
         users,
         termine,
         allTermine,
-        docs
+        docs,
+        mdName: discordInfo?.displayName || req.session.user?.username || "Ausbilder"
     }));
 });
 

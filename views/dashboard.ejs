@@ -4,7 +4,7 @@
     const termineAll = allTermine || [];
     const docsAll = docs || [];
 
-    const displayName = user && user.username ? user.username : "Ausbilder";
+    const displayName = typeof mdName !== "undefined" ? mdName : (user && user.username ? user.username : "Ausbilder");
 
     function parseDate(value) {
         if (!value) return null;
@@ -41,8 +41,7 @@
         <span class="clean-dashboard-label">LSMD Zentrale</span>
         <h1>Willkommen zur&uuml;ck,<br><%= displayName %></h1>
         <p>
-            Deine moderne &Uuml;bersicht f&uuml;r Ausbildungstermine, Mitglieder,
-            Dokumente und MD-Verwaltung.
+            Ausbildungstermine, Mitglieder, Dokumente und MD-Verwaltung auf einen Blick
         </p>
 
         <div class="clean-dashboard-pills">
@@ -213,36 +212,4 @@
         </div>
     </div>
 
-    <div class="card clean-panel">
-        <div class="card-header">
-            <div>
-                <h2>System Status</h2>
-                <p class="card-subtitle">Aktueller Zustand der Webseite.</p>
-            </div>
-
-            <span class="chip green">Online</span>
-        </div>
-
-        <div class="clean-status-list">
-            <div>
-                <span>Dashboard</span>
-                <strong>Online</strong>
-            </div>
-
-            <div>
-                <span>Ausbildungstermine</span>
-                <strong>Online</strong>
-            </div>
-
-            <div>
-                <span>Mitglieder</span>
-                <strong>Online</strong>
-            </div>
-
-            <div>
-                <span>Dokumente</span>
-                <strong>Online</strong>
-            </div>
-        </div>
-    </div>
 </section>
