@@ -1,7 +1,78 @@
-<div class="page-header training-header">
+<%
+    const allTermine = termine || [];
+
+    function parseDate(value) {
+        if (!value) return null;
+        return new Date(value + "T00:00:00");
+    }
+
+    function getWeekNumber(date) {
+        if (!date || isNaN(date)) return "-";
+        const tempDate = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
+        const dayNum = tempDate.getUTCDay() || 7;
+        tempDate.setUTCDate(tempDate.getUTCDate() + 4 - dayNum);
+        const yearStart = new Date(Date.UTC(tempDate.getUTCFullYear(), 0, 1));
+        return Math.ceil((((tempDate - yearStart) / 86400000) + 1) / 7);
+    }
+
+    function formatDate(value) {
+        const date = parseDate(value);
+        if (!date || isNaN(date)) return "-";
+
+        const day = String(date.getDate()).padStart(2, "0");
+        const month = String(date.getMonth() + 1).padStart(2, "0");
+        const year = date.getFullYear();
+
+        return day + "." + month + "." + year;
+    }
+
+    function getDayName(value) {
+        const date = parseDate(value);
+        if (!date || isNaN(date)) return "-";
+
+        const days = ["Sonntag", "Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag", "Samstag"];
+        return days[date.getDay()];
+    }
+
+    const groupedWeeks = {};
+
+    allTermine.forEach((item) => {
+        const date = parseDate(item.date);
+        const week = date && !isNaN(date) ? "Woche " + getWeekNumber(date) : "Ohne Woche";
+
+        if (!groupedWeeks[week]) {
+            groupedWeeks[week] = [];
+        }
+
+        groupedWeeks[week].push(item);
+    });
+
+    const weekKeys = Object.keys(groupedWeeks);
+
+    const ausbilderStats = {};
+
+    allTermine.forEach((item) => {
+        const name = item.examiner || "Nicht eingetragen";
+
+        if (!ausbilderStats[name]) {
+            ausbilderStats[name] = 0;
+        }
+
+        ausbilderStats[name]++;
+    });
+
+    const ausbilderList = Object.entries(ausbilderStats);
+%>
+
+<div class="page-header sheet-hero">
     <div>
         <h1>Ausbildungstermine</h1>
-        <p>Moderne Dokumentation aller Sanit&auml;ter-Pr&uuml;fungen mit Datum, Ausbilder, Status und Notizen.</p>
+        <p>Modernes Wochen-System f&uuml;r Sanit&auml;ter-Pr&uuml;fungen, Ausbilder und Dokumentation.</p>
+    </div>
+
+    <div class="sheet-hero-count">
+        <strong><%= allTermine.length %></strong>
+        <span>Eintr&auml;ge</span>
     </div>
 </div>
 
@@ -9,25 +80,25 @@
     <div class="stat-card stat-blue">
         <div class="stat-icon">AZ</div>
         <div>
-            <h2><%= termine ? termine.length : 0 %></h2>
+            <h2><%= allTermine.length %></h2>
             <strong>Gesamt</strong>
-            <p>Dokumentierte Eintr&auml;ge</p>
+            <p>Dokumentierte Pr&uuml;fungen</p>
         </div>
     </div>
 
     <div class="stat-card stat-green">
         <div class="stat-icon">OK</div>
         <div>
-            <h2><%= termine ? termine.filter(t => t.status === "Bestanden").length : 0 %></h2>
+            <h2><%= allTermine.filter(t => t.status === "Bestanden").length %></h2>
             <strong>Bestanden</strong>
-            <p>Erfolgreiche Pr&uuml;fungen</p>
+            <p>Erfolgreich abgeschlossen</p>
         </div>
     </div>
 
     <div class="stat-card stat-red">
         <div class="stat-icon">NO</div>
         <div>
-            <h2><%= termine ? termine.filter(t => t.status === "Nicht bestanden").length : 0 %></h2>
+            <h2><%= allTermine.filter(t => t.status === "Nicht bestanden").length %></h2>
             <strong>Nicht bestanden</strong>
             <p>Fehlversuche</p>
         </div>
@@ -36,25 +107,25 @@
     <div class="stat-card stat-yellow">
         <div class="stat-icon">OF</div>
         <div>
-            <h2><%= termine ? termine.filter(t => !t.status || t.status === "Offen" || t.status === "Teilgenommen").length : 0 %></h2>
+            <h2><%= allTermine.filter(t => !t.status || t.status === "Offen" || t.status === "Teilgenommen").length %></h2>
             <strong>Offen</strong>
             <p>Offen / Teilgenommen</p>
         </div>
     </div>
 </section>
 
-<section class="training-doc-layout">
-    <div class="card training-doc-main">
+<section class="sheet-layout">
+    <div class="card sheet-main">
         <div class="card-header">
             <div>
-                <h2>Ausbildungsdokumentation</h2>
-                <p class="card-subtitle">Automatisch erstellt durch neue Eintr&auml;ge bei Pr&uuml;fungen.</p>
+                <h2>Wochen-Dokumentation</h2>
+                <p class="card-subtitle">Alle Eintr&auml;ge werden automatisch aus Pr&uuml;fungen &uuml;bernommen.</p>
             </div>
 
-            <span class="chip blue"><%= termine ? termine.length : 0 %> Eintr&auml;ge</span>
+            <span class="chip blue"><%= allTermine.length %> Eintr&auml;ge</span>
         </div>
 
-        <% if (!termine || termine.length === 0) { %>
+        <% if (allTermine.length === 0) { %>
             <div class="empty-state">
                 <div>Keine Daten</div>
                 <h3>Keine Ausbildungstermine vorhanden</h3>
@@ -62,74 +133,88 @@
             </div>
         <% } else { %>
 
-            <div class="training-board">
-                <% termine.forEach((termin, index) => { %>
-                    <div class="training-entry">
-                        <div class="training-number">
-                            <span>#</span>
-                            <strong><%= index + 1 %></strong>
+            <div class="sheet-week-list">
+                <% weekKeys.forEach((week) => { %>
+                    <div class="sheet-week-card">
+                        <div class="sheet-week-header">
+                            <h3><%= week %></h3>
+                            <span><%= groupedWeeks[week].length %> Pr&uuml;fung(en)</span>
                         </div>
 
-                        <div class="training-date-box">
-                            <span>Datum</span>
-                            <strong><%= termin.date || "-" %></strong>
-                            <small><%= termin.time || "--:--" %> Uhr</small>
+                        <div class="sheet-table">
+                            <div class="sheet-table-head">
+                                <span>Wochentag</span>
+                                <span>Datum</span>
+                                <span>Uhrzeit</span>
+                                <span>Teilnehmer</span>
+                                <span>DN / Discord ID</span>
+                                <span>Ausbilder</span>
+                                <span>Status</span>
+                            </div>
+
+                            <% groupedWeeks[week].forEach((termin) => { %>
+                                <div class="sheet-table-row">
+                                    <div>
+                                        <small>Wochentag</small>
+                                        <strong><%= getDayName(termin.date) %></strong>
+                                    </div>
+
+                                    <div>
+                                        <small>Datum</small>
+                                        <strong><%= formatDate(termin.date) %></strong>
+                                    </div>
+
+                                    <div>
+                                        <small>Uhrzeit</small>
+                                        <strong><%= termin.time || "--:--" %></strong>
+                                    </div>
+
+                                    <div>
+                                        <small>Teilnehmer</small>
+                                        <strong><%= termin.name || "Unbekannt" %></strong>
+                                    </div>
+
+                                    <div>
+                                        <small>DN / Discord ID</small>
+                                        <strong><%= termin.discordId || "-" %></strong>
+                                    </div>
+
+                                    <div>
+                                        <small>Ausbilder</small>
+                                        <strong><%= termin.examiner || "-" %></strong>
+                                    </div>
+
+                                    <div>
+                                        <% if (termin.status === "Bestanden") { %>
+                                            <span class="badge success">Bestanden</span>
+                                        <% } else if (termin.status === "Nicht bestanden") { %>
+                                            <span class="badge danger">Nicht bestanden</span>
+                                        <% } else if (termin.status === "Teilgenommen") { %>
+                                            <span class="badge blue">Teilgenommen</span>
+                                        <% } else { %>
+                                            <span class="badge warning"><%= termin.status || "Offen" %></span>
+                                        <% } %>
+                                    </div>
+
+                                    <% if (termin.notes) { %>
+                                        <div class="sheet-note">
+                                            <small>Notiz</small>
+                                            <p><%= termin.notes %></p>
+                                        </div>
+                                    <% } %>
+
+                                    <% if (isAdmin) { %>
+                                        <div class="sheet-actions">
+                                            <form method="POST" action="/termine/delete/<%= termin._id %>">
+                                                <button type="submit" class="danger-btn" onclick="return confirm('Eintrag wirklich l&ouml;schen?');">
+                                                    L&ouml;schen
+                                                </button>
+                                            </form>
+                                        </div>
+                                    <% } %>
+                                </div>
+                            <% }) %>
                         </div>
-
-                        <div class="training-content">
-                            <div class="training-topline">
-                                <h3><%= termin.name || "Unbekannt" %></h3>
-
-                                <% if (termin.status === "Bestanden") { %>
-                                    <span class="badge success">Bestanden</span>
-                                <% } else if (termin.status === "Nicht bestanden") { %>
-                                    <span class="badge danger">Nicht bestanden</span>
-                                <% } else if (termin.status === "Teilgenommen") { %>
-                                    <span class="badge blue">Teilgenommen</span>
-                                <% } else { %>
-                                    <span class="badge warning"><%= termin.status || "Offen" %></span>
-                                <% } %>
-                            </div>
-
-                            <div class="training-info-grid">
-                                <div>
-                                    <span>Pr&uuml;fung</span>
-                                    <strong>Sanit&auml;ter</strong>
-                                </div>
-
-                                <div>
-                                    <span>Ausbilder</span>
-                                    <strong><%= termin.examiner || "-" %></strong>
-                                </div>
-
-                                <div>
-                                    <span>Discord ID</span>
-                                    <strong><%= termin.discordId || "-" %></strong>
-                                </div>
-
-                                <div>
-                                    <span>Quelle</span>
-                                    <strong>Pr&uuml;fungen</strong>
-                                </div>
-                            </div>
-
-                            <% if (termin.notes) { %>
-                                <div class="training-note-box">
-                                    <span>Notiz</span>
-                                    <p><%= termin.notes %></p>
-                                </div>
-                            <% } %>
-                        </div>
-
-                        <% if (isAdmin) { %>
-                            <div class="training-actions">
-                                <form method="POST" action="/termine/delete/<%= termin._id %>">
-                                    <button type="submit" class="danger-btn" onclick="return confirm('Eintrag wirklich l&ouml;schen?');">
-                                        L&ouml;schen
-                                    </button>
-                                </form>
-                            </div>
-                        <% } %>
                     </div>
                 <% }) %>
             </div>
@@ -137,32 +222,39 @@
         <% } %>
     </div>
 
-    <div class="card training-doc-side">
+    <div class="card sheet-side">
         <div class="card-header">
-            <h2>Dokumentation</h2>
-            <span class="chip green">Auto</span>
+            <h2>Ausbilder</h2>
+            <span class="chip green">Team</span>
         </div>
 
-        <div class="doc-info-list">
-            <div>
-                <strong>Eintragung</strong>
-                <p>Neue Eintr&auml;ge werden nur bei Pr&uuml;fungen erstellt.</p>
+        <% if (ausbilderList.length === 0) { %>
+            <div class="empty-state">
+                <div>Keine Daten</div>
+                <h3>Keine Ausbilder vorhanden</h3>
             </div>
+        <% } else { %>
+            <div class="trainer-list">
+                <% ausbilderList.forEach(([name, count]) => { %>
+                    <div class="trainer-row">
+                        <div class="trainer-avatar">
+                            <%= name.charAt(0).toUpperCase() %>
+                        </div>
 
-            <div>
-                <strong>Ausbildung</strong>
-                <p>Dokumentiert werden Sanit&auml;ter-Pr&uuml;fungen.</p>
+                        <div>
+                            <strong><%= name %></strong>
+                            <span><%= count %> Eintrag(e)</span>
+                        </div>
+                    </div>
+                <% }) %>
             </div>
+        <% } %>
 
-            <div>
-                <strong>Ausbilder</strong>
-                <p>Der eingetragene Ausbilder / Pr&uuml;fer wird automatisch &uuml;bernommen.</p>
-            </div>
+        <div class="clean-divider"></div>
 
-            <div>
-                <strong>Status</strong>
-                <p>Bestanden, Nicht bestanden, Teilgenommen oder Offen.</p>
-            </div>
+        <div class="sheet-help">
+            <h3>System</h3>
+            <p>Eintragungen werden bei Pr&uuml;fungen erstellt und hier automatisch als Wochen-Dokumentation angezeigt.</p>
         </div>
     </div>
 </section>

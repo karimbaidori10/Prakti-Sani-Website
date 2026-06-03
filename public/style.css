@@ -2734,3 +2734,266 @@ a {
         flex-direction: column;
     }
 }
+
+/* =====================
+   WOCHEN-SYSTEM AUSBILDUNGSTERMINE
+===================== */
+
+.sheet-hero {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 18px;
+}
+
+.sheet-hero-count {
+    min-width: 120px;
+    padding: 18px;
+    border-radius: 20px;
+    text-align: center;
+    background: rgba(37, 99, 235, 0.16);
+    border: 1px solid rgba(37, 99, 235, 0.35);
+}
+
+.sheet-hero-count strong {
+    display: block;
+    font-size: 34px;
+    line-height: 1;
+    color: white;
+}
+
+.sheet-hero-count span {
+    display: block;
+    margin-top: 6px;
+    color: var(--muted);
+    font-weight: 800;
+}
+
+.sheet-layout {
+    display: grid;
+    grid-template-columns: 1fr 320px;
+    gap: 18px;
+    margin-top: 18px;
+}
+
+.card-subtitle {
+    color: var(--muted);
+    margin-top: 5px;
+    font-size: 13px;
+}
+
+.sheet-week-list {
+    display: grid;
+    gap: 18px;
+}
+
+.sheet-week-card {
+    border-radius: 22px;
+    overflow: hidden;
+    background: rgba(8, 14, 32, 0.86);
+    border: 1px solid rgba(255,255,255,0.08);
+}
+
+.sheet-week-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 18px 20px;
+    background: linear-gradient(90deg, rgba(139,92,246,0.28), rgba(37,99,235,0.12));
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+
+.sheet-week-header h3 {
+    margin: 0;
+    font-size: 22px;
+    color: #ffffff;
+}
+
+.sheet-week-header span {
+    color: #cbd5e1;
+    font-weight: 800;
+}
+
+.sheet-table {
+    display: grid;
+}
+
+.sheet-table-head {
+    display: grid;
+    grid-template-columns: 120px 120px 100px 1.1fr 1.2fr 1.1fr 130px;
+    gap: 10px;
+    padding: 14px 18px;
+    background: rgba(2,6,23,0.45);
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+
+.sheet-table-head span {
+    color: var(--muted);
+    font-size: 11px;
+    font-weight: 1000;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.sheet-table-row {
+    display: grid;
+    grid-template-columns: 120px 120px 100px 1.1fr 1.2fr 1.1fr 130px;
+    gap: 10px;
+    align-items: center;
+    padding: 16px 18px;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+    transition: 0.2s ease;
+}
+
+.sheet-table-row:hover {
+    background: rgba(37,99,235,0.08);
+}
+
+.sheet-table-row > div {
+    min-width: 0;
+}
+
+.sheet-table-row small {
+    display: none;
+    color: var(--muted);
+    font-size: 11px;
+    font-weight: 900;
+    text-transform: uppercase;
+    margin-bottom: 4px;
+}
+
+.sheet-table-row strong {
+    display: block;
+    color: #ffffff;
+    font-size: 14px;
+    word-break: break-word;
+}
+
+.sheet-note {
+    grid-column: 1 / -1;
+    padding: 12px 14px;
+    border-radius: 14px;
+    background: rgba(234,179,8,0.08);
+    border: 1px solid rgba(234,179,8,0.18);
+}
+
+.sheet-note small {
+    display: block;
+    color: #facc15;
+}
+
+.sheet-note p {
+    margin: 0;
+    color: #e2e8f0;
+}
+
+.sheet-actions {
+    grid-column: 1 / -1;
+    display: flex;
+    justify-content: flex-end;
+}
+
+.sheet-actions form {
+    width: auto;
+}
+
+.sheet-actions button {
+    padding: 10px 14px;
+    font-size: 13px;
+}
+
+.sheet-side {
+    height: fit-content;
+}
+
+.trainer-list {
+    display: grid;
+    gap: 12px;
+}
+
+.trainer-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px;
+    border-radius: 16px;
+    background: rgba(2,6,23,0.38);
+    border: 1px solid rgba(255,255,255,0.08);
+}
+
+.trainer-avatar {
+    width: 42px;
+    height: 42px;
+    min-width: 42px;
+    border-radius: 14px;
+    display: grid;
+    place-items: center;
+    background: rgba(37,99,235,0.18);
+    border: 1px solid rgba(37,99,235,0.38);
+    color: #93c5fd;
+    font-weight: 1000;
+}
+
+.trainer-row strong {
+    display: block;
+    color: #ffffff;
+}
+
+.trainer-row span {
+    display: block;
+    color: var(--muted);
+    font-size: 13px;
+    margin-top: 3px;
+}
+
+.sheet-help h3 {
+    margin-bottom: 8px;
+}
+
+.sheet-help p {
+    color: var(--muted);
+    line-height: 1.5;
+}
+
+.badge.blue {
+    background: rgba(37,99,235,0.18);
+    color: #93c5fd;
+    border: 1px solid rgba(37,99,235,0.32);
+}
+
+@media (max-width: 1250px) {
+    .sheet-layout {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 950px) {
+    .sheet-table-head {
+        display: none;
+    }
+
+    .sheet-table-row {
+        grid-template-columns: 1fr 1fr;
+        gap: 14px;
+    }
+
+    .sheet-table-row small {
+        display: block;
+    }
+
+    .sheet-note,
+    .sheet-actions {
+        grid-column: 1 / -1;
+    }
+}
+
+@media (max-width: 650px) {
+    .sheet-hero {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .sheet-table-row {
+        grid-template-columns: 1fr;
+    }
+}
