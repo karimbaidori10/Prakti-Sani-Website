@@ -3862,3 +3862,96 @@ a {
         grid-column: 1 / -1;
     }
 }
+
+/* =====================
+   FINAL DOKUMENTE CLEANUP
+===================== */
+
+.page-header + .dashboard-grid {
+    align-items: stretch;
+}
+
+.docs-grid {
+    display: grid !important;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 380px)) !important;
+    gap: 16px !important;
+    justify-content: start !important;
+}
+
+.doc-card {
+    max-width: 380px !important;
+    padding: 18px !important;
+    border-radius: 22px !important;
+}
+
+.doc-icon {
+    width: 48px !important;
+    height: 48px !important;
+    border-radius: 15px !important;
+    font-size: 13px !important;
+}
+
+.doc-card h3 {
+    font-size: 18px !important;
+    margin-top: 4px !important;
+}
+
+.doc-card p {
+    font-size: 14px !important;
+    min-height: 0 !important;
+    margin: 8px 0 14px !important;
+}
+
+.doc-actions {
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    gap: 8px !important;
+}
+
+.doc-actions .open-doc-btn,
+.doc-actions .danger-btn {
+    min-height: 38px !important;
+    padding: 9px 12px !important;
+    font-size: 13px !important;
+}
+
+.doc-actions form {
+    width: 100% !important;
+    margin: 0 !important;
+}
+
+.card:has(.docs-grid) {
+    margin-top: 16px !important;
+}
+
+.card:has(form[action="/dokumente/create"]) {
+    min-height: auto !important;
+}
+
+.card:has(form[action="/dokumente/create"]) textarea {
+    min-height: 84px !important;
+}
+
+.card:has(form[action="/dokumente/create"]) button {
+    min-height: 46px !important;
+}
+
+@media (min-width: 900px) {
+    .doc-actions {
+        grid-template-columns: 1fr 1fr !important;
+    }
+
+    .doc-actions form {
+        grid-column: 1 / -1 !important;
+    }
+}
+
+@media (max-width: 700px) {
+    .docs-grid {
+        grid-template-columns: 1fr !important;
+    }
+
+    .doc-card {
+        max-width: none !important;
+    }
+}
