@@ -1,50 +1,44 @@
 <div class="page-header">
-    <h1>Pruefungen</h1>
-    <p>Pruefungen erfassen, Ergebnisse verwalten und Verlauf anzeigen.</p>
+    <h1>Pr&uuml;fungen</h1>
+    <p>Sanit&auml;ter-Ausbildungen erfassen, Ergebnisse dokumentieren und Verlauf anzeigen.</p>
 </div>
 
 <section class="dashboard-grid">
     <div class="card">
         <div class="card-header">
-            <h2>Neue Pruefung eintragen</h2>
+            <h2>Sanit&auml;ter-Ausbildung eintragen</h2>
             <span class="chip blue">Erfassung</span>
         </div>
 
         <form method="POST" action="/pruefungen/create" class="form">
-            <input name="name" placeholder="Name des Teilnehmers" required>
+            <input name="name" placeholder="Name des Sanit&auml;ters" required>
 
             <input name="discordId" placeholder="Discord ID optional">
 
-            <select name="examType" required>
-                <option value="">Pruefungsart waehlen</option>
-                <option value="Prakti-Pruefung">Prakti-Pruefung</option>
-                <option value="Darf alleine fahren">Darf alleine fahren</option>
-                <option value="Sanitaeter-Pruefung">Sanitaeter-Pruefung</option>
-                <option value="Theorie-Pruefung">Theorie-Pruefung</option>
-                <option value="Regelwerk">Regelwerk</option>
-                <option value="Blaues Blatt">Blaues Blatt</option>
-                <option value="Funkleitfaden">Funkleitfaden</option>
-                <option value="Sonstiges">Sonstiges</option>
-            </select>
+            <div class="form-row">
+                <input type="date" name="date" required>
+                <input type="time" name="time">
+            </div>
+
+            <input name="examiner" placeholder="Ausbilder / Pr&uuml;fer" required>
 
             <select name="result" required>
-                <option value="">Ergebnis waehlen</option>
-                <option value="offen">Offen</option>
-                <option value="bestanden">Bestanden</option>
-                <option value="nicht bestanden">Nicht bestanden</option>
+                <option value="">Status w&auml;hlen</option>
+                <option value="Bestanden">Bestanden</option>
+                <option value="Nicht bestanden">Nicht bestanden</option>
+                <option value="Teilgenommen">Teilgenommen</option>
+                <option value="Offen">Offen</option>
             </select>
 
-            <input name="examiner" placeholder="Pruefer / Ausbilder">
+            <textarea name="notes" placeholder="Notizen zur Ausbildung"></textarea>
 
-            <textarea name="notes" placeholder="Notizen"></textarea>
-
-            <button type="submit">Pruefung speichern</button>
+            <button type="submit">Sanit&auml;ter-Ausbildung dokumentieren</button>
         </form>
     </div>
 
     <div class="card">
         <div class="card-header">
-            <h2>Pruefungsstatus</h2>
+            <h2>Ausbildungsstatus</h2>
             <span class="chip green">Live</span>
         </div>
 
@@ -55,17 +49,17 @@
             </div>
 
             <div class="mini-stat">
-                <strong><%= exams ? exams.filter(e => e.result === "bestanden").length : 0 %></strong>
+                <strong><%= exams ? exams.filter(e => e.result === "Bestanden").length : 0 %></strong>
                 <span>Bestanden</span>
             </div>
 
             <div class="mini-stat">
-                <strong><%= exams ? exams.filter(e => e.result === "nicht bestanden").length : 0 %></strong>
+                <strong><%= exams ? exams.filter(e => e.result === "Nicht bestanden").length : 0 %></strong>
                 <span>Nicht bestanden</span>
             </div>
 
             <div class="mini-stat">
-                <strong><%= exams ? exams.filter(e => !e.result || e.result === "offen").length : 0 %></strong>
+                <strong><%= exams ? exams.filter(e => !e.result || e.result === "Offen").length : 0 %></strong>
                 <span>Offen</span>
             </div>
         </div>
@@ -73,64 +67,65 @@
         <div class="clean-divider"></div>
 
         <p style="color: var(--muted);">
-            Hier siehst du alle gespeicherten Pruefungen und deren aktuellen Stand.
+            Hier werden Sanit&auml;ter-Ausbildungen dokumentiert. Jeder neue Eintrag erscheint automatisch auch bei Ausbildungstermine.
         </p>
     </div>
 </section>
 
 <section class="card">
     <div class="card-header">
-        <h2>Pruefungsverlauf</h2>
-        <span class="chip blue"><%= exams ? exams.length : 0 %> Eintraege</span>
+        <h2>Dokumentierte Sanit&auml;ter-Ausbildungen</h2>
+        <span class="chip blue"><%= exams ? exams.length : 0 %> Eintr&auml;ge</span>
     </div>
 
     <% if (!exams || exams.length === 0) { %>
         <div class="empty-state">
             <div>Keine Daten</div>
-            <h3>Keine Pruefungen vorhanden</h3>
-            <p>Trage oben die erste Pruefung ein.</p>
+            <h3>Keine Ausbildung vorhanden</h3>
+            <p>Trage oben die erste Sanit&auml;ter-Ausbildung ein.</p>
         </div>
     <% } else { %>
 
-        <div class="activity-list">
-            <% exams.forEach((exam, index) => { %>
-                <div class="activity-item">
-                    <div>
-                        <h3><%= exam.examType || "Pruefung" %></h3>
+        <div class="exam-list">
+            <% exams.forEach((exam) => { %>
+                <div class="exam-card">
+                    <div class="exam-icon">SA</div>
 
-                        <p>
-                            Teilnehmer: <%= exam.name || "Unbekannt" %>
-                            <% if (exam.discordId) { %>
-                                - Discord ID: <%= exam.discordId %>
+                    <div class="exam-main">
+                        <div class="exam-title-row">
+                            <h3><%= exam.name || "Unbekannt" %></h3>
+
+                            <% if (exam.result === "Bestanden") { %>
+                                <span class="badge success">Bestanden</span>
+                            <% } else if (exam.result === "Nicht bestanden") { %>
+                                <span class="badge danger">Nicht bestanden</span>
+                            <% } else { %>
+                                <span class="badge warning"><%= exam.result || "Offen" %></span>
                             <% } %>
-                        </p>
+                        </div>
 
-                        <p>
-                            Pruefer: <%= exam.examiner || "Kein Pruefer eingetragen" %>
-                        </p>
+                        <p><strong>Ausbildung:</strong> Sanit&auml;ter</p>
+                        <p><strong>Datum:</strong> <%= exam.date || "-" %> <%= exam.time || "" %></p>
+                        <p><strong>Ausbilder:</strong> <%= exam.examiner || "-" %></p>
+
+                        <% if (exam.discordId) { %>
+                            <p><strong>Discord ID:</strong> <%= exam.discordId %></p>
+                        <% } %>
 
                         <% if (exam.notes) { %>
-                            <p>Notiz: <%= exam.notes %></p>
+                            <p class="exam-note"><strong>Notiz:</strong> <%= exam.notes %></p>
                         <% } %>
                     </div>
 
-                    <div class="termin-status">
-                        <% if (exam.result === "bestanden") { %>
-                            <span class="badge success">Bestanden</span>
-                        <% } else if (exam.result === "nicht bestanden") { %>
-                            <span class="badge danger">Nicht bestanden</span>
-                        <% } else { %>
-                            <span class="badge warning">Offen</span>
-                        <% } %>
-
+                    <div class="exam-actions">
                         <a href="/pruefungen/edit/<%= exam._id %>" class="open-doc-btn">
                             Bearbeiten
                         </a>
 
                         <% if (isAdmin) { %>
                             <form method="POST" action="/pruefungen/delete/<%= exam._id %>">
-                                <button type="submit" class="danger-btn" onclick="return confirm('Pruefung wirklich loeschen?');">
-                                    Loeschen
+                                <button type="submit" class="danger-btn" onclick="return confirm('Ausbildung wirklich loeschen?');">
+                                    L&ouml;schen
                                 </button>
                             </form>
                         <% } %>

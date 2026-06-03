@@ -610,25 +610,50 @@ app.post("/pruefungen/create", requireLogin, async (req, res) => {
     const {
         name,
         discordId,
-        examType,
+        date,
+        time,
         result,
         examiner,
         notes
     } = req.body;
 
+    const examType = "Sanitaeter";
+
     await examsCollection.insertOne({
         name,
         discordId,
         examType,
+        date,
+        time,
         result,
         examiner,
         notes,
         createdAt: new Date()
     });
 
-    await addLog("Pruefung gespeichert", { name, examType, result });
+    await termineCollection.insertOne({
+        name,
+        discordId,
+        examType,
+        date,
+        time,
+        examiner,
+        status: result || "dokumentiert",
+        notes,
+        source: "pruefung",
+        createdAt: new Date()
+    });
 
-    res.redirect("/pruefungen");
+    await addLog("Sanitaeter Ausbildung dokumentiert", {
+        name,
+        discordId,
+        date,
+        time,
+        result,
+        examiner
+    });
+
+    res.redirect("/termine");
 });
 
 app.post("/pruefungen/delete/:id", requireLogin, requireAdmin, async (req, res) => {
