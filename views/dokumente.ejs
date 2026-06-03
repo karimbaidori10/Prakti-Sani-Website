@@ -1,6 +1,6 @@
-﻿<div class="page-header">
+<div class="page-header">
     <h1>Dokumente</h1>
-    <p>Leitf&auml;den, Formulare, SOPs und wichtige Unterlagen zentral verwalten.</p>
+    <p>Leitf&auml;den, Regelwerke, Checklisten und wichtige LSMD-Unterlagen zentral verwalten.</p>
 </div>
 
 <section class="dashboard-grid">
@@ -15,15 +15,15 @@
                 <input type="text" name="title" placeholder="Titel des Dokuments" required>
 
                 <select name="type" required>
-    <option value="">Kategorie ausw&auml;hlen</option>
-    <option value="LSMD Dienstblatt">LSMD Dienstblatt</option>
-    <option value="Einstellungs-Checkliste">Einstellungs-Checkliste</option>
-    <option value="Prakti darf alleine">Prakti darf alleine</option>
-    <option value="Sani Leitfaden">Sani Leitfaden</option>
-    <option value="Sanitaeter Theorie">Sanit&auml;ter Theorie</option>
-    <option value="Dienstvorschrift LSMD">Dienstvorschrift LSMD</option>
-    <option value="Prakti Sani Regelwerk">Prakti Sani Regelwerk</option>
-</select>
+                    <option value="">Kategorie ausw&auml;hlen</option>
+                    <option value="LSMD Dienstblatt">LSMD Dienstblatt</option>
+                    <option value="Einstellungs-Checkliste">Einstellungs-Checkliste</option>
+                    <option value="Prakti darf alleine">Prakti darf alleine</option>
+                    <option value="Sani Leitfaden">Sani Leitfaden</option>
+                    <option value="Sanitaeter Theorie">Sanit&auml;ter Theorie</option>
+                    <option value="Dienstvorschrift LSMD">Dienstvorschrift LSMD</option>
+                    <option value="Prakti Sani Regelwerk">Prakti Sani Regelwerk</option>
+                </select>
 
                 <input type="url" name="url" placeholder="Dokument-Link / Google Docs Link" required>
 
@@ -34,34 +34,39 @@
         </div>
     <% } %>
 
-    <div class="mini-stats">
-    <div class="mini-stat">
-        <strong><%= docs ? docs.length : 0 %></strong>
-        <span>Gesamt</span>
-    </div>
+    <div class="card">
+        <div class="card-header">
+            <h2>Dokumentenstatus</h2>
+            <span class="chip green">Live</span>
+        </div>
 
-    <div class="mini-stat">
-        <strong><%= docs ? docs.filter(d => d.type === "Sani Leitfaden").length : 0 %></strong>
-        <span>Leitf&auml;den</span>
-    </div>
+        <div class="mini-stats">
+            <div class="mini-stat">
+                <strong><%= docs ? docs.length : 0 %></strong>
+                <span>Gesamt</span>
+            </div>
 
-    <div class="mini-stat">
-        <strong><%= docs ? docs.filter(d => d.type === "Einstellungs-Checkliste").length : 0 %></strong>
-        <span>Checklisten</span>
-    </div>
+            <div class="mini-stat">
+                <strong><%= docs ? docs.filter(d => d.type === "Sani Leitfaden").length : 0 %></strong>
+                <span>Leitf&auml;den</span>
+            </div>
 
-    <div class="mini-stat">
-        <strong><%= docs ? docs.filter(d => d.type === "Dienstvorschrift LSMD" || d.type === "Prakti Sani Regelwerk").length : 0 %></strong>
-        <span>Regelwerke</span>
-    </div>
-</div>
+            <div class="mini-stat">
+                <strong><%= docs ? docs.filter(d => d.type === "Einstellungs-Checkliste").length : 0 %></strong>
+                <span>Checklisten</span>
+            </div>
 
-<div class="clean-divider"></div>
+            <div class="mini-stat">
+                <strong><%= docs ? docs.filter(d => d.type === "Dienstvorschrift LSMD" || d.type === "Prakti Sani Regelwerk").length : 0 %></strong>
+                <span>Regelwerke</span>
+            </div>
+        </div>
 
-<p style="color: var(--muted);">
-    Hier kannst du LSMD-Dokumente, Google-Docs-Links, Leitf&auml;den, Regelwerke und Checklisten sammeln.
-</p>
+        <div class="clean-divider"></div>
 
+        <p style="color: var(--muted);">
+            Hier kannst du LSMD-Dokumente, Google-Docs-Links, Leitf&auml;den, Regelwerke und Checklisten sammeln.
+        </p>
     </div>
 </section>
 
@@ -75,10 +80,9 @@
         <div class="empty-state">
             <div style="font-size: 42px;">Keine Dateien</div>
             <h3>Keine Dokumente gespeichert</h3>
-            <p>Fuege oben dein erstes Dokument oder einen Google Docs Link hinzu.</p>
+            <p>F&uuml;ge oben dein erstes Dokument oder einen Google-Docs-Link hinzu.</p>
         </div>
     <% } else { %>
-
         <div class="docs-grid">
             <% docs.forEach(doc => { %>
                 <div class="doc-card">
@@ -110,7 +114,7 @@
                                 <button
                                     type="submit"
                                     class="danger-btn"
-                                    onclick="return confirm('Dokument wirklich L&ouml;schen?');"
+                                    onclick="return confirm('Dokument wirklich l&ouml;schen?');"
                                 >
                                     L&ouml;schen
                                 </button>
@@ -120,6 +124,5 @@
                 </div>
             <% }) %>
         </div>
-
     <% } %>
 </section>
