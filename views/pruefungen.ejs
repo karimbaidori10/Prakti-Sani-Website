@@ -1,7 +1,7 @@
 <div class="page-header md-exam-hero">
     <div>
         <h1>Pr&uuml;fungen</h1>
-        <p>MD-Pr&uuml;fungssystem f&uuml;r Sanit&auml;ter-Pr&uuml;fungen und Fahrfreigaben.</p>
+        <p>MD-Pr&uuml;fungssystem f&uuml;r Fahrfreigaben und Sanit&auml;ter-Pr&uuml;fungen.</p>
     </div>
 
     <div class="md-exam-hero-badge">
@@ -15,15 +15,13 @@
         <div class="card-header">
             <div>
                 <h2>Pr&uuml;fung eintragen</h2>
-                <p class="card-subtitle">W&auml;hle die Pr&uuml;fungsart und dokumentiere den Stand.</p>
+                <p class="card-subtitle">Einfach eintragen, speichern und dokumentieren.</p>
             </div>
             <span class="chip blue">MD-System</span>
         </div>
 
         <form method="POST" action="/pruefungen/create" class="form md-exam-form">
             <input name="name" placeholder="Name des Teilnehmers" required>
-
-            <input name="discordId" placeholder="Discord ID optional">
 
             <select name="examType" required>
                 <option value="">Pr&uuml;fungsart w&auml;hlen</option>
@@ -37,14 +35,6 @@
             </div>
 
             <input name="examiner" placeholder="Ausbilder / Pr&uuml;fer" required>
-
-            <select name="result" required>
-                <option value="">Ergebnis w&auml;hlen</option>
-                <option value="Bestanden">Bestanden</option>
-                <option value="Nicht bestanden">Nicht bestanden</option>
-                <option value="Teilgenommen">Teilgenommen</option>
-                <option value="Offen">Offen</option>
-            </select>
 
             <textarea name="notes" placeholder="Notizen zur Pr&uuml;fung"></textarea>
 
@@ -78,15 +68,15 @@
             </div>
 
             <div class="mini-stat">
-                <strong><%= exams ? exams.filter(e => e.result === "Bestanden").length : 0 %></strong>
-                <span>Bestanden</span>
+                <strong><%= exams ? [...new Set(exams.map(e => e.examiner).filter(Boolean))].length : 0 %></strong>
+                <span>Ausbilder</span>
             </div>
         </div>
 
         <div class="clean-divider"></div>
 
         <p style="color: var(--muted);">
-            Nur Sanit&auml;ter-Pr&uuml;fungen werden automatisch bei Ausbildungstermine dokumentiert.
+            Sanit&auml;ter-Pr&uuml;fungen werden automatisch bei Ausbildungstermine dokumentiert.
             Fahrfreigaben bleiben nur im Pr&uuml;fungsverlauf.
         </p>
     </div>
@@ -133,14 +123,10 @@
                                 <% } %>
                             </div>
 
-                            <% if (exam.result === "Bestanden") { %>
-                                <span class="badge success">Bestanden</span>
-                            <% } else if (exam.result === "Nicht bestanden") { %>
-                                <span class="badge danger">Nicht bestanden</span>
-                            <% } else if (exam.result === "Teilgenommen") { %>
-                                <span class="badge blue">Teilgenommen</span>
+                            <% if (exam.examType === "Darf alleine fahren") { %>
+                                <span class="badge blue">Fahrfreigabe</span>
                             <% } else { %>
-                                <span class="badge warning"><%= exam.result || "Offen" %></span>
+                                <span class="badge success">Sanit&auml;ter</span>
                             <% } %>
                         </div>
 
@@ -161,8 +147,8 @@
                             </div>
 
                             <div>
-                                <span>Discord ID</span>
-                                <strong><%= exam.discordId || "-" %></strong>
+                                <span>System</span>
+                                <strong>MD</strong>
                             </div>
                         </div>
 

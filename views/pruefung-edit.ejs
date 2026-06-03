@@ -1,61 +1,46 @@
 ﻿<div class="page-header">
-    <h1>Pruefung bearbeiten</h1>
-    <p>Bearbeite Teilnehmer, Pruefungsart, Ergebnis und Notizen.</p>
+    <h1>Pr&uuml;fung bearbeiten</h1>
+    <p>Bearbeite Teilnehmer, Pr&uuml;fungsart, Datum, Ausbilder und Notizen.</p>
 </div>
 
-<section class="card">
+<section class="card md-exam-form-card">
     <div class="card-header">
-        <h2>Pruefungsdaten</h2>
+        <div>
+            <h2>Pr&uuml;fungsdaten</h2>
+            <p class="card-subtitle">Discord ID und Ergebnis werden hier nicht mehr ben&ouml;tigt.</p>
+        </div>
+
         <span class="chip blue">Bearbeiten</span>
     </div>
 
-    <form method="POST" action="/pruefungen/edit/<%= exam._id %>" class="form">
-        <input 
-            name="name" 
-            placeholder="Name des Teilnehmers" 
-            value="<%= exam.name || '' %>" 
-            required
-        >
-
-        <input 
-            name="discordId" 
-            placeholder="Discord ID optional" 
-            value="<%= exam.discordId || '' %>"
-        >
+    <form method="POST" action="/pruefungen/edit/<%= exam._id %>" class="form md-exam-form">
+        <input name="name" value="<%= exam.name || '' %>" placeholder="Name des Teilnehmers" required>
 
         <select name="examType" required>
-            <option value="">Pruefungsart waehlen</option>
-            <option value="Prakti-Pruefung" <%= exam.examType === "Prakti-Pruefung" ? "selected" : "" %>>Prakti-Pruefung</option>
-            <option value="Darf alleine fahren" <%= exam.examType === "Darf alleine fahren" ? "selected" : "" %>>Darf alleine fahren</option>
-            <option value="Sanitaeter-Pruefung" <%= exam.examType === "Sanitaeter-Pruefung" ? "selected" : "" %>>Sanitaeter-Pruefung</option>
-            <option value="Theorie-Pruefung" <%= exam.examType === "Theorie-Pruefung" ? "selected" : "" %>>Theorie-Pruefung</option>
-            <option value="Regelwerk" <%= exam.examType === "Regelwerk" ? "selected" : "" %>>Regelwerk</option>
-            <option value="Blaues Blatt" <%= exam.examType === "Blaues Blatt" ? "selected" : "" %>>Blaues Blatt</option>
-            <option value="Funkleitfaden" <%= exam.examType === "Funkleitfaden" ? "selected" : "" %>>Funkleitfaden</option>
-            <option value="Sonstiges" <%= exam.examType === "Sonstiges" ? "selected" : "" %>>Sonstiges</option>
+            <option value="">Pr&uuml;fungsart w&auml;hlen</option>
+
+            <option value="Darf alleine fahren" <%= exam.examType === "Darf alleine fahren" ? "selected" : "" %>>
+                Darf alleine fahren
+            </option>
+
+            <option value="Sanitaeter-Pruefung" <%= exam.examType === "Sanitaeter-Pruefung" ? "selected" : "" %>>
+                Sanit&auml;ter-Pr&uuml;fung
+            </option>
         </select>
 
-        <select name="result" required>
-            <option value="">Ergebnis wählen</option>
-            <option value="offen" <%= exam.result === "offen" ? "selected" : "" %>>Offen</option>
-            <option value="bestanden" <%= exam.result === "bestanden" ? "selected" : "" %>>Bestanden</option>
-            <option value="nicht bestanden" <%= exam.result === "nicht bestanden" ? "selected" : "" %>>Nicht bestanden</option>
-        </select>
-
-        <input 
-            name="examiner" 
-            placeholder="Pruefer / Ausbilder" 
-            value="<%= exam.examiner || '' %>"
-        >
-
-        <textarea name="notes" placeholder="Notizen"><%= exam.notes || '' %></textarea>
-
-        <div class="doc-actions">
-            <button type="submit">Speichern</button>
-
-            <a href="/pruefungen" class="open-doc-btn">
-                Abbrechen
-            </a>
+        <div class="form-row">
+            <input type="date" name="date" value="<%= exam.date || '' %>" required>
+            <input type="time" name="time" value="<%= exam.time || '' %>">
         </div>
+
+        <input name="examiner" value="<%= exam.examiner || '' %>" placeholder="Ausbilder / Pr&uuml;fer" required>
+
+        <textarea name="notes" placeholder="Notizen zur Pr&uuml;fung"><%= exam.notes || '' %></textarea>
+
+        <button type="submit">Speichern</button>
+
+        <a href="/pruefungen" class="open-doc-btn">
+            Abbrechen
+        </a>
     </form>
 </section>
