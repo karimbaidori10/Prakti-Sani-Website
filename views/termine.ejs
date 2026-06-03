@@ -67,7 +67,7 @@
 <div class="page-header sheet-hero">
     <div>
         <h1>Ausbildungstermine</h1>
-        <p>Modernes Wochen-System f&uuml;r Sanit&auml;ter-Pr&uuml;fungen, Ausbilder und Dokumentation.</p>
+        <p>MD-System f&uuml;r Fahrfreigaben, Sanit&auml;ter-Pr&uuml;fungen und Ausbildungsdokumentation.</p>
     </div>
 
     <div class="sheet-hero-count">
@@ -76,13 +76,43 @@
     </div>
 </div>
 
+<section class="card md-small-entry-card">
+    <div class="card-header">
+        <div>
+            <h2>Neuen Eintrag erstellen</h2>
+            <p class="card-subtitle">Kleine Schnell-Eingabe f&uuml;r Ausbilder.</p>
+        </div>
+
+        <span class="chip blue">Eintragen</span>
+    </div>
+
+    <form method="POST" action="/termine/create" class="md-small-form">
+        <input name="name" placeholder="Name des Teilnehmers" required>
+
+        <select name="examType" required>
+            <option value="">Art w&auml;hlen</option>
+            <option value="Darf alleine fahren">Darf alleine fahren</option>
+            <option value="Sanitaeter-Pruefung">Sanit&auml;ter-Pr&uuml;fung</option>
+        </select>
+
+        <input type="date" name="date" required>
+        <input type="time" name="time">
+
+        <input name="examiner" placeholder="Ausbilder / Pr&uuml;fer" required>
+
+        <textarea name="notes" placeholder="Notiz optional"></textarea>
+
+        <button type="submit">Speichern</button>
+    </form>
+</section>
+
 <section class="stats-grid">
     <div class="stat-card stat-blue">
         <div class="stat-icon">AZ</div>
         <div>
             <h2><%= allTermine.length %></h2>
             <strong>Gesamt</strong>
-            <p>Dokumentierte Pr&uuml;fungen</p>
+            <p>Dokumentierte Eintr&auml;ge</p>
         </div>
     </div>
 
@@ -96,20 +126,20 @@
     </div>
 
     <div class="stat-card stat-yellow">
+        <div class="stat-icon">DF</div>
+        <div>
+            <h2><%= allTermine.filter(t => t.examType === "Darf alleine fahren").length %></h2>
+            <strong>Fahrfreigaben</strong>
+            <p>Darf alleine fahren</p>
+        </div>
+    </div>
+
+    <div class="stat-card stat-red">
         <div class="stat-icon">AB</div>
         <div>
             <h2><%= ausbilderList.length %></h2>
             <strong>Ausbilder</strong>
             <p>Aktive Ausbilder</p>
-        </div>
-    </div>
-
-    <div class="stat-card stat-red">
-        <div class="stat-icon">MD</div>
-        <div>
-            <h2>MD</h2>
-            <strong>System</strong>
-            <p>Automatische Dokumentation</p>
         </div>
     </div>
 </section>
@@ -119,7 +149,7 @@
         <div class="card-header">
             <div>
                 <h2>Wochen-Dokumentation</h2>
-                <p class="card-subtitle">Alle Eintr&auml;ge werden automatisch aus Sanit&auml;ter-Pr&uuml;fungen &uuml;bernommen.</p>
+                <p class="card-subtitle">Alle Eintr&auml;ge werden nach Kalenderwoche sortiert.</p>
             </div>
 
             <span class="chip blue"><%= allTermine.length %> Eintr&auml;ge</span>
@@ -129,7 +159,7 @@
             <div class="empty-state">
                 <div>Keine Daten</div>
                 <h3>Keine Ausbildungstermine vorhanden</h3>
-                <p>Trage bei Pr&uuml;fungen eine Sanit&auml;ter-Pr&uuml;fung ein. Danach erscheint sie automatisch hier.</p>
+                <p>Trage oben den ersten Eintrag ein.</p>
             </div>
         <% } else { %>
 
@@ -138,7 +168,7 @@
                     <div class="sheet-week-card">
                         <div class="sheet-week-header">
                             <h3><%= week %></h3>
-                            <span><%= groupedWeeks[week].length %> Pr&uuml;fung(en)</span>
+                            <span><%= groupedWeeks[week].length %> Eintrag(e)</span>
                         </div>
 
                         <div class="sheet-table">
@@ -148,7 +178,7 @@
                                 <span>Uhrzeit</span>
                                 <span>Teilnehmer</span>
                                 <span>Ausbilder</span>
-                                <span>System</span>
+                                <span>Art</span>
                             </div>
 
                             <% groupedWeeks[week].forEach((termin) => { %>
@@ -179,8 +209,12 @@
                                     </div>
 
                                     <div>
-                                        <small>System</small>
-                                        <span class="badge success">Sanit&auml;ter</span>
+                                        <small>Art</small>
+                                        <% if (termin.examType === "Darf alleine fahren") { %>
+                                            <span class="badge blue">Fahrfreigabe</span>
+                                        <% } else { %>
+                                            <span class="badge success">Sanit&auml;ter</span>
+                                        <% } %>
                                     </div>
 
                                     <% if (termin.notes) { %>
@@ -192,6 +226,10 @@
 
                                     <% if (isAdmin) { %>
                                         <div class="sheet-actions">
+                                            <a href="/termine/edit/<%= termin._id %>" class="open-doc-btn">
+                                                Bearbeiten
+                                            </a>
+
                                             <form method="POST" action="/termine/delete/<%= termin._id %>">
                                                 <button type="submit" class="danger-btn" onclick="return confirm('Eintrag wirklich l&ouml;schen?');">
                                                     L&ouml;schen
@@ -241,7 +279,7 @@
 
         <div class="sheet-help">
             <h3>System</h3>
-            <p>Nur Sanit&auml;ter-Pr&uuml;fungen werden hier automatisch angezeigt. Discord ID und Ergebnis werden nicht mehr ben&ouml;tigt.</p>
+            <p>Pr&uuml;fungen wurden entfernt. Alles wird jetzt direkt hier bei Ausbildungstermine eingetragen.</p>
         </div>
     </div>
 </section>

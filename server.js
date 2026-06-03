@@ -445,28 +445,37 @@ app.post("/points/set", requireLogin, requireAdmin, async (req, res) => {
 app.post("/termine/create", requireLogin, async (req, res) => {
     const {
         name,
-        discordId,
         examType,
         date,
         time,
         examiner,
-        status,
         notes
     } = req.body;
 
+    if (!name || !examType || !date || !examiner) {
+        return res.redirect("/termine");
+    }
+
     await termineCollection.insertOne({
         name,
-        discordId,
+        discordId: "",
         examType,
         date,
         time,
         examiner,
-        status: status || "offen",
+        status: "Offen",
         notes,
+        source: "termine",
         createdAt: new Date()
     });
 
-    await addLog("Termin erstellt", { name, examType, date, time });
+    await addLog("Ausbildungstermin erstellt", {
+        name,
+        examType,
+        date,
+        time,
+        examiner
+    });
 
     res.redirect("/termine");
 });
