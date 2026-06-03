@@ -1,6 +1,8 @@
-<div class="page-header">
-    <h1>Ausbildungstermine</h1>
-    <p>Automatisch dokumentierte Sanit&auml;ter-Pr&uuml;fungen mit Datum, Uhrzeit, Ausbilder und Status.</p>
+<div class="page-header training-header">
+    <div>
+        <h1>Ausbildungstermine</h1>
+        <p>Moderne Dokumentation aller Sanit&auml;ter-Pr&uuml;fungen mit Datum, Ausbilder, Status und Notizen.</p>
+    </div>
 </div>
 
 <section class="stats-grid">
@@ -8,8 +10,8 @@
         <div class="stat-icon">AZ</div>
         <div>
             <h2><%= termine ? termine.length : 0 %></h2>
-            <strong>Eintr&auml;ge</strong>
-            <p>Dokumentierte Termine</p>
+            <strong>Gesamt</strong>
+            <p>Dokumentierte Eintr&auml;ge</p>
         </div>
     </div>
 
@@ -27,7 +29,7 @@
         <div>
             <h2><%= termine ? termine.filter(t => t.status === "Nicht bestanden").length : 0 %></h2>
             <strong>Nicht bestanden</strong>
-            <p>Dokumentierte Fehlversuche</p>
+            <p>Fehlversuche</p>
         </div>
     </div>
 
@@ -36,65 +38,131 @@
         <div>
             <h2><%= termine ? termine.filter(t => !t.status || t.status === "Offen" || t.status === "Teilgenommen").length : 0 %></h2>
             <strong>Offen</strong>
-            <p>Noch offen / teilgenommen</p>
+            <p>Offen / Teilgenommen</p>
         </div>
     </div>
 </section>
 
-<section class="card">
-    <div class="card-header">
-        <h2>Ausbildungsdokumentation</h2>
-        <span class="chip blue"><%= termine ? termine.length : 0 %> Eintr&auml;ge</span>
+<section class="training-doc-layout">
+    <div class="card training-doc-main">
+        <div class="card-header">
+            <div>
+                <h2>Ausbildungsdokumentation</h2>
+                <p class="card-subtitle">Automatisch erstellt durch neue Eintr&auml;ge bei Pr&uuml;fungen.</p>
+            </div>
+
+            <span class="chip blue"><%= termine ? termine.length : 0 %> Eintr&auml;ge</span>
+        </div>
+
+        <% if (!termine || termine.length === 0) { %>
+            <div class="empty-state">
+                <div>Keine Daten</div>
+                <h3>Keine Ausbildungstermine vorhanden</h3>
+                <p>Trage bei Pr&uuml;fungen eine Sanit&auml;ter-Pr&uuml;fung ein. Danach erscheint sie automatisch hier.</p>
+            </div>
+        <% } else { %>
+
+            <div class="training-board">
+                <% termine.forEach((termin, index) => { %>
+                    <div class="training-entry">
+                        <div class="training-number">
+                            <span>#</span>
+                            <strong><%= index + 1 %></strong>
+                        </div>
+
+                        <div class="training-date-box">
+                            <span>Datum</span>
+                            <strong><%= termin.date || "-" %></strong>
+                            <small><%= termin.time || "--:--" %> Uhr</small>
+                        </div>
+
+                        <div class="training-content">
+                            <div class="training-topline">
+                                <h3><%= termin.name || "Unbekannt" %></h3>
+
+                                <% if (termin.status === "Bestanden") { %>
+                                    <span class="badge success">Bestanden</span>
+                                <% } else if (termin.status === "Nicht bestanden") { %>
+                                    <span class="badge danger">Nicht bestanden</span>
+                                <% } else if (termin.status === "Teilgenommen") { %>
+                                    <span class="badge blue">Teilgenommen</span>
+                                <% } else { %>
+                                    <span class="badge warning"><%= termin.status || "Offen" %></span>
+                                <% } %>
+                            </div>
+
+                            <div class="training-info-grid">
+                                <div>
+                                    <span>Pr&uuml;fung</span>
+                                    <strong>Sanit&auml;ter</strong>
+                                </div>
+
+                                <div>
+                                    <span>Ausbilder</span>
+                                    <strong><%= termin.examiner || "-" %></strong>
+                                </div>
+
+                                <div>
+                                    <span>Discord ID</span>
+                                    <strong><%= termin.discordId || "-" %></strong>
+                                </div>
+
+                                <div>
+                                    <span>Quelle</span>
+                                    <strong>Pr&uuml;fungen</strong>
+                                </div>
+                            </div>
+
+                            <% if (termin.notes) { %>
+                                <div class="training-note-box">
+                                    <span>Notiz</span>
+                                    <p><%= termin.notes %></p>
+                                </div>
+                            <% } %>
+                        </div>
+
+                        <% if (isAdmin) { %>
+                            <div class="training-actions">
+                                <form method="POST" action="/termine/delete/<%= termin._id %>">
+                                    <button type="submit" class="danger-btn" onclick="return confirm('Eintrag wirklich l&ouml;schen?');">
+                                        L&ouml;schen
+                                    </button>
+                                </form>
+                            </div>
+                        <% } %>
+                    </div>
+                <% }) %>
+            </div>
+
+        <% } %>
     </div>
 
-    <% if (!termine || termine.length === 0) { %>
-        <div class="empty-state">
-            <div>Keine Daten</div>
-            <h3>Keine Ausbildungstermine vorhanden</h3>
-            <p>Neue Eintr&auml;ge entstehen automatisch, sobald eine Sanit&auml;ter-Pr&uuml;fung eingetragen wird.</p>
-        </div>
-    <% } else { %>
-
-        <div class="training-list">
-            <% termine.forEach((termin) => { %>
-                <div class="training-card">
-                    <div class="training-date">
-                        <span class="training-label">Datum</span>
-                        <strong><%= termin.date || "-" %></strong>
-                        <span><%= termin.time || "--:--" %> Uhr</span>
-                    </div>
-
-                    <div class="training-main">
-                        <div class="training-title-row">
-                            <h3><%= termin.name || "Unbekannt" %></h3>
-                            <span class="chip blue">Sanit&auml;ter-Pr&uuml;fung</span>
-                        </div>
-
-                        <div class="training-meta">
-                            <p><strong>Ausbilder:</strong> <%= termin.examiner || "-" %></p>
-                            <p><strong>Discord ID:</strong> <%= termin.discordId || "-" %></p>
-                            <p><strong>Eintrag:</strong> Automatisch aus Pr&uuml;fungen</p>
-                        </div>
-
-                        <% if (termin.notes) { %>
-                            <p class="training-note"><strong>Notiz:</strong> <%= termin.notes %></p>
-                        <% } %>
-                    </div>
-
-                    <div class="training-status">
-                        <% if (termin.status === "Bestanden") { %>
-                            <span class="badge success">Bestanden</span>
-                        <% } else if (termin.status === "Nicht bestanden") { %>
-                            <span class="badge danger">Nicht bestanden</span>
-                        <% } else if (termin.status === "Teilgenommen") { %>
-                            <span class="badge blue">Teilgenommen</span>
-                        <% } else { %>
-                            <span class="badge warning"><%= termin.status || "Offen" %></span>
-                        <% } %>
-                    </div>
-                </div>
-            <% }) %>
+    <div class="card training-doc-side">
+        <div class="card-header">
+            <h2>Dokumentation</h2>
+            <span class="chip green">Auto</span>
         </div>
 
-    <% } %>
+        <div class="doc-info-list">
+            <div>
+                <strong>Eintragung</strong>
+                <p>Neue Eintr&auml;ge werden nur bei Pr&uuml;fungen erstellt.</p>
+            </div>
+
+            <div>
+                <strong>Ausbildung</strong>
+                <p>Dokumentiert werden Sanit&auml;ter-Pr&uuml;fungen.</p>
+            </div>
+
+            <div>
+                <strong>Ausbilder</strong>
+                <p>Der eingetragene Ausbilder / Pr&uuml;fer wird automatisch &uuml;bernommen.</p>
+            </div>
+
+            <div>
+                <strong>Status</strong>
+                <p>Bestanden, Nicht bestanden, Teilgenommen oder Offen.</p>
+            </div>
+        </div>
+    </div>
 </section>
