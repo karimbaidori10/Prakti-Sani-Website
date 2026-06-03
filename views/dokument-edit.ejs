@@ -19,14 +19,40 @@
         >
 
         <select name="type" required>
-            <option value="">Kategorie auswählen</option>
-            <option value="Leitfaden" <%= doc.type === "Leitfaden" ? "selected" : "" %>>Leitfaden</option>
-            <option value="Formular" <%= doc.type === "Formular" ? "selected" : "" %>>Formular</option>
-            <option value="SOP" <%= doc.type === "SOP" ? "selected" : "" %>>SOP</option>
-            <option value="Prüfung" <%= doc.type === "Prüfung" ? "selected" : "" %>>Prüfung</option>
-            <option value="Google Docs" <%= doc.type === "Google Docs" ? "selected" : "" %>>Google Docs</option>
-            <option value="Sonstiges" <%= doc.type === "Sonstiges" ? "selected" : "" %>>Sonstiges</option>
-        </select>
+    <option value="">Kategorie ausw&auml;hlen</option>
+
+    <option value="LSMD Dienstblatt" <%= doc.type === "LSMD Dienstblatt" ? "selected" : "" %>>
+        LSMD Dienstblatt
+    </option>
+
+    <option value="Einstellungs-Checkliste" <%= doc.type === "Einstellungs-Checkliste" ? "selected" : "" %>>
+        Einstellungs-Checkliste
+    </option>
+
+    <option value="Prakti darf alleine" <%= doc.type === "Prakti darf alleine" ? "selected" : "" %>>
+        Prakti darf alleine
+    </option>
+
+    <option value="Sani Leitfaden" <%= doc.type === "Sani Leitfaden" ? "selected" : "" %>>
+        Sani Leitfaden
+    </option>
+
+    <option value="Sanitaeter Theorie" <%= doc.type === "Sanitaeter Theorie" ? "selected" : "" %>>
+        Sanit&auml;ter Theorie
+    </option>
+
+    <option value="Dienstvorschrift LSMD" <%= doc.type === "Dienstvorschrift LSMD" ? "selected" : "" %>>
+        Dienstvorschrift LSMD
+    </option>
+
+    <option value="Prakti Sani Regelwerk" <%= doc.type === "Prakti Sani Regelwerk" ? "selected" : "" %>>
+        Prakti Sani Regelwerk
+    </option>
+
+    <option value="Google Docs" <%= doc.type === "Google Docs" ? "selected" : "" %>>
+        Google Docs
+    </option>
+</select>
 
         <input
             type="url"

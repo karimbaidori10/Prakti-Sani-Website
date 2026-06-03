@@ -643,7 +643,11 @@ app.post("/dokumente/edit/:id", requireLogin, requireAdmin, async (req, res) => 
             }
         );
 
-        await addLog("Dokument bearbeitet", { id: req.params.id, title, type });
+        await addLog("Dokument bearbeitet", {
+            id: req.params.id,
+            title,
+            type
+        });
 
         res.redirect("/dokumente");
     } catch (err) {
