@@ -209,11 +209,14 @@ async function getDiscordMemberInfo(userId) {
     }
 }
 
-async function addLog(action, data = {}) {
+async function addLog(action, data = {}, actor = null) {
+    const createdAt = new Date();
+
     const logEntry = {
         action,
         data,
-        createdAt: new Date()
+        actor,
+        createdAt
     };
 
     await logsCollection.insertOne(logEntry);
@@ -223,6 +226,142 @@ async function addLog(action, data = {}) {
     }
 
     try {
+        const actorId = actor?.discordId || data?.userId || null;
+        const actorName = actor?.username || actor?.displayName || data?.name || "Unbekannt";
+        const pingText = actorId ? `<@${actorId}>` : actorName;
+
+        let title = "LSMD Dashboard Log";
+        let description = `${pingText} hat eine Aktion ausgef&uuml;hrt.`;
+        let color = 3447003;
+
+        if (action.includes("Login")) {
+            title = "Login erkannt";
+            description = `${pingText} hat sich im LSMD Dashboard eingeloggt.`;
+            color = 5763719;
+        }
+
+        if (action.includes("Ausbildungstermin erstellt")) {
+            title = "Ausbildungstermin erstellt";
+            description = `${pingText} hat einen neuen Ausbildungstermin eingetragen.`;
+            color = 3447003;
+        }
+
+        if (action.includes("Ausbildungstermin bearbeitet")) {
+            title = "Ausbildungstermin bearbeitet";
+            description = `${pingText} hat einen Ausbildungstermin bearbeitet.`;
+            color = 16705372;
+        }
+
+        if (action.includes("Termin geloescht")) {
+            title = "Ausbildungstermin gel&ouml;scht";
+            description = `${pingText} hat einen Ausbildungstermin gel&ouml;scht.`;
+            color = 15548997;
+        }
+
+        if (action.includes("Dokument hinzugefuegt")) {
+            title = "Dokument hinzugef&uuml;gt";
+            description = `${pingText} hat ein neues Dokument hinzugef&uuml;gt.`;
+            color = 3447003;
+        }
+
+        if (action.includes("Dokument bearbeitet")) {
+            title = "Dokument bearbeitet";
+            description = `${pingText} hat ein Dokument bearbeitet.`;
+            color = 16705372;
+        }
+
+        if (action.includes("Dokument geloescht")) {
+            title = "Dokument gel&ouml;scht";
+            description = `${pingText} hat ein Dokument gel&ouml;scht.`;
+            color = 15548997;
+        }
+
+        if (action.includes("Punkte")) {
+            title = "Punkteverwaltung";
+            description = `${pingText} hat Punkte im Dashboard ge&auml;ndert.`;
+            color = 10181046;
+        }
+
+        const fields = [];
+
+        if (data.name) {
+            fields.push({
+                name: "Teilnehmer",
+                value: String(data.name),
+                inline: true
+            });
+        }
+
+        if (data.title) {
+            fields.push({
+                name: "Dokument",
+                value: String(data.title),
+                inline: true
+            });
+        }
+
+        if (data.examType) {
+            fields.push({
+                name: "Art",
+                value: String(data.examType).replace("Sanitaeter", "Sanit&auml;ter"),
+                inline: true
+            });
+        }
+
+        if (data.date) {
+            fields.push({
+                name: "Datum",
+                value: String(data.date),
+                inline: true
+            });
+        }
+
+        if (data.time) {
+            fields.push({
+                name: "Uhrzeit",
+                value: String(data.time),
+                inline: true
+            });
+        }
+
+        if (data.examiner) {
+            fields.push({
+                name: "Ausbilder",
+                value: String(data.examiner),
+                inline: true
+            });
+        }
+
+        if (data.type) {
+            fields.push({
+                name: "Kategorie",
+                value: String(data.type).replace("Sanitaeter", "Sanit&auml;ter"),
+                inline: true
+            });
+        }
+
+        if (data.amount !== undefined) {
+            fields.push({
+                name: "Punkte",
+                value: String(data.amount),
+                inline: true
+            });
+        }
+
+        if (data.userId) {
+            fields.push({
+                name: "Betroffener User",
+                value: `<@${data.userId}>`,
+                inline: true
+            });
+        }
+
+        fields.push({
+            name: "Zeit",
+            value: createdAt.toLocaleString("de-DE"),
+            inline: false
+        });
+
         await fetch(process.env.DISCORD_LOG_WEBHOOK, {
             method: "POST",
             headers: {
@@ -230,20 +369,21 @@ async function addLog(action, data = {}) {
             },
             body: JSON.stringify({
                 username: "LSMD Dashboard Logs",
+                avatar_url: "https://cdn.discordapp.com/embed/avatars/0.png",
+                content: actorId ? `<@${actorId}>` : "",
+                allowed_mentions: {
+                    parse: ["users"]
+                },
                 embeds: [
                     {
-                        title: action,
-                        color: 15158332,
-                        fields: [
-                            {
-                                name: "Daten",
-                                value: "```json\n" + JSON.stringify(data, null, 2).slice(0, 900) + "\n```"
-                            },
-                            {
-                                name: "Zeit",
-                                value: new Date().toLocaleString("de-DE")
-                            }
-                        ]
+                        title,
+                        description,
+                        color,
+                        fields,
+                        footer: {
+                            text: "LSMD Dashboard System"
+                        },
+                        timestamp: createdAt.toISOString()
                     }
                 ]
             })
@@ -444,7 +584,7 @@ app.post("/points/add", requireLogin, requireAdmin, async (req, res) => {
         { upsert: true }
     );
 
-    await addLog("Punkte hinzugefuegt", { userId, amount });
+    await addLog("Punkte hinzugefuegt", { userId, amount }, req.session.user);
 
     res.redirect("/admin");
 });
@@ -467,7 +607,7 @@ app.post("/points/remove", requireLogin, requireAdmin, async (req, res) => {
         { upsert: true }
     );
 
-    await addLog("Punkte entfernt", { userId, amount });
+    await addLog("Punkte entfernt", { userId, amount }, req.session.user);
 
     res.redirect("/admin");
 });
@@ -486,7 +626,7 @@ app.post("/points/set", requireLogin, requireAdmin, async (req, res) => {
         { upsert: true }
     );
 
-    await addLog("Punkte gesetzt", { userId, amount });
+    await addLog("Punkte gesetzt", { userId, amount }, req.session.user);
 
     res.redirect("/admin");
 });
@@ -523,12 +663,12 @@ app.post("/termine/create", requireLogin, async (req, res) => {
     });
 
     await addLog("Ausbildungstermin erstellt", {
-        name,
-        examType,
-        date,
-        time,
-        examiner
-    });
+    name,
+    examType,
+    date,
+    time,
+    examiner
+}, req.session.user);
 
     res.redirect("/termine");
 });
@@ -585,13 +725,13 @@ app.post("/termine/edit/:id", requireLogin, requireAdmin, async (req, res) => {
         );
 
         await addLog("Ausbildungstermin bearbeitet", {
-            id: req.params.id,
-            name,
-            examType,
-            date,
-            time,
-            examiner
-        });
+    id: req.params.id,
+    name,
+    examType,
+    date,
+    time,
+    examiner
+}, req.session.user);
 
         res.redirect("/termine");
     } catch (err) {
@@ -608,7 +748,7 @@ app.post("/termine/status/:id", requireLogin, async (req, res) => {
         { $set: { status } }
     );
 
-    await addLog("Termin Status geaendert", { id: req.params.id, status });
+    await addLog("Termin Status geaendert", { id: req.params.id, status }, req.session.user);
 
     res.redirect("/termine");
 });
@@ -618,7 +758,7 @@ app.post("/termine/delete/:id", requireLogin, requireAdmin, async (req, res) => 
         _id: new ObjectId(req.params.id)
     });
 
-    await addLog("Termin geloescht", { id: req.params.id });
+    await addLog("Termin geloescht", { id: req.params.id }, req.session.user);
 
     res.redirect("/termine");
 });
@@ -638,7 +778,7 @@ app.post("/dokumente/create", requireLogin, requireAdmin, async (req, res) => {
         createdAt: new Date()
     });
 
-    await addLog("Dokument hinzugefuegt", { title, type });
+    await addLog("Dokument hinzugefuegt", { title, type }, req.session.user);
 
     res.redirect("/dokumente");
 });
@@ -680,10 +820,10 @@ app.post("/dokumente/edit/:id", requireLogin, requireAdmin, async (req, res) => 
         );
 
         await addLog("Dokument bearbeitet", {
-            id: req.params.id,
-            title,
-            type
-        });
+    id: req.params.id,
+    title,
+    type
+}, req.session.user);
 
         res.redirect("/dokumente");
     } catch (err) {
@@ -698,7 +838,7 @@ app.post("/dokumente/delete/:id", requireLogin, requireAdmin, async (req, res) =
             _id: new ObjectId(req.params.id)
         });
 
-        await addLog("Dokument geloescht", { id: req.params.id });
+        await addLog("Dokument geloescht", { id: req.params.id }, req.session.user);
 
         res.redirect("/dokumente");
     } catch (err) {
