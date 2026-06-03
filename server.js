@@ -210,11 +210,47 @@ async function getDiscordMemberInfo(userId) {
 }
 
 async function addLog(action, data = {}) {
-    await logsCollection.insertOne({
+    const logEntry = {
         action,
         data,
         createdAt: new Date()
-    });
+    };
+
+    await logsCollection.insertOne(logEntry);
+
+    if (!process.env.DISCORD_LOG_WEBHOOK) {
+        return;
+    }
+
+    try {
+        await fetch(process.env.DISCORD_LOG_WEBHOOK, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                username: "LSMD Dashboard Logs",
+                embeds: [
+                    {
+                        title: action,
+                        color: 15158332,
+                        fields: [
+                            {
+                                name: "Daten",
+                                value: "```json\n" + JSON.stringify(data, null, 2).slice(0, 900) + "\n```"
+                            },
+                            {
+                                name: "Zeit",
+                                value: new Date().toLocaleString("de-DE")
+                            }
+                        ]
+                    }
+                ]
+            })
+        });
+    } catch (err) {
+        console.error("Discord Log konnte nicht gesendet werden:", err);
+    }
 }
 
 async function getAllPoints() {
