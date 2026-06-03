@@ -606,10 +606,69 @@ app.post("/pruefungen/edit/:id", requireLogin, async (req, res) => {
     res.redirect("/pruefungen");
 });
 
-node --check server.js
-git add .
-git commit -m "Remove discord and result from pruefungen"
-git push origin main --force
+app.post("/pruefungen/edit/:id", requireLogin, async (req, res) => {
+    const {
+        name,
+        date,
+        time,
+        examType,
+        examiner,
+        notes
+    } = req.body;
+
+    await examsCollection.updateOne(
+        { _id: new ObjectId(req.params.id) },
+        {
+            $set: {
+                name,
+                discordId: "",
+                date,
+                time,
+                examType,
+                result: "Offen",
+                examiner,
+                notes
+            }
+        }
+    );
+
+    if (examType === "Sanitaeter-Pruefung") {
+        await termineCollection.updateOne(
+            { sourceExamId: req.params.id },
+            {
+                $set: {
+                    sourceExamId: req.params.id,
+                    name,
+                    discordId: "",
+                    examType,
+                    date,
+                    time,
+                    examiner,
+                    status: "Offen",
+                    notes,
+                    source: "pruefung",
+                    updatedAt: new Date()
+                },
+                $setOnInsert: {
+                    createdAt: new Date()
+                }
+            },
+            { upsert: true }
+        );
+    } else {
+        await termineCollection.deleteOne({
+            sourceExamId: req.params.id
+        });
+    }
+
+    await addLog("Pruefung bearbeitet", {
+        id: req.params.id,
+        name,
+        examType
+    });
+
+    res.redirect("/pruefungen");
+});
 
 app.post("/pruefungen/delete/:id", requireLogin, requireAdmin, async (req, res) => {
     await examsCollection.deleteOne({
