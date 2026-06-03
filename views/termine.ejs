@@ -1,152 +1,95 @@
 <div class="page-header">
-    <h1>Termine</h1>
-    <p>Pruefungstermine planen, verwalten und Status aktuell halten.</p>
+    <h1>Ausbildungstermine</h1>
+    <p>Automatisch dokumentierte Sanit&auml;ter-Pr&uuml;fungen mit Datum, Uhrzeit, Ausbilder und Status.</p>
 </div>
 
-<section class="dashboard-grid">
-    <div class="card">
-        <div class="card-header">
-            <h2>Neuen Termin erstellen</h2>
-            <span class="chip blue">Planung</span>
+<section class="stats-grid">
+    <div class="stat-card stat-blue">
+        <div class="stat-icon">AZ</div>
+        <div>
+            <h2><%= termine ? termine.length : 0 %></h2>
+            <strong>Eintr&auml;ge</strong>
+            <p>Dokumentierte Termine</p>
         </div>
-
-        <form method="POST" action="/termine/create" class="form">
-            <input name="name" placeholder="Name des Teilnehmers" required>
-
-            <input name="discordId" placeholder="Discord ID optional">
-
-            <select name="examType" required>
-                <option value="">Pruefungsart waehlen</option>
-                <option>Prakti-Pruefung</option>
-                <option>Darf alleine fahren</option>
-                <option>Sanitaeter-Pruefung</option>
-                <option>Theorie-Pruefung</option>
-                <option>Regelwerk</option>
-                <option>Blaues Blatt</option>
-                <option>Funkleitfaden</option>
-            </select>
-
-            <div class="form-row">
-                <input type="date" name="date" required>
-                <input type="time" name="time" required>
-            </div>
-
-            <input name="examiner" placeholder="Pruefer / Ausbilder">
-
-            <select name="status">
-                <option value="offen">Offen</option>
-                <option value="bestanden">Bestanden</option>
-                <option value="nicht bestanden">Nicht bestanden</option>
-                <option value="verschoben">Verschoben</option>
-            </select>
-
-            <textarea name="notes" placeholder="Notizen"></textarea>
-
-            <button type="submit">Termin speichern</button>
-        </form>
     </div>
 
-    <div class="card">
-        <div class="card-header">
-            <h2>Termin-Status</h2>
-            <span class="chip green">Live</span>
+    <div class="stat-card stat-green">
+        <div class="stat-icon">OK</div>
+        <div>
+            <h2><%= termine ? termine.filter(t => t.status === "Bestanden").length : 0 %></h2>
+            <strong>Bestanden</strong>
+            <p>Erfolgreiche Pr&uuml;fungen</p>
         </div>
+    </div>
 
-        <div class="mini-stats">
-            <div class="mini-stat">
-                <strong><%= termine ? termine.length : 0 %></strong>
-                <span>Gesamt</span>
-            </div>
-
-            <div class="mini-stat">
-                <strong><%= termine ? termine.filter(t => t.status === "offen").length : 0 %></strong>
-                <span>Offen</span>
-            </div>
-
-            <div class="mini-stat">
-                <strong><%= termine ? termine.filter(t => t.status === "bestanden").length : 0 %></strong>
-                <span>Bestanden</span>
-            </div>
-
-            <div class="mini-stat">
-                <strong><%= termine ? termine.filter(t => t.status === "verschoben").length : 0 %></strong>
-                <span>Verschoben</span>
-            </div>
+    <div class="stat-card stat-red">
+        <div class="stat-icon">NO</div>
+        <div>
+            <h2><%= termine ? termine.filter(t => t.status === "Nicht bestanden").length : 0 %></h2>
+            <strong>Nicht bestanden</strong>
+            <p>Dokumentierte Fehlversuche</p>
         </div>
+    </div>
 
-        <div class="clean-divider"></div>
-
-        <p style="color: var(--muted);">
-            Hier siehst du den aktuellen Stand deiner Pruefungstermine.
-        </p>
+    <div class="stat-card stat-yellow">
+        <div class="stat-icon">OF</div>
+        <div>
+            <h2><%= termine ? termine.filter(t => !t.status || t.status === "Offen" || t.status === "Teilgenommen").length : 0 %></h2>
+            <strong>Offen</strong>
+            <p>Noch offen / teilgenommen</p>
+        </div>
     </div>
 </section>
 
 <section class="card">
     <div class="card-header">
-        <h2>Terminuebersicht</h2>
-        <span class="chip blue"><%= termine ? termine.length : 0 %> Termine</span>
+        <h2>Ausbildungsdokumentation</h2>
+        <span class="chip blue"><%= termine ? termine.length : 0 %> Eintr&auml;ge</span>
     </div>
 
     <% if (!termine || termine.length === 0) { %>
         <div class="empty-state">
             <div>Keine Daten</div>
-            <h3>Keine Termine vorhanden</h3>
-            <p>Erstelle oben deinen ersten Pruefungstermin.</p>
+            <h3>Keine Ausbildungstermine vorhanden</h3>
+            <p>Neue Eintr&auml;ge entstehen automatisch, sobald eine Sanit&auml;ter-Pr&uuml;fung eingetragen wird.</p>
         </div>
     <% } else { %>
 
-        <div class="termine-list">
-            <% termine.forEach(t => { %>
-                <div class="termin-card">
-                    <div class="date-box">
-                        <strong><%= t.date ? new Date(t.date).getDate() : "--" %></strong>
-                        <span>
-                            <%= t.date ? new Date(t.date).toLocaleString("de-DE", { month: "short" }).toUpperCase() : "---" %>
-                        </span>
+        <div class="training-list">
+            <% termine.forEach((termin) => { %>
+                <div class="training-card">
+                    <div class="training-date">
+                        <span class="training-label">Datum</span>
+                        <strong><%= termin.date || "-" %></strong>
+                        <span><%= termin.time || "--:--" %> Uhr</span>
                     </div>
 
-                    <div class="termin-main">
-                        <h3><%= t.examType || "Termin" %></h3>
+                    <div class="training-main">
+                        <div class="training-title-row">
+                            <h3><%= termin.name || "Unbekannt" %></h3>
+                            <span class="chip blue">Sanit&auml;ter-Pr&uuml;fung</span>
+                        </div>
 
-                        <p>
-                            Teilnehmer: <%= t.name || "Unbekannt" %>
-                            <% if (t.discordId) { %>
-                                - Discord ID: <%= t.discordId %>
-                            <% } %>
-                        </p>
+                        <div class="training-meta">
+                            <p><strong>Ausbilder:</strong> <%= termin.examiner || "-" %></p>
+                            <p><strong>Discord ID:</strong> <%= termin.discordId || "-" %></p>
+                            <p><strong>Eintrag:</strong> Automatisch aus Pr&uuml;fungen</p>
+                        </div>
 
-                        <p>
-                            Zeit: <%= t.time || "--:--" %> Uhr
-                            - Pruefer: <%= t.examiner || "Kein Pruefer eingetragen" %>
-                        </p>
-
-                        <% if (t.notes) { %>
-                            <p class="termin-note">Notiz: <%= t.notes %></p>
+                        <% if (termin.notes) { %>
+                            <p class="training-note"><strong>Notiz:</strong> <%= termin.notes %></p>
                         <% } %>
                     </div>
 
-                    <div class="termin-status">
-                        <% if (t.status === "bestanden") { %>
+                    <div class="training-status">
+                        <% if (termin.status === "Bestanden") { %>
                             <span class="badge success">Bestanden</span>
-                        <% } else if (t.status === "nicht bestanden") { %>
+                        <% } else if (termin.status === "Nicht bestanden") { %>
                             <span class="badge danger">Nicht bestanden</span>
-                        <% } else if (t.status === "verschoben") { %>
-                            <span class="badge warning">Verschoben</span>
+                        <% } else if (termin.status === "Teilgenommen") { %>
+                            <span class="badge blue">Teilgenommen</span>
                         <% } else { %>
-                            <span class="badge warning">Offen</span>
-                        <% } %>
-
-                        <% if (isAdmin) { %>
-                            <a href="/termine/edit/<%= t._id %>" class="open-doc-btn">
-                                Bearbeiten
-                            </a>
-
-                            <form method="POST" action="/termine/delete/<%= t._id %>">
-                                <button type="submit" class="danger-btn" onclick="return confirm('Termin wirklich loeschen?');">
-                                    Loeschen
-                                </button>
-                            </form>
+                            <span class="badge warning"><%= termin.status || "Offen" %></span>
                         <% } %>
                     </div>
                 </div>

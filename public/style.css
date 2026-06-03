@@ -2352,3 +2352,122 @@ a {
     object-fit: cover;
     display: block;
 }
+
+/* =====================
+   AUSBILDUNGSTERMINE
+===================== */
+
+.training-list {
+    display: grid;
+    gap: 16px;
+}
+
+.training-card {
+    display: grid;
+    grid-template-columns: 150px 1fr 170px;
+    gap: 18px;
+    align-items: center;
+    padding: 20px;
+    border-radius: 20px;
+    background: rgba(8, 14, 32, 0.88);
+    border: 1px solid rgba(255,255,255,0.08);
+    transition: 0.2s ease;
+}
+
+.training-card:hover {
+    transform: translateY(-2px);
+    border-color: rgba(37, 99, 235, 0.45);
+    box-shadow: 0 14px 40px rgba(0,0,0,0.24);
+}
+
+.training-date {
+    padding: 16px;
+    border-radius: 16px;
+    background: rgba(37,99,235,0.14);
+    border: 1px solid rgba(37,99,235,0.34);
+    text-align: center;
+}
+
+.training-label {
+    display: block;
+    margin-bottom: 8px;
+    color: var(--muted);
+    font-size: 12px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.training-date strong {
+    display: block;
+    font-size: 19px;
+    font-weight: 1000;
+    color: #ffffff;
+}
+
+.training-date span:last-child {
+    display: block;
+    margin-top: 6px;
+    color: var(--muted);
+    font-weight: 800;
+}
+
+.training-title-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-bottom: 10px;
+}
+
+.training-title-row h3 {
+    margin: 0;
+    font-size: 22px;
+    font-weight: 1000;
+    color: #ffffff;
+}
+
+.training-meta {
+    display: grid;
+    gap: 6px;
+}
+
+.training-meta p {
+    margin: 0;
+    color: #cbd5e1;
+}
+
+.training-meta strong {
+    color: #ffffff;
+}
+
+.training-note {
+    margin-top: 14px !important;
+    padding: 12px 14px;
+    border-radius: 14px;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.08);
+    color: #cbd5e1;
+}
+
+.training-status {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+}
+
+.badge.blue {
+    background: rgba(37, 99, 235, 0.18);
+    color: #93c5fd;
+    border: 1px solid rgba(37, 99, 235, 0.32);
+}
+
+@media (max-width: 950px) {
+    .training-card {
+        grid-template-columns: 1fr;
+    }
+
+    .training-status {
+        justify-content: flex-start;
+    }
+}

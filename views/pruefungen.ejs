@@ -1,12 +1,12 @@
 <div class="page-header">
     <h1>Pr&uuml;fungen</h1>
-    <p>Sanit&auml;ter-Ausbildungen erfassen, Ergebnisse dokumentieren und Verlauf anzeigen.</p>
+    <p>Sanit&auml;ter-Pr&uuml;fungen erfassen, Ergebnisse dokumentieren und Verlauf anzeigen.</p>
 </div>
 
 <section class="dashboard-grid">
     <div class="card">
         <div class="card-header">
-            <h2>Sanit&auml;ter-Ausbildung eintragen</h2>
+            <h2>Sanit&auml;ter-Pr&uuml;fung eintragen</h2>
             <span class="chip blue">Erfassung</span>
         </div>
 
@@ -30,15 +30,15 @@
                 <option value="Offen">Offen</option>
             </select>
 
-            <textarea name="notes" placeholder="Notizen zur Ausbildung"></textarea>
+            <textarea name="notes" placeholder="Notizen zur Pr&uuml;fung"></textarea>
 
-            <button type="submit">Sanit&auml;ter-Ausbildung dokumentieren</button>
+            <button type="submit">Sanit&auml;ter-Pr&uuml;fung eintragen</button>
         </form>
     </div>
 
     <div class="card">
         <div class="card-header">
-            <h2>Ausbildungsstatus</h2>
+            <h2>Pr&uuml;fungsstatus</h2>
             <span class="chip green">Live</span>
         </div>
 
@@ -67,29 +67,29 @@
         <div class="clean-divider"></div>
 
         <p style="color: var(--muted);">
-            Hier werden Sanit&auml;ter-Ausbildungen dokumentiert. Jeder neue Eintrag erscheint automatisch auch bei den Ausbildungsterminen.
+            Hier werden Sanit&auml;ter-Pr&uuml;fungen erfasst. Jeder neue Eintrag erscheint automatisch auch bei den Ausbildungsterminen.
         </p>
     </div>
 </section>
 
 <section class="card">
     <div class="card-header">
-        <h2>Dokumentierte Sanit&auml;ter-Ausbildungen</h2>
+        <h2>Ausbildungstermine</h2>
         <span class="chip blue"><%= exams ? exams.length : 0 %> Eintr&auml;ge</span>
     </div>
 
     <% if (!exams || exams.length === 0) { %>
         <div class="empty-state">
             <div>Keine Daten</div>
-            <h3>Keine Ausbildung vorhanden</h3>
-            <p>Trage oben die erste Sanit&auml;ter-Ausbildung ein.</p>
+            <h3>Keine Pr&uuml;fung vorhanden</h3>
+            <p>Trage oben die erste Sanit&auml;ter-Pr&uuml;fung ein.</p>
         </div>
     <% } else { %>
 
         <div class="exam-list">
             <% exams.forEach((exam) => { %>
                 <div class="exam-card">
-                    <div class="exam-icon">SA</div>
+                    <div class="exam-icon">SP</div>
 
                     <div class="exam-main">
                         <div class="exam-title-row">
@@ -104,7 +104,7 @@
                             <% } %>
                         </div>
 
-                        <p><strong>Ausbildung:</strong> Sanit&auml;ter</p>
+                        <p><strong>Pr&uuml;fung:</strong> Sanit&auml;ter</p>
                         <p><strong>Datum:</strong> <%= exam.date || "-" %> <%= exam.time || "" %></p>
                         <p><strong>Ausbilder:</strong> <%= exam.examiner || "-" %></p>
 
@@ -124,7 +124,7 @@
 
                         <% if (isAdmin) { %>
                             <form method="POST" action="/pruefungen/delete/<%= exam._id %>">
-                                <button type="submit" class="danger-btn" onclick="return confirm('Ausbildung wirklich l&ouml;schen?');">
+                                <button type="submit" class="danger-btn" onclick="return confirm('Pr&uuml;fung wirklich l&ouml;schen?');">
                                     L&ouml;schen
                                 </button>
                             </form>
