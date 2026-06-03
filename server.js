@@ -86,15 +86,26 @@ passport.use(new DiscordStrategy({
             return done(null, false);
         }
 
-        return done(null, {
+const displayName =
+    member.nick ||
+    member.user?.global_name ||
+    member.user?.username ||
+    profile.username;
+
+const avatarUrl = member.user?.avatar
+    ? `https://cdn.discordapp.com/avatars/${member.user.id}/${member.user.avatar}.png`
+    : null;
+
+return done(null, {
     id: profile.id,
-    username: profile.username,
-    avatar: profile.avatar,
+    username: displayName,
+    avatar: avatarUrl,
     roles,
     isAdmin,
     role: isAdmin ? "Admin" : "Prakti-Sani",
     rank
 });
+
     } catch (error) {
         return done(error, null);
     }
@@ -264,9 +275,7 @@ app.get(
             discordId: req.user.id,
             role: req.user.role,
             rank: req.user.rank,
-            avatar: req.user.avatar
-                ? `https://cdn.discordapp.com/avatars/${req.user.id}/${req.user.avatar}.png`
-                : null
+avatar: req.user.avatar || null
         };
 
         await pointsCollection.updateOne(
@@ -323,22 +332,13 @@ app.get("/dashboard", requireLogin, async (req, res) => {
         .limit(5)
         .toArray();
 
-    const discordInfo = await getDiscordMemberInfo(req.session.user?.discordId);
-
-    if (discordInfo) {
-        req.session.user.username = discordInfo.displayName;
-        req.session.user.displayName = discordInfo.displayName;
-        req.session.user.rank = discordInfo.rank;
-        req.session.user.avatar = discordInfo.avatarUrl;
-    }
-
     res.render("dashboard", viewData(req, {
         active: "dashboard",
         users,
         termine,
         allTermine,
         docs,
-        mdName: discordInfo?.displayName || req.session.user?.username || "Ausbilder"
+        mdName: req.session.user?.username || "Ausbilder"
     }));
 });
 
