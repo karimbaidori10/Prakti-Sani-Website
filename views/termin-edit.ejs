@@ -1,76 +1,46 @@
 <div class="page-header">
-    <h1>Termin bearbeiten</h1>
-    <p>Bearbeite Teilnehmer, Pruefungsart, Datum, Uhrzeit und Status.</p>
+    <h1>Eintrag bearbeiten</h1>
+    <p>Bearbeite Teilnehmer, Art, Datum, Uhrzeit, Ausbilder und Notizen.</p>
 </div>
 
-<section class="card">
+<section class="card md-exam-form-card">
     <div class="card-header">
-        <h2>Termindaten</h2>
+        <div>
+            <h2>Ausbildungstermin</h2>
+            <p class="card-subtitle">Discord ID und Status werden nicht mehr ben&ouml;tigt.</p>
+        </div>
+
         <span class="chip blue">Bearbeiten</span>
     </div>
 
-    <form method="POST" action="/termine/edit/<%= termin._id %>" class="form">
-        <input 
-            name="name" 
-            placeholder="Name des Teilnehmers" 
-            value="<%= termin.name || '' %>" 
-            required
-        >
-
-        <input 
-            name="discordId" 
-            placeholder="Discord ID optional" 
-            value="<%= termin.discordId || '' %>"
-        >
+    <form method="POST" action="/termine/edit/<%= termin._id %>" class="form md-exam-form">
+        <input name="name" value="<%= termin.name || '' %>" placeholder="Name des Teilnehmers" required>
 
         <select name="examType" required>
-            <option value="">Pruefungsart waehlen</option>
-            <option value="Prakti-Pruefung" <%= termin.examType === "Prakti-Pruefung" ? "selected" : "" %>>Prakti-Pruefung</option>
-            <option value="Darf alleine fahren" <%= termin.examType === "Darf alleine fahren" ? "selected" : "" %>>Darf alleine fahren</option>
-            <option value="Sanitaeter-Pruefung" <%= termin.examType === "Sanitaeter-Pruefung" ? "selected" : "" %>>Sanitaeter-Pruefung</option>
-            <option value="Theorie-Pruefung" <%= termin.examType === "Theorie-Pruefung" ? "selected" : "" %>>Theorie-Pruefung</option>
-            <option value="Regelwerk" <%= termin.examType === "Regelwerk" ? "selected" : "" %>>Regelwerk</option>
-            <option value="Blaues Blatt" <%= termin.examType === "Blaues Blatt" ? "selected" : "" %>>Blaues Blatt</option>
-            <option value="Funkleitfaden" <%= termin.examType === "Funkleitfaden" ? "selected" : "" %>>Funkleitfaden</option>
+            <option value="">Art w&auml;hlen</option>
+
+            <option value="Darf alleine fahren" <%= termin.examType === "Darf alleine fahren" ? "selected" : "" %>>
+                Darf alleine fahren
+            </option>
+
+            <option value="Sanitaeter-Pruefung" <%= termin.examType === "Sanitaeter-Pruefung" ? "selected" : "" %>>
+                Sanit&auml;ter-Pr&uuml;fung
+            </option>
         </select>
 
         <div class="form-row">
-            <input 
-                type="date" 
-                name="date" 
-                value="<%= termin.date || '' %>" 
-                required
-            >
-
-            <input 
-                type="time" 
-                name="time" 
-                value="<%= termin.time || '' %>" 
-                required
-            >
+            <input type="date" name="date" value="<%= termin.date || '' %>" required>
+            <input type="time" name="time" value="<%= termin.time || '' %>">
         </div>
 
-        <input 
-            name="examiner" 
-            placeholder="Pruefer / Ausbilder" 
-            value="<%= termin.examiner || '' %>"
-        >
-
-        <select name="status">
-            <option value="offen" <%= termin.status === "offen" ? "selected" : "" %>>Offen</option>
-            <option value="bestanden" <%= termin.status === "bestanden" ? "selected" : "" %>>Bestanden</option>
-            <option value="nicht bestanden" <%= termin.status === "nicht bestanden" ? "selected" : "" %>>Nicht bestanden</option>
-            <option value="verschoben" <%= termin.status === "verschoben" ? "selected" : "" %>>Verschoben</option>
-        </select>
+        <input name="examiner" value="<%= termin.examiner || '' %>" placeholder="Ausbilder / Pr&uuml;fer" required>
 
         <textarea name="notes" placeholder="Notizen"><%= termin.notes || '' %></textarea>
 
-        <div class="doc-actions">
-            <button type="submit">Speichern</button>
+        <button type="submit">Speichern</button>
 
-            <a href="/termine" class="open-doc-btn">
-                Abbrechen
-            </a>
-        </div>
+        <a href="/termine" class="open-doc-btn">
+            Abbrechen
+        </a>
     </form>
 </section>

@@ -504,37 +504,40 @@ app.post("/termine/edit/:id", requireLogin, requireAdmin, async (req, res) => {
     try {
         const {
             name,
-            discordId,
             examType,
             date,
             time,
             examiner,
-            status,
             notes
         } = req.body;
+
+        if (!name || !examType || !date || !examiner) {
+            return res.redirect("/termine/edit/" + req.params.id);
+        }
 
         await termineCollection.updateOne(
             { _id: new ObjectId(req.params.id) },
             {
                 $set: {
                     name,
-                    discordId,
+                    discordId: "",
                     examType,
                     date,
                     time,
                     examiner,
-                    status,
+                    status: "Offen",
                     notes
                 }
             }
         );
 
-        await addLog("Termin bearbeitet", {
+        await addLog("Ausbildungstermin bearbeitet", {
             id: req.params.id,
             name,
             examType,
             date,
-            time
+            time,
+            examiner
         });
 
         res.redirect("/termine");
