@@ -1,11 +1,11 @@
 <div class="page-header">
     <h1>Admin</h1>
-    <p>Leitungsbereich fuer Punkte, Mitglieder, Logs und Schnellzugriff.</p>
+    <p>Leitungsbereich f&uuml;r Punkte, Mitglieder, Logs und Systemstatus.</p>
 </div>
 
 <section class="stats-grid">
     <div class="stat-card stat-blue">
-        <div class="stat-icon">User</div>
+        <div class="stat-icon">US</div>
         <div>
             <h2><%= users ? users.length : 0 %></h2>
             <strong>Mitglieder</strong>
@@ -23,7 +23,7 @@
     </div>
 
     <div class="stat-card stat-yellow">
-        <div class="stat-icon">Log</div>
+        <div class="stat-icon">LG</div>
         <div>
             <h2><%= logs ? logs.length : 0 %></h2>
             <strong>Logs</strong>
@@ -32,7 +32,7 @@
     </div>
 
     <div class="stat-card stat-red">
-        <div class="stat-icon">Admin</div>
+        <div class="stat-icon">AD</div>
         <div>
             <h2>Admin</h2>
             <strong>Modus</strong>
@@ -44,14 +44,17 @@
 <section class="dashboard-grid">
     <div class="card admin-glow">
         <div class="card-header">
-            <h2>Punkte verwalten</h2>
+            <div>
+                <h2>Punkte verwalten</h2>
+                <p class="card-subtitle">Punkte setzen, hinzuf&uuml;gen oder entfernen.</p>
+            </div>
             <span class="chip red">Admin Tool</span>
         </div>
 
         <div class="points-admin-grid">
             <form action="/points/set" method="POST" class="points-box">
                 <h3>Wert setzen</h3>
-                <p>Punkte eines Users direkt auf einen Wert setzen.</p>
+                <p>Punkte eines Mitglieds direkt auf einen Wert setzen.</p>
 
                 <input type="text" name="userId" placeholder="Discord User ID" required>
                 <input type="number" name="points" placeholder="Punkte" required>
@@ -60,13 +63,13 @@
             </form>
 
             <form action="/points/add" method="POST" class="points-box">
-                <h3>Punkte hinzufuegen</h3>
-                <p>Zusaetzliche Punkte auf den aktuellen Stand addieren.</p>
+                <h3>Punkte hinzuf&uuml;gen</h3>
+                <p>Zus&auml;tzliche Punkte auf den aktuellen Stand addieren.</p>
 
                 <input type="text" name="userId" placeholder="Discord User ID" required>
-                <input type="number" name="points" placeholder="Punkte hinzufuegen" required>
+                <input type="number" name="points" placeholder="Punkte hinzuf&uuml;gen" required>
 
-                <button type="submit">Hinzufuegen</button>
+                <button type="submit">Hinzuf&uuml;gen</button>
             </form>
 
             <form action="/points/remove" method="POST" class="points-box danger-box">
@@ -83,29 +86,32 @@
 
     <div class="card">
         <div class="card-header">
-            <h2>Schnellzugriff</h2>
+            <div>
+                <h2>Schnellzugriff</h2>
+                <p class="card-subtitle">Direkt zu den wichtigsten Bereichen.</p>
+            </div>
             <span class="chip blue">Navigation</span>
         </div>
 
         <div class="quick-grid">
             <a href="/users" class="quick-card red">
                 <h3>Mitglieder</h3>
-                <p>Benutzeruebersicht oeffnen</p>
+                <p>Mitglieder&uuml;bersicht &ouml;ffnen</p>
             </a>
 
             <a href="/termine" class="quick-card blue">
-                <h3>Termine</h3>
-                <p>Pruefungstermine verwalten</p>
-            </a>
-
-            <a href="/pruefungen" class="quick-card green">
-                <h3>Pruefungen</h3>
-                <p>Pruefungsverlauf oeffnen</p>
+                <h3>Ausbildungstermine</h3>
+                <p>Eintr&auml;ge verwalten</p>
             </a>
 
             <a href="/dokumente" class="quick-card yellow">
                 <h3>Dokumente</h3>
                 <p>Unterlagen verwalten</p>
+            </a>
+
+            <a href="/dashboard" class="quick-card green">
+                <h3>Dashboard</h3>
+                <p>Zentrale &ouml;ffnen</p>
             </a>
         </div>
     </div>
@@ -114,54 +120,61 @@
 <section class="dashboard-grid">
     <div class="card">
         <div class="card-header">
-            <h2>Aktuelle Mitglieder / Punkte</h2>
-            <span class="chip blue"><%= users ? users.length : 0 %> User</span>
+            <div>
+                <h2>Mitglieder / Punkte</h2>
+                <p class="card-subtitle">Alle Mitglieder mit Punkteverwaltung.</p>
+            </div>
+            <span class="chip blue"><%= users ? users.length : 0 %> Mitglieder</span>
         </div>
 
         <% if (!users || users.length === 0) { %>
             <div class="empty-state">
                 <div>Keine Daten</div>
                 <h3>Keine Mitglieder vorhanden</h3>
-                <p>Sobald Punkte vergeben werden, erscheinen User hier.</p>
+                <p>Sobald Punkte vergeben werden, erscheinen Mitglieder hier.</p>
             </div>
         <% } else { %>
             <div class="admin-member-list">
-                <% users.forEach((user, index) => { %>
+                <% users.forEach((member, index) => { %>
                     <div class="admin-member-row">
                         <div class="rank-number">
                             #<%= index + 1 %>
                         </div>
 
                         <div class="leader-avatar">
-                            <%= user.userId ? user.userId.toString().charAt(0).toUpperCase() : "?" %>
+                            <% if (member.avatarUrl) { %>
+                                <img src="<%= member.avatarUrl %>" alt="Avatar">
+                            <% } else { %>
+                                <%= (member.displayName || member.username || member.userId || "?").toString().charAt(0).toUpperCase() %>
+                            <% } %>
                         </div>
 
                         <div>
-                            <h3>User <%= index + 1 %></h3>
-                            <p>Discord ID: <%= user.userId %></p>
+                            <h3><%= member.displayName || member.username || member.userId || "Unbekannt" %></h3>
+                            <p><%= member.rank || "Kein Rang" %></p>
                         </div>
 
                         <div class="leader-points">
-                            <strong><%= user.points || 0 %></strong>
+                            <strong><%= member.points || 0 %></strong>
                             <span>Punkte</span>
                         </div>
 
                         <div class="points-actions">
-                            <form action="/points/add" method="POST" style="display:inline;">
-                                <input type="hidden" name="userId" value="<%= user.userId %>">
+                            <form action="/points/add" method="POST">
+                                <input type="hidden" name="userId" value="<%= member.userId %>">
                                 <input type="hidden" name="points" value="10">
                                 <button type="submit">+10</button>
                             </form>
 
-                            <form action="/points/remove" method="POST" style="display:inline;">
-                                <input type="hidden" name="userId" value="<%= user.userId %>">
+                            <form action="/points/remove" method="POST">
+                                <input type="hidden" name="userId" value="<%= member.userId %>">
                                 <input type="hidden" name="points" value="10">
                                 <button type="submit" class="danger-btn">-10</button>
                             </form>
 
-                            <form action="/points/set" method="POST" style="display:inline;">
-                                <input type="hidden" name="userId" value="<%= user.userId %>">
-                                <input type="number" name="points" value="<%= user.points || 0 %>" min="0" style="width:80px;">
+                            <form action="/points/set" method="POST">
+                                <input type="hidden" name="userId" value="<%= member.userId %>">
+                                <input type="number" name="points" value="<%= member.points || 0 %>" min="0">
                                 <button type="submit">Setzen</button>
                             </form>
                         </div>
@@ -173,7 +186,10 @@
 
     <div class="card">
         <div class="card-header">
-            <h2>Admin Logs</h2>
+            <div>
+                <h2>Admin Logs</h2>
+                <p class="card-subtitle">Letzte Aktionen im System.</p>
+            </div>
             <span class="chip green"><%= logs ? logs.length : 0 %> Logs</span>
         </div>
 

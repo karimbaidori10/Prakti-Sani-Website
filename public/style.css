@@ -3955,3 +3955,70 @@ a {
         max-width: none !important;
     }
 }
+
+/* =====================
+   CLEAN ADMIN PAGE
+===================== */
+
+.admin-member-row {
+    gap: 14px !important;
+}
+
+.admin-member-row .leader-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: inherit;
+}
+
+.points-actions {
+    display: flex !important;
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: flex-end;
+}
+
+.points-actions form {
+    display: flex !important;
+    gap: 6px;
+    align-items: center;
+    margin: 0;
+}
+
+.points-actions input[type="number"] {
+    width: 86px !important;
+    min-height: 38px !important;
+    padding: 8px 10px !important;
+}
+
+.points-actions button {
+    min-height: 38px !important;
+    padding: 8px 12px !important;
+    border-radius: 12px !important;
+    font-size: 13px !important;
+    font-weight: 1000 !important;
+}
+
+.quick-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+
+.quick-card {
+    text-decoration: none;
+}
+
+@media (max-width: 900px) {
+    .quick-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .admin-member-row {
+        grid-template-columns: 1fr !important;
+    }
+
+    .points-actions {
+        justify-content: flex-start;
+    }
+}
