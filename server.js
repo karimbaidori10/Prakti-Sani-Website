@@ -577,31 +577,52 @@ app.get("/pruefungen/edit/:id", requireLogin, async (req, res) => {
     }));
 });
 
-app.post("/pruefungen/edit/:id", requireLogin, async (req, res) => {
+app.post("/pruefungen/create", requireLogin, async (req, res) => {
     const {
         name,
-        discordId,
+        date,
+        time,
         examType,
-        result,
         examiner,
         notes
     } = req.body;
 
-    await examsCollection.updateOne(
-        { _id: new ObjectId(req.params.id) },
-        {
-            $set: {
-                name,
-                discordId,
-                examType,
-                result,
-                examiner,
-                notes
-            }
-        }
-    );
+    if (!name || !examType || !date || !examiner) {
+        return res.redirect("/pruefungen");
+    }
 
-    await addLog("Pruefung bearbeitet", { id: req.params.id, name, examType, result });
+    const examResult = await examsCollection.insertOne({
+        name,
+        discordId: "",
+        date,
+        time,
+        examType,
+        result: "Offen",
+        examiner,
+        notes,
+        createdAt: new Date()
+    });
+
+    if (examType === "Sanitaeter-Pruefung") {
+        await termineCollection.insertOne({
+            sourceExamId: examResult.insertedId.toString(),
+            name,
+            discordId: "",
+            examType,
+            date,
+            time,
+            examiner,
+            status: "Offen",
+            notes,
+            source: "pruefung",
+            createdAt: new Date()
+        });
+    }
+
+    await addLog("Pruefung gespeichert", {
+        name,
+        examType
+    });
 
     res.redirect("/pruefungen");
 });
@@ -615,6 +636,10 @@ app.post("/pruefungen/edit/:id", requireLogin, async (req, res) => {
         examiner,
         notes
     } = req.body;
+
+    if (!name || !examType || !date || !examiner) {
+        return res.redirect("/pruefungen/edit/" + req.params.id);
+    }
 
     await examsCollection.updateOne(
         { _id: new ObjectId(req.params.id) },
@@ -675,7 +700,13 @@ app.post("/pruefungen/delete/:id", requireLogin, requireAdmin, async (req, res) 
         _id: new ObjectId(req.params.id)
     });
 
-    await addLog("Pruefung geloescht", { id: req.params.id });
+    await termineCollection.deleteOne({
+        sourceExamId: req.params.id
+    });
+
+    await addLog("Pruefung geloescht", {
+        id: req.params.id
+    });
 
     res.redirect("/pruefungen");
 });
