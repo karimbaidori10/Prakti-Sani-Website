@@ -37,8 +37,8 @@
     const groupedWeeks = {};
 
     allTermine.forEach((item) => {
-        const date = parseDate(item.date);
-        const week = date && !isNaN(date) ? "Woche " + getWeekNumber(date) : "Ohne Woche";
+    const currentDate = new Date();
+    const week = "Woche " + getWeekNumber(currentDate);
 
         if (!groupedWeeks[week]) {
             groupedWeeks[week] = [];
