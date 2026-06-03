@@ -1,185 +1,247 @@
-<section class="hero">
-    <small>Willkommen zurueck,</small>
+<%
+    const allUsers = users || [];
+    const latestTermine = termine || [];
+    const termineAll = allTermine || [];
+    const docsAll = docs || [];
 
-    <h1>
-        <%= user && user.username ? user.username : "Leitung" %>
-        <span class="wave">Hallo</span>
-    </h1>
+    const displayName = user && user.username ? user.username : "Ausbilder";
 
-    <p>
-        Hier ist deine moderne Prakti-Sani Zentrale. Termine, Pruefungen,
-        Mitglieder und Dokumente auf einen Blick.
-    </p>
+    function parseDate(value) {
+        if (!value) return null;
+        return new Date(value + "T00:00:00");
+    }
 
-    <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:20px;">
-        <div class="status-pill">
-            <span class="online-dot"></span>
-            Alle Systeme online
+    function getWeekNumber(date) {
+        if (!date || isNaN(date)) return "-";
+        const tempDate = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
+        const dayNum = tempDate.getUTCDay() || 7;
+        tempDate.setUTCDate(tempDate.getUTCDate() + 4 - dayNum);
+        const yearStart = new Date(Date.UTC(tempDate.getUTCFullYear(), 0, 1));
+        return Math.ceil((((tempDate - yearStart) / 86400000) + 1) / 7);
+    }
+
+    function formatDate(value) {
+        const date = parseDate(value);
+        if (!date || isNaN(date)) return "-";
+
+        const day = String(date.getDate()).padStart(2, "0");
+        const month = String(date.getMonth() + 1).padStart(2, "0");
+
+        return day + "." + month;
+    }
+
+    const currentWeek = getWeekNumber(new Date());
+
+    const saniCount = termineAll.filter(t => t.examType === "Sanitaeter-Pruefung").length;
+    const fahrCount = termineAll.filter(t => t.examType === "Darf alleine fahren").length;
+%>
+
+<section class="clean-dashboard-hero">
+    <div>
+        <span class="clean-dashboard-label">LSMD Zentrale</span>
+        <h1>Willkommen zur&uuml;ck,<br><%= displayName %></h1>
+        <p>
+            Deine moderne &Uuml;bersicht f&uuml;r Ausbildungstermine, Mitglieder,
+            Dokumente und MD-Verwaltung.
+        </p>
+
+        <div class="clean-dashboard-pills">
+            <span>Alle Systeme online</span>
+            <span>Woche <%= currentWeek %></span>
+            <% if (isAdmin) { %>
+                <span>Admin</span>
+            <% } %>
         </div>
+    </div>
 
-        <div class="role-pill">
-            <%= user && user.role ? user.role : "Leitung" %>
-        </div>
+    <div class="clean-dashboard-visual">
+        <div class="clean-pulse"></div>
+        <div class="clean-ambulance">+</div>
     </div>
 </section>
 
-<section class="stats-grid">
-    <div class="stat-card stat-red">
-        <div class="stat-icon">User</div>
+<section class="clean-stats-grid">
+    <div class="clean-stat-card">
+        <div class="clean-stat-icon red">US</div>
         <div>
-            <h2><%= users ? users.length : 0 %></h2>
+            <h2><%= allUsers.length %></h2>
             <strong>Mitglieder</strong>
             <p>Aktive Mitglieder</p>
         </div>
     </div>
 
-    <div class="stat-card stat-blue">
-        <div class="stat-icon">Termin</div>
+    <div class="clean-stat-card">
+        <div class="clean-stat-icon blue">TE</div>
         <div>
-            <h2><%= termine ? termine.length : 0 %></h2>
-            <strong>Termine</strong>
-            <p>Naechste Termine</p>
+            <h2><%= termineAll.length %></h2>
+            <strong>Ausbildungstermine</strong>
+            <p>Gespeicherte Eintr&auml;ge</p>
         </div>
     </div>
 
-    <div class="stat-card stat-green">
-        <div class="stat-icon">Test</div>
+    <div class="clean-stat-card">
+        <div class="clean-stat-icon green">SP</div>
         <div>
-            <h2><%= exams ? exams.length : 0 %></h2>
-            <strong>Pruefungen</strong>
-            <p>Gesamt Pruefungen</p>
+            <h2><%= saniCount %></h2>
+            <strong>Sanit&auml;ter</strong>
+            <p>Sanit&auml;ter-Pr&uuml;fungen</p>
         </div>
     </div>
 
-    <div class="stat-card stat-yellow">
-        <div class="stat-icon">Docs</div>
+    <div class="clean-stat-card">
+        <div class="clean-stat-icon yellow">DF</div>
         <div>
-            <h2>0</h2>
-            <strong>Dokumente</strong>
-            <p>Gespeicherte Dateien</p>
+            <h2><%= fahrCount %></h2>
+            <strong>Fahrfreigaben</strong>
+            <p>Darf alleine fahren</p>
         </div>
     </div>
 </section>
 
-<section class="dashboard-grid">
-    <div class="card">
+<section class="clean-dashboard-grid">
+    <div class="card clean-panel">
         <div class="card-header">
-            <h2>Naechste Termine</h2>
-            <a href="/termine" class="mini-btn">Alle anzeigen</a>
+            <div>
+                <h2>Letzte Ausbildungseintr&auml;ge</h2>
+                <p class="card-subtitle">Neueste MD-Eintr&auml;ge aus Ausbildungstermine.</p>
+            </div>
+
+            <a href="/termine" class="open-doc-btn">Alle anzeigen</a>
         </div>
 
-        <div class="event-list">
-            <% if (termine && termine.length > 0) { %>
-                <% termine.forEach(termin => { %>
-                    <div class="event-item">
-                        <div class="date-box">
-                            <strong><%= termin.date ? new Date(termin.date).getDate() : "--" %></strong>
-                            <span>
-                                <%= termin.date ? new Date(termin.date).toLocaleString("de-DE", { month: "short" }).toUpperCase() : "DAT" %>
-                            </span>
+        <% if (latestTermine.length === 0) { %>
+            <div class="empty-state">
+                <div>Keine Daten</div>
+                <h3>Keine Eintr&auml;ge vorhanden</h3>
+                <p>Erstelle den ersten Eintrag bei Ausbildungstermine.</p>
+            </div>
+        <% } else { %>
+            <div class="clean-entry-list">
+                <% latestTermine.forEach((termin) => { %>
+                    <a href="/termine" class="clean-entry-row">
+                        <div class="clean-entry-date">
+                            <strong><%= formatDate(termin.date) %></strong>
+                            <span><%= termin.time || "--:--" %></span>
                         </div>
 
-                        <div>
-                            <h3><%= termin.examType || termin.name || "Termin" %></h3>
-                            <p><%= termin.time || "--:--" %> Uhr - LSMD Base</p>
+                        <div class="clean-entry-main">
+                            <h3><%= termin.name || "Unbekannt" %></h3>
+                            <p><%= termin.examiner || "Kein Ausbilder" %></p>
                         </div>
 
-                        <span class="chip blue"><%= termin.status || "Offen" %></span>
-                    </div>
+                        <% if (termin.examType === "Darf alleine fahren") { %>
+                            <span class="badge blue">Fahrfreigabe</span>
+                        <% } else { %>
+                            <span class="badge success">Sanit&auml;ter</span>
+                        <% } %>
+                    </a>
                 <% }) %>
-            <% } else { %>
-                <div class="event-item">
-                    <div class="date-box">
-                        <strong>--</strong>
-                        <span>---</span>
+            </div>
+        <% } %>
+    </div>
+
+    <div class="card clean-panel">
+        <div class="card-header">
+            <div>
+                <h2>Schnellzugriff</h2>
+                <p class="card-subtitle">Direkt zu den wichtigsten Bereichen.</p>
+            </div>
+        </div>
+
+        <div class="clean-quick-grid">
+            <a href="/users" class="clean-quick-card red">
+                <div>
+                    <strong>Mitglieder</strong>
+                    <span>Benutzer verwalten</span>
+                </div>
+                <b>&rsaquo;</b>
+            </a>
+
+            <a href="/termine" class="clean-quick-card blue">
+                <div>
+                    <strong>Ausbildungstermine</strong>
+                    <span>Eintr&auml;ge verwalten</span>
+                </div>
+                <b>&rsaquo;</b>
+            </a>
+
+            <a href="/dokumente" class="clean-quick-card yellow">
+                <div>
+                    <strong>Dokumente</strong>
+                    <span>Dateien verwalten</span>
+                </div>
+                <b>&rsaquo;</b>
+            </a>
+
+            <% if (isAdmin) { %>
+                <a href="/admin" class="clean-quick-card green">
+                    <div>
+                        <strong>Admin</strong>
+                        <span>System verwalten</span>
                     </div>
+                    <b>&rsaquo;</b>
+                </a>
+            <% } %>
+        </div>
+    </div>
+</section>
+
+<section class="clean-dashboard-grid">
+    <div class="card clean-panel">
+        <div class="card-header">
+            <div>
+                <h2>Top Mitglieder</h2>
+                <p class="card-subtitle">Mitglieder mit den meisten Punkten.</p>
+            </div>
+
+            <a href="/users" class="open-doc-btn">Alle anzeigen</a>
+        </div>
+
+        <div class="clean-member-list">
+            <% allUsers.slice(0, 5).forEach((member, index) => { %>
+                <div class="clean-member-row">
+                    <span class="clean-rank">#<%= index + 1 %></span>
 
                     <div>
-                        <h3>Keine Termine vorhanden</h3>
-                        <p>Lege neue Termine im Bereich Termine an.</p>
+                        <strong><%= member.displayName || member.username || member.userId || "Unbekannt" %></strong>
+                        <p><%= member.rank || "Kein Rang" %></p>
                     </div>
 
-                    <span class="chip yellow">Leer</span>
+                    <b><%= member.points || 0 %> P</b>
                 </div>
-            <% } %>
+            <% }) %>
         </div>
     </div>
 
-    <div class="card">
+    <div class="card clean-panel">
         <div class="card-header">
-            <h2>Schnellzugriff</h2>
-        </div>
+            <div>
+                <h2>System Status</h2>
+                <p class="card-subtitle">Aktueller Zustand der Webseite.</p>
+            </div>
 
-        <div class="quick-grid">
-            <a href="/users" class="quick-card red">
-                <h3>Mitglieder</h3>
-                <p>Benutzer verwalten</p>
-            </a>
-
-            <a href="/termine" class="quick-card blue">
-                <h3>Termine</h3>
-                <p>Termine verwalten</p>
-            </a>
-
-            <a href="/pruefungen" class="quick-card green">
-                <h3>Pruefungen</h3>
-                <p>Pruefungen verwalten</p>
-            </a>
-
-            <a href="/dokumente" class="quick-card yellow">
-                <h3>Dokumente</h3>
-                <p>Dokumente verwalten</p>
-            </a>
-        </div>
-    </div>
-</section>
-
-<section class="dashboard-grid">
-    <div class="card">
-        <div class="card-header">
-            <h2>Letzte Pruefungen</h2>
-            <a href="/pruefungen" class="mini-btn">Alle anzeigen</a>
-        </div>
-
-        <div class="activity-list">
-            <% if (exams && exams.length > 0) { %>
-                <% exams.forEach(exam => { %>
-                    <div class="activity-item">
-                        <span>Pruefung erstellt: <strong><%= exam.examType %></strong> fuer <%= exam.name %></span>
-                        <small><%= exam.result || "Offen" %></small>
-                    </div>
-                <% }) %>
-            <% } else { %>
-                <div class="activity-item">
-                    <span>Keine Pruefungen vorhanden</span>
-                    <small>--</small>
-                </div>
-            <% } %>
-        </div>
-    </div>
-
-    <div class="card">
-        <div class="card-header">
-            <h2>System Status</h2>
             <span class="chip green">Online</span>
         </div>
 
-        <p>Alle Systeme funktionieren einwandfrei.</p>
-
-        <div class="activity-list" style="margin-top: 18px;">
-            <div class="activity-item">
-                <span><span class="online-dot"></span> Datenbank</span>
-                <small>Online</small>
+        <div class="clean-status-list">
+            <div>
+                <span>Dashboard</span>
+                <strong>Online</strong>
             </div>
 
-            <div class="activity-item">
-                <span><span class="online-dot"></span> Web Server</span>
-                <small>Online</small>
+            <div>
+                <span>Ausbildungstermine</span>
+                <strong>Online</strong>
             </div>
 
-            <div class="activity-item">
-                <span><span class="online-dot"></span> MongoDB</span>
-                <small>Online</small>
+            <div>
+                <span>Mitglieder</span>
+                <strong>Online</strong>
+            </div>
+
+            <div>
+                <span>Dokumente</span>
+                <strong>Online</strong>
             </div>
         </div>
     </div>

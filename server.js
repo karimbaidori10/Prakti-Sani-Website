@@ -306,14 +306,29 @@ app.get("/", requireLogin, (req, res) => {
 
 app.get("/dashboard", requireLogin, async (req, res) => {
     const users = await getAllPoints();
-    const termine = await termineCollection.find({}).sort({ date: 1 }).limit(5).toArray();
-    const exams = await examsCollection.find({}).sort({ createdAt: -1 }).limit(5).toArray();
+
+    const termine = await termineCollection
+        .find({})
+        .sort({ createdAt: -1 })
+        .limit(6)
+        .toArray();
+
+    const allTermine = await termineCollection
+        .find({})
+        .toArray();
+
+    const docs = await docsCollection
+        .find({})
+        .sort({ createdAt: -1 })
+        .limit(5)
+        .toArray();
 
     res.render("dashboard", viewData(req, {
         active: "dashboard",
         users,
         termine,
-        exams
+        allTermine,
+        docs
     }));
 });
 
