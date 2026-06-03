@@ -1,6 +1,6 @@
 <div class="page-header">
     <h1>Admin</h1>
-    <p>Leitungsbereich f&uuml;r Punkte, Mitglieder, Logs und Systemstatus.</p>
+    <p>Leitungsbereich f&uuml;r Punkte, Mitglieder, Discord und Systemstatus.</p>
 </div>
 
 <section class="stats-grid">
@@ -23,13 +23,13 @@
     </div>
 
     <div class="stat-card stat-yellow">
-        <div class="stat-icon">LG</div>
-        <div>
-            <h2><%= logs ? logs.length : 0 %></h2>
-            <strong>Logs</strong>
-            <p>Letzte Aktionen</p>
-        </div>
+    <div class="stat-icon">DC</div>
+    <div>
+        <h2>Aktiv</h2>
+        <strong>Discord</strong>
+        <p>Login verbunden</p>
     </div>
+</div>
 
     <div class="stat-card stat-red">
         <div class="stat-icon">AD</div>
@@ -160,62 +160,55 @@
                         </div>
 
                         <div class="points-actions">
-                            <form action="/points/add" method="POST">
-                                <input type="hidden" name="userId" value="<%= member.userId %>">
-                                <input type="hidden" name="points" value="10">
-                                <button type="submit">+10</button>
-                            </form>
+    <form action="/points/add" method="POST">
+        <input type="hidden" name="userId" value="<%= member.userId %>">
+        <input type="hidden" name="points" value="10">
+        <button type="submit">+10</button>
+    </form>
 
-                            <form action="/points/remove" method="POST">
-                                <input type="hidden" name="userId" value="<%= member.userId %>">
-                                <input type="hidden" name="points" value="10">
-                                <button type="submit" class="danger-btn">-10</button>
-                            </form>
-
-                            <form action="/points/set" method="POST">
-                                <input type="hidden" name="userId" value="<%= member.userId %>">
-                                <input type="number" name="points" value="<%= member.points || 0 %>" min="0">
-                                <button type="submit">Setzen</button>
-                            </form>
-                        </div>
+    <form action="/points/remove" method="POST">
+        <input type="hidden" name="userId" value="<%= member.userId %>">
+        <input type="hidden" name="points" value="10">
+        <button type="submit" class="danger-btn">-10</button>
+    </form>
+</div>
                     </div>
                 <% }) %>
             </div>
         <% } %>
     </div>
 
-    <div class="card">
-        <div class="card-header">
-            <div>
-                <h2>Admin Logs</h2>
-                <p class="card-subtitle">Letzte Aktionen im System.</p>
-            </div>
-            <span class="chip green"><%= logs ? logs.length : 0 %> Logs</span>
+<div class="card">
+    <div class="card-header">
+        <div>
+            <h2>Discord</h2>
+            <p class="card-subtitle">Discord-Anbindung und Loginstatus.</p>
+        </div>
+        <span class="chip green">Verbunden</span>
+    </div>
+
+    <div class="clean-status-list">
+        <div>
+            <span>Discord Login</span>
+            <strong>Aktiv</strong>
         </div>
 
-        <% if (!logs || logs.length === 0) { %>
-            <div class="empty-state">
-                <div>Keine Logs</div>
-                <h3>Keine Logs vorhanden</h3>
-                <p>Admin-Aktionen werden hier automatisch gespeichert.</p>
-            </div>
-        <% } else { %>
-            <div class="log-timeline">
-                <% logs.forEach(log => { %>
-                    <div class="log-item">
-                        <div class="log-dot"></div>
+        <div>
+            <span>Rollenpr&uuml;fung</span>
+            <strong>Aktiv</strong>
+        </div>
 
-                        <div>
-                            <h3><%= log.action %></h3>
-                            <p>
-                                <%= log.createdAt ? new Date(log.createdAt).toLocaleString("de-DE") : "Kein Datum" %>
-                            </p>
-                        </div>
-                    </div>
-                <% }) %>
-            </div>
-        <% } %>
+        <div>
+            <span>Admin-Erkennung</span>
+            <strong>Aktiv</strong>
+        </div>
+
+        <div>
+            <span>Mitglieder-Daten</span>
+            <strong>Aktiv</strong>
+        </div>
     </div>
+</div>   
 </section>
 
 <section class="card clean-panel" style="margin-top: 18px;">
