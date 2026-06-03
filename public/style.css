@@ -3810,3 +3810,55 @@ a {
         grid-template-columns: 1fr;
     }
 }
+
+/* =====================
+   FIX KOMPAKTE DOKUMENTE KARTEN
+===================== */
+
+.docs-grid {
+    display: grid !important;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 420px)) !important;
+    gap: 18px !important;
+    justify-content: start !important;
+    align-items: start !important;
+}
+
+.doc-card {
+    width: 100% !important;
+    max-width: 420px !important;
+    min-height: auto !important;
+    padding: 20px !important;
+}
+
+.doc-card p {
+    min-height: 0 !important;
+    margin: 8px 0 16px !important;
+}
+
+.doc-actions {
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    gap: 8px !important;
+}
+
+.doc-actions .open-doc-btn,
+.doc-actions .danger-btn {
+    min-height: 40px !important;
+    padding: 10px 12px !important;
+    font-size: 13px !important;
+    border-radius: 12px !important;
+}
+
+.doc-actions form {
+    margin: 0 !important;
+}
+
+@media (min-width: 900px) {
+    .doc-actions {
+        grid-template-columns: 1fr 1fr !important;
+    }
+
+    .doc-actions form {
+        grid-column: 1 / -1;
+    }
+}
