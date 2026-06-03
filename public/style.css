@@ -3239,3 +3239,22 @@ a {
         flex-direction: column;
     }
 }
+
+/* FIX CLEAN TERMINE TABLE WITHOUT DISCORD ID */
+
+.sheet-table-head-clean,
+.sheet-table-row-clean {
+    grid-template-columns: 120px 120px 100px 1.3fr 1.2fr 120px !important;
+}
+
+@media (max-width: 950px) {
+    .sheet-table-row-clean {
+        grid-template-columns: 1fr 1fr !important;
+    }
+}
+
+@media (max-width: 650px) {
+    .sheet-table-row-clean {
+        grid-template-columns: 1fr !important;
+    }
+}

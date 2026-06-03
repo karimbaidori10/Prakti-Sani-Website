@@ -87,29 +87,29 @@
     </div>
 
     <div class="stat-card stat-green">
-        <div class="stat-icon">OK</div>
+        <div class="stat-icon">SP</div>
         <div>
-            <h2><%= allTermine.filter(t => t.status === "Bestanden").length %></h2>
-            <strong>Bestanden</strong>
-            <p>Erfolgreich abgeschlossen</p>
-        </div>
-    </div>
-
-    <div class="stat-card stat-red">
-        <div class="stat-icon">NO</div>
-        <div>
-            <h2><%= allTermine.filter(t => t.status === "Nicht bestanden").length %></h2>
-            <strong>Nicht bestanden</strong>
-            <p>Fehlversuche</p>
+            <h2><%= allTermine.filter(t => t.examType === "Sanitaeter-Pruefung").length %></h2>
+            <strong>Sanit&auml;ter</strong>
+            <p>Sanit&auml;ter-Pr&uuml;fungen</p>
         </div>
     </div>
 
     <div class="stat-card stat-yellow">
-        <div class="stat-icon">OF</div>
+        <div class="stat-icon">AB</div>
         <div>
-            <h2><%= allTermine.filter(t => !t.status || t.status === "Offen" || t.status === "Teilgenommen").length %></h2>
-            <strong>Offen</strong>
-            <p>Offen / Teilgenommen</p>
+            <h2><%= ausbilderList.length %></h2>
+            <strong>Ausbilder</strong>
+            <p>Aktive Ausbilder</p>
+        </div>
+    </div>
+
+    <div class="stat-card stat-red">
+        <div class="stat-icon">MD</div>
+        <div>
+            <h2>MD</h2>
+            <strong>System</strong>
+            <p>Automatische Dokumentation</p>
         </div>
     </div>
 </section>
@@ -119,7 +119,7 @@
         <div class="card-header">
             <div>
                 <h2>Wochen-Dokumentation</h2>
-                <p class="card-subtitle">Alle Eintr&auml;ge werden automatisch aus Pr&uuml;fungen &uuml;bernommen.</p>
+                <p class="card-subtitle">Alle Eintr&auml;ge werden automatisch aus Sanit&auml;ter-Pr&uuml;fungen &uuml;bernommen.</p>
             </div>
 
             <span class="chip blue"><%= allTermine.length %> Eintr&auml;ge</span>
@@ -142,18 +142,17 @@
                         </div>
 
                         <div class="sheet-table">
-                            <div class="sheet-table-head">
+                            <div class="sheet-table-head sheet-table-head-clean">
                                 <span>Wochentag</span>
                                 <span>Datum</span>
                                 <span>Uhrzeit</span>
                                 <span>Teilnehmer</span>
-                                <span>DN / Discord ID</span>
                                 <span>Ausbilder</span>
-                                <span>Status</span>
+                                <span>System</span>
                             </div>
 
                             <% groupedWeeks[week].forEach((termin) => { %>
-                                <div class="sheet-table-row">
+                                <div class="sheet-table-row sheet-table-row-clean">
                                     <div>
                                         <small>Wochentag</small>
                                         <strong><%= getDayName(termin.date) %></strong>
@@ -175,25 +174,13 @@
                                     </div>
 
                                     <div>
-                                        <small>DN / Discord ID</small>
-                                        <strong><%= termin.discordId || "-" %></strong>
-                                    </div>
-
-                                    <div>
                                         <small>Ausbilder</small>
                                         <strong><%= termin.examiner || "-" %></strong>
                                     </div>
 
                                     <div>
-                                        <% if (termin.status === "Bestanden") { %>
-                                            <span class="badge success">Bestanden</span>
-                                        <% } else if (termin.status === "Nicht bestanden") { %>
-                                            <span class="badge danger">Nicht bestanden</span>
-                                        <% } else if (termin.status === "Teilgenommen") { %>
-                                            <span class="badge blue">Teilgenommen</span>
-                                        <% } else { %>
-                                            <span class="badge warning"><%= termin.status || "Offen" %></span>
-                                        <% } %>
+                                        <small>System</small>
+                                        <span class="badge success">Sanit&auml;ter</span>
                                     </div>
 
                                     <% if (termin.notes) { %>
@@ -254,7 +241,7 @@
 
         <div class="sheet-help">
             <h3>System</h3>
-            <p>Eintragungen werden bei Pr&uuml;fungen erstellt und hier automatisch als Wochen-Dokumentation angezeigt.</p>
+            <p>Nur Sanit&auml;ter-Pr&uuml;fungen werden hier automatisch angezeigt. Discord ID und Ergebnis werden nicht mehr ben&ouml;tigt.</p>
         </div>
     </div>
 </section>
