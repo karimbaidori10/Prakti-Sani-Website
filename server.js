@@ -467,22 +467,22 @@ async function getAllPoints() {
             return user;
         }
 
-if (
-    user.displayName !== discordInfo.displayName ||
-    user.rank !== discordInfo.rank ||
-    user.avatarUrl !== discordInfo.avatarUrl
-) {
-    await pointsCollection.updateOne(
-        { userId: user.userId },
-        {
-            $set: {
-                displayName: discordInfo.displayName,
-                rank: discordInfo.rank,
-                avatarUrl: discordInfo.avatarUrl
-            }
+        if (
+            user.displayName !== discordInfo.displayName ||
+            user.rank !== discordInfo.rank ||
+            user.avatarUrl !== discordInfo.avatarUrl
+        ) {
+            await pointsCollection.updateOne(
+                { userId: user.userId },
+                {
+                    $set: {
+                        displayName: discordInfo.displayName,
+                        rank: discordInfo.rank,
+                        avatarUrl: discordInfo.avatarUrl
+                    }
+                }
+            );
         }
-    );
-}
 
         return {
             ...user,
@@ -493,9 +493,9 @@ if (
     }));
 
     pointsListCache = enrichedUsers;
-pointsListCacheTime = Date.now();
+    pointsListCacheTime = Date.now();
 
-return enrichedUsers;
+    return enrichedUsers;
 }
 // =====================
 // LOGIN
@@ -634,8 +634,10 @@ app.get("/dokumente", requireLogin, async (req, res) => {
 });
 
 app.get("/admin", requireLogin, requireAdmin, async (req, res) => {
-    const users = await getAllPoints();
-    const logs = await logsCollection.find({}).sort({ createdAt: -1 }).limit(50).toArray();
+    const [users, logs] = await Promise.all([
+        getAllPoints(),
+        logsCollection.find({}).sort({ createdAt: -1 }).limit(50).toArray()
+    ]);
 
     res.render("admin", viewData(req, {
         active: "admin",

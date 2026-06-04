@@ -5850,3 +5850,162 @@ button:hover,
     transform: none !important;
     filter: brightness(1.06) !important;
 }
+
+/* =====================
+   FINAL SPEED PRO MODE
+===================== */
+
+:root {
+    --fast-bg: rgba(15, 23, 42, 0.86);
+    --fast-border: rgba(255, 255, 255, 0.08);
+    --fast-shadow: 0 10px 26px rgba(0, 0, 0, 0.24);
+}
+
+/* schwere Effekte killen */
+*,
+*::before,
+*::after {
+    animation: none !important;
+    transition-duration: 0.10s !important;
+}
+
+body {
+    background: linear-gradient(135deg, #020617, #0f172a 55%, #020617) !important;
+    background-attachment: scroll !important;
+}
+
+body::before,
+main::before,
+.content::before,
+.main-content::before {
+    display: none !important;
+}
+
+.sidebar,
+.card,
+.stat-card,
+.doc-card,
+.quick-card,
+.points-box,
+.clean-panel,
+.admin-member-row,
+.leaderboard-row,
+.sheet-table-row-clean,
+.login-card,
+.auth-card {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    background: var(--fast-bg) !important;
+    border: 1px solid var(--fast-border) !important;
+    box-shadow: var(--fast-shadow) !important;
+}
+
+/* alle riesen glow layer aus */
+.sidebar::before,
+.card::before,
+.card::after,
+.stat-card::before,
+.stat-card::after,
+.doc-card::before,
+.doc-card::after,
+.quick-card::before,
+.quick-card::after,
+.points-box::before,
+.points-box::after,
+.dashboard-hero::before,
+.hero-card::before,
+.welcome-card::before,
+.admin-glow::before,
+.md-small-entry-card::before,
+.md-exam-form-card::before,
+.login-card::before,
+.auth-card::before,
+button::after,
+.open-doc-btn::after,
+.danger-btn::after {
+    display: none !important;
+}
+
+/* Hover smooth aber nicht laggy */
+.card:hover,
+.stat-card:hover,
+.doc-card:hover,
+.quick-card:hover,
+.points-box:hover,
+.admin-member-row:hover,
+.leaderboard-row:hover,
+.sheet-table-row-clean:hover,
+.sidebar nav a:hover {
+    transform: none !important;
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.28) !important;
+    border-color: rgba(96, 165, 250, 0.24) !important;
+}
+
+button:hover,
+.open-doc-btn:hover,
+.danger-btn:hover {
+    transform: none !important;
+    filter: brightness(1.06) !important;
+}
+
+/* Inputs clean */
+input,
+select,
+textarea {
+    background: rgba(2, 6, 23, 0.78) !important;
+    border: 1px solid rgba(148, 163, 184, 0.18) !important;
+    color: #ffffff !important;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+    border-color: rgba(96, 165, 250, 0.55) !important;
+    box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.16) !important;
+}
+
+/* Karten weiter pro, aber leicht */
+.card,
+.stat-card,
+.doc-card,
+.quick-card,
+.points-box {
+    border-radius: 22px !important;
+}
+
+.card-header {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.07) !important;
+}
+
+.page-header h1 {
+    filter: none !important;
+    text-shadow: none !important;
+}
+
+/* Tabellen/List schnell */
+.admin-member-row,
+.leaderboard-row,
+.sheet-table-row-clean {
+    background: rgba(15, 23, 42, 0.72) !important;
+}
+
+/* Mobile extra smooth */
+@media (max-width: 900px) {
+    .sidebar,
+    .card,
+    .stat-card,
+    .doc-card,
+    .quick-card,
+    .points-box,
+    .clean-panel {
+        box-shadow: 0 8px 20px rgba(0,0,0,0.20) !important;
+    }
+
+    .stats-grid,
+    .dashboard-grid,
+    .docs-grid,
+    .quick-grid,
+    .points-admin-grid {
+        grid-template-columns: 1fr !important;
+    }
+}
