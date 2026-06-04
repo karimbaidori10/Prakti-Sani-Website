@@ -23,6 +23,10 @@ let logsCollection;
 const discordMemberCache = new Map();
 const DISCORD_CACHE_TIME = 1000 * 60 * 10;
 
+let pointsListCache = null;
+let pointsListCacheTime = 0;
+const POINTS_LIST_CACHE_TIME = 1000 * 30;
+
 const ADMIN_ROLE_ID = process.env.ADMIN_ROLE_ID;
 const PRAKTI_SANI_ROLE_ID = process.env.PRAKTI_SANI_ROLE_ID;
 const ROLE_TESTPHASE = process.env.PRAKTI_SANI_ROLE_ID;
@@ -450,6 +454,10 @@ async function addLog(action, data = {}, actor = null) {
 }
 
 async function getAllPoints() {
+    if (pointsListCache && Date.now() - pointsListCacheTime < POINTS_LIST_CACHE_TIME) {
+        return pointsListCache;
+    }
+
     const users = await pointsCollection.find({}).sort({ points: -1 }).toArray();
 
     const enrichedUsers = await Promise.all(users.map(async (user) => {
@@ -484,7 +492,10 @@ if (
         };
     }));
 
-    return enrichedUsers;
+    pointsListCache = enrichedUsers;
+pointsListCacheTime = Date.now();
+
+return enrichedUsers;
 }
 // =====================
 // LOGIN
@@ -653,7 +664,9 @@ app.post("/points/add", requireLogin, requireAdmin, async (req, res) => {
 
     await addLog("Punkte hinzugefuegt", { userId, amount }, req.session.user);
 
-    res.redirect("/admin");
+pointsListCache = null;
+
+res.redirect("/admin");
 });
 
 app.post("/points/remove", requireLogin, requireAdmin, async (req, res) => {
@@ -676,7 +689,9 @@ app.post("/points/remove", requireLogin, requireAdmin, async (req, res) => {
 
     await addLog("Punkte entfernt", { userId, amount }, req.session.user);
 
-    res.redirect("/admin");
+pointsListCache = null;
+
+res.redirect("/admin");
 });
 
 app.post("/points/set", requireLogin, requireAdmin, async (req, res) => {
@@ -695,7 +710,9 @@ app.post("/points/set", requireLogin, requireAdmin, async (req, res) => {
 
     await addLog("Punkte gesetzt", { userId, amount }, req.session.user);
 
-    res.redirect("/admin");
+pointsListCache = null;
+
+res.redirect("/admin");
 });
 
 // =====================
