@@ -1,4 +1,4 @@
-ï»¿
+
 require("dotenv").config();
 
 const express = require("express");
@@ -21,7 +21,8 @@ const {
     Events,
     ModalBuilder,
     TextInputBuilder,
-    TextInputStyle
+    TextInputStyle,
+    MessageFlags
 } = require("discord.js");
 
 const app = express();
@@ -289,22 +290,22 @@ async function sendSpontanePruefungenPanel() {
     const channel = await botClient.channels.fetch(process.env.SPONTANE_PRUEFUNGEN_CHANNEL_ID);
 
     if (!channel) {
-        console.log("Spontane PrÃ¼fungen Channel nicht gefunden");
+        console.log("Spontane Prüfungen Channel nicht gefunden");
         return;
     }
 
     const embed = new EmbedBuilder()
         .setColor(0x2563eb)
-        .setTitle("ğŸš‘ Spontane PrÃ¼fung eintragen")
+        .setTitle("?? Spontane Prüfung eintragen")
         .setDescription(
-            "WÃ¤hle zuerst die PrÃ¼fungsart aus.\n\n" +
-            "Klicke danach auf **Antrag erstellen** und trage im Fenster die **DN** und den **Namen** des PrÃ¼flings ein.\n\n" +
-            "AnschlieÃŸend wartet der Antrag auf die Entscheidung der Leitung."
+            "Wähle zuerst die Prüfungsart aus.\n\n" +
+            "Klicke danach auf **Antrag erstellen** und trage im Fenster die **DN** und den **Namen** des Prüflings ein.\n\n" +
+            "Anschließend wartet der Antrag auf die Entscheidung der Leitung."
         )
         .addFields(
             {
                 name: "Schritt 1",
-                value: "PrÃ¼fungsart auswÃ¤hlen.",
+                value: "Prüfungsart auswählen.",
                 inline: true
             },
             {
@@ -352,64 +353,64 @@ async function addLog(action, data = {}, actor = null) {
             "Unbekannt";
 
         let title = "LSMD Dashboard";
-        let description = `${actorName} hat eine Aktion ausgefÃ¼hrt.`;
+        let description = `${actorName} hat eine Aktion ausgeführt.`;
         let color = 3447003;
-        let emoji = "ğŸ“Œ";
+        let emoji = "??";
 
         if (action === "Login") {
             title = "Login";
             description = `${actorName} hat sich im LSMD Dashboard eingeloggt.`;
             color = 5763719;
-            emoji = "ğŸ”";
+            emoji = "??";
         }
 
         if (action === "Ausbildungstermin erstellt") {
             title = "Ausbildungstermin erstellt";
             description = `${actorName} hat einen neuen Ausbildungstermin eingetragen.`;
             color = 3447003;
-            emoji = "ğŸ“…";
+            emoji = "??";
         }
 
         if (action === "Ausbildungstermin bearbeitet") {
             title = "Ausbildungstermin bearbeitet";
             description = `${actorName} hat einen Ausbildungstermin bearbeitet.`;
             color = 16705372;
-            emoji = "ğŸ› ï¸";
+            emoji = "???";
         }
 
         if (action === "Termin geloescht") {
-            title = "Ausbildungstermin gelÃ¶scht";
-            description = `${actorName} hat einen Ausbildungstermin gelÃ¶scht.`;
+            title = "Ausbildungstermin gelöscht";
+            description = `${actorName} hat einen Ausbildungstermin gelöscht.`;
             color = 15158332;
-            emoji = "ğŸ—‘ï¸";
+            emoji = "???";
         }
 
         if (action === "Dokument hinzugefuegt") {
-            title = "Dokument hinzugefÃ¼gt";
-            description = `${actorName} hat ein neues Dokument hinzugefÃ¼gt.`;
+            title = "Dokument hinzugefügt";
+            description = `${actorName} hat ein neues Dokument hinzugefügt.`;
             color = 3066993;
-            emoji = "ğŸ“„";
+            emoji = "??";
         }
 
         if (action === "Dokument bearbeitet") {
             title = "Dokument bearbeitet";
             description = `${actorName} hat ein Dokument bearbeitet.`;
             color = 16705372;
-            emoji = "âœï¸";
+            emoji = "??";
         }
 
         if (action === "Dokument geloescht") {
-            title = "Dokument gelÃ¶scht";
-            description = `${actorName} hat ein Dokument gelÃ¶scht.`;
+            title = "Dokument gelöscht";
+            description = `${actorName} hat ein Dokument gelöscht.`;
             color = 15158332;
-            emoji = "ğŸ—‘ï¸";
+            emoji = "???";
         }
 
         if (action === "Punkte hinzugefuegt" || action === "Punkte entfernt" || action === "Punkte gesetzt") {
             title = "Punkteverwaltung";
-            description = `${actorName} hat Punkte im Dashboard geÃ¤ndert.`;
+            description = `${actorName} hat Punkte im Dashboard geändert.`;
             color = 10181046;
-            emoji = "ğŸ†";
+            emoji = "??";
         }
 
         const fields = [];
@@ -464,7 +465,7 @@ async function addLog(action, data = {}, actor = null) {
 
         if (data.examiner) {
             fields.push({
-                name: "Ausbilder / PrÃ¼fer",
+                name: "Ausbilder / Prüfer",
                 value: String(data.examiner),
                 inline: true
             });
@@ -487,7 +488,7 @@ async function addLog(action, data = {}, actor = null) {
         }
 
         fields.push({
-            name: "AusgefÃ¼hrt von",
+            name: "Ausgeführt von",
             value: actorId ? `<@${actorId}>` : actorName,
             inline: true
         });
@@ -604,8 +605,8 @@ botClient.on(Events.InteractionCreate, async (interaction) => {
 
         if (!isDiscordAdmin(interaction)) {
             return interaction.reply({
-                content: "Du hast keine Berechtigung fÃ¼r dieses PrÃ¼fungs-Panel.",
-                ephemeral: true
+                content: "Du hast keine Berechtigung für dieses Prüfungs-Panel.",
+                flags: MessageFlags.Ephemeral
             });
         }
 
@@ -621,8 +622,8 @@ botClient.on(Events.InteractionCreate, async (interaction) => {
             });
 
             return interaction.reply({
-                content: `PrÃ¼fungsart ausgewÃ¤hlt: **${examType}**. Klicke jetzt auf **Antrag erstellen**.`,
-                ephemeral: true
+                content: `Prüfungsart ausgewählt: **${examType}**. Klicke jetzt auf **Antrag erstellen**.`,
+                flags: MessageFlags.Ephemeral
             });
         }
 
@@ -631,8 +632,8 @@ botClient.on(Events.InteractionCreate, async (interaction) => {
 
             if (!state || !state.examType) {
                 return interaction.reply({
-                    content: "Bitte zuerst die PrÃ¼fungsart auswÃ¤hlen.",
-                    ephemeral: true
+                    content: "Bitte zuerst die Prüfungsart auswählen.",
+                    flags: MessageFlags.Ephemeral
                 });
             }
 
@@ -644,11 +645,11 @@ botClient.on(Events.InteractionCreate, async (interaction) => {
 
             const modal = new ModalBuilder()
                 .setCustomId("spontan_submit_modal")
-                .setTitle("Spontane PrÃ¼fung eintragen");
+                .setTitle("Spontane Prüfung eintragen");
 
             const dnInput = new TextInputBuilder()
                 .setCustomId("pruefling_dn")
-                .setLabel("DN des PrÃ¼flings")
+                .setLabel("DN des Prüflings")
                 .setStyle(TextInputStyle.Short)
                 .setRequired(true)
                 .setMaxLength(30)
@@ -656,7 +657,7 @@ botClient.on(Events.InteractionCreate, async (interaction) => {
 
             const nameInput = new TextInputBuilder()
                 .setCustomId("pruefling_name")
-                .setLabel("Name des PrÃ¼flings")
+                .setLabel("Name des Prüflings")
                 .setStyle(TextInputStyle.Short)
                 .setRequired(true)
                 .setMaxLength(80)
@@ -675,8 +676,8 @@ botClient.on(Events.InteractionCreate, async (interaction) => {
 
             if (!state || !state.examType) {
                 return interaction.reply({
-                    content: "Die PrÃ¼fungsart fehlt. Bitte Antrag nochmal neu erstellen.",
-                    ephemeral: true
+                    content: "Die Prüfungsart fehlt. Bitte Antrag nochmal neu erstellen.",
+                    flags: MessageFlags.Ephemeral
                 });
             }
 
@@ -687,14 +688,14 @@ botClient.on(Events.InteractionCreate, async (interaction) => {
 
             const embed = new EmbedBuilder()
                 .setColor(0xf59e0b)
-                .setTitle("ğŸ“‹ Neuer Antrag: Spontane PrÃ¼fung")
+                .setTitle("?? Neuer Antrag: Spontane Prüfung")
                 .setDescription(
-                    "Ein PrÃ¼fling wurde fÃ¼r eine spontane PrÃ¼fung eingetragen.\n\n" +
+                    "Ein Prüfling wurde für eine spontane Prüfung eingetragen.\n\n" +
                     "Die Leitung kann diesen Antrag jetzt genehmigen oder ablehnen."
                 )
                 .addFields(
                     {
-                        name: "PrÃ¼fling",
+                        name: "Prüfling",
                         value: `**${prueflingName}**`,
                         inline: true
                     },
@@ -704,7 +705,7 @@ botClient.on(Events.InteractionCreate, async (interaction) => {
                         inline: true
                     },
                     {
-                        name: "PrÃ¼fung",
+                        name: "Prüfung",
                         value: state.examType,
                         inline: true
                     },
@@ -715,24 +716,24 @@ botClient.on(Events.InteractionCreate, async (interaction) => {
                     },
                     {
                         name: "Status",
-                        value: "â³ Wartet auf Entscheidung der Leitung",
+                        value: "? Wartet auf Entscheidung der Leitung",
                         inline: false
                     }
                 )
-                .setFooter({ text: `LSMD Ausbildungssystem â€¢ Antrag #${requestId}` })
+                .setFooter({ text: `LSMD Ausbildungssystem • Antrag #${requestId}` })
                 .setTimestamp();
 
             const decisionRow = new ActionRowBuilder().addComponents(
                 new ButtonBuilder()
                     .setCustomId(`spontan_request_approve_${requestId}`)
                     .setLabel("Genehmigen")
-                    .setEmoji("âœ…")
+                    .setEmoji("?")
                     .setStyle(ButtonStyle.Success),
 
                 new ButtonBuilder()
                     .setCustomId(`spontan_request_reject_${requestId}`)
                     .setLabel("Ablehnen")
-                    .setEmoji("âŒ")
+                    .setEmoji("?")
                     .setStyle(ButtonStyle.Danger)
             );
 
@@ -766,14 +767,14 @@ botClient.on(Events.InteractionCreate, async (interaction) => {
                     });
                 }
             } catch (err) {
-                console.error("Panel konnte nicht zurÃ¼ckgesetzt werden:", err);
+                console.error("Panel konnte nicht zurückgesetzt werden:", err);
             }
 
             spontaneSelections.delete(adminId);
 
             return interaction.reply({
                 content: "Der Antrag wurde unten als neue Nachricht erstellt.",
-                ephemeral: true
+                flags: MessageFlags.Ephemeral
             });
         }
 
@@ -784,7 +785,7 @@ botClient.on(Events.InteractionCreate, async (interaction) => {
             if (!request || request.status !== "offen") {
                 return interaction.reply({
                     content: "Dieser Antrag wurde bereits bearbeitet oder nicht gefunden.",
-                    ephemeral: true
+                    flags: MessageFlags.Ephemeral
                 });
             }
 
@@ -793,11 +794,11 @@ botClient.on(Events.InteractionCreate, async (interaction) => {
 
             const embed = new EmbedBuilder()
                 .setColor(0x22c55e)
-                .setTitle("âœ… Spontane PrÃ¼fung genehmigt")
+                .setTitle("? Spontane Prüfung genehmigt")
                 .setDescription("Die Leitung hat den Antrag genehmigt.")
                 .addFields(
                     {
-                        name: "PrÃ¼fling",
+                        name: "Prüfling",
                         value: `**${request.targetName}**`,
                         inline: true
                     },
@@ -807,7 +808,7 @@ botClient.on(Events.InteractionCreate, async (interaction) => {
                         inline: true
                     },
                     {
-                        name: "PrÃ¼fung",
+                        name: "Prüfung",
                         value: request.examType,
                         inline: true
                     },
@@ -823,11 +824,11 @@ botClient.on(Events.InteractionCreate, async (interaction) => {
                     },
                     {
                         name: "Status",
-                        value: "âœ… Genehmigt",
+                        value: "? Genehmigt",
                         inline: false
                     }
                 )
-                .setFooter({ text: `LSMD Ausbildungssystem â€¢ Antrag #${requestId}` })
+                .setFooter({ text: `LSMD Ausbildungssystem • Antrag #${requestId}` })
                 .setTimestamp();
 
             await interaction.message.edit({
@@ -837,7 +838,7 @@ botClient.on(Events.InteractionCreate, async (interaction) => {
 
             return interaction.reply({
                 content: "Der Antrag wurde genehmigt.",
-                ephemeral: true
+                flags: MessageFlags.Ephemeral
             });
         }
 
@@ -848,21 +849,21 @@ botClient.on(Events.InteractionCreate, async (interaction) => {
             if (!request || request.status !== "offen") {
                 return interaction.reply({
                     content: "Dieser Antrag wurde bereits bearbeitet oder nicht gefunden.",
-                    ephemeral: true
+                    flags: MessageFlags.Ephemeral
                 });
             }
 
             const modal = new ModalBuilder()
                 .setCustomId(`spontan_reject_modal_${requestId}`)
-                .setTitle("Spontane PrÃ¼fung ablehnen");
+                .setTitle("Spontane Prüfung ablehnen");
 
             const reasonInput = new TextInputBuilder()
                 .setCustomId("reject_reason")
-                .setLabel("Grund fÃ¼r die Ablehnung")
+                .setLabel("Grund für die Ablehnung")
                 .setStyle(TextInputStyle.Paragraph)
                 .setRequired(true)
                 .setMaxLength(500)
-                .setPlaceholder("z.B. Voraussetzungen fehlen, RÃ¼cksprache nÃ¶tig, falscher Zeitpunkt...");
+                .setPlaceholder("z.B. Voraussetzungen fehlen, Rücksprache nötig, falscher Zeitpunkt...");
 
             modal.addComponents(
                 new ActionRowBuilder().addComponents(reasonInput)
@@ -878,7 +879,7 @@ botClient.on(Events.InteractionCreate, async (interaction) => {
             if (!request || request.status !== "offen") {
                 return interaction.reply({
                     content: "Dieser Antrag wurde bereits bearbeitet oder nicht gefunden.",
-                    ephemeral: true
+                    flags: MessageFlags.Ephemeral
                 });
             }
 
@@ -893,11 +894,11 @@ botClient.on(Events.InteractionCreate, async (interaction) => {
 
             const embed = new EmbedBuilder()
                 .setColor(0xef233c)
-                .setTitle("âŒ Spontane PrÃ¼fung abgelehnt")
+                .setTitle("? Spontane Prüfung abgelehnt")
                 .setDescription("Die Leitung hat den Antrag abgelehnt.")
                 .addFields(
                     {
-                        name: "PrÃ¼fling",
+                        name: "Prüfling",
                         value: `**${request.targetName}**`,
                         inline: true
                     },
@@ -907,7 +908,7 @@ botClient.on(Events.InteractionCreate, async (interaction) => {
                         inline: true
                     },
                     {
-                        name: "PrÃ¼fung",
+                        name: "Prüfung",
                         value: request.examType,
                         inline: true
                     },
@@ -928,11 +929,11 @@ botClient.on(Events.InteractionCreate, async (interaction) => {
                     },
                     {
                         name: "Status",
-                        value: "âŒ Abgelehnt",
+                        value: "? Abgelehnt",
                         inline: false
                     }
                 )
-                .setFooter({ text: `LSMD Ausbildungssystem â€¢ Antrag #${requestId}` })
+                .setFooter({ text: `LSMD Ausbildungssystem • Antrag #${requestId}` })
                 .setTimestamp();
 
             await requestMessage.edit({
@@ -942,16 +943,16 @@ botClient.on(Events.InteractionCreate, async (interaction) => {
 
             return interaction.reply({
                 content: "Der Antrag wurde abgelehnt und der Grund wurde eingetragen.",
-                ephemeral: true
+                flags: MessageFlags.Ephemeral
             });
         }
     } catch (err) {
-        console.error("Fehler bei Spontane-PrÃ¼fungen Interaction:", err);
+        console.error("Fehler bei Spontane-Prüfungen Interaction:", err);
 
         if (!interaction.replied && !interaction.deferred) {
             await interaction.reply({
                 content: "Es ist ein Fehler aufgetreten.",
-                ephemeral: true
+                flags: MessageFlags.Ephemeral
             });
         }
     }
@@ -1109,7 +1110,7 @@ app.get("/admin", requireLogin, requireAdmin, async (req, res) => {
 app.post("/admin/spontane-panel", requireLogin, requireAdmin, async (req, res) => {
     await sendSpontanePruefungenPanel();
 
-    await addLog("Spontane PrÃ¼fungen Panel gesendet", {
+    await addLog("Spontane Prüfungen Panel gesendet", {
         channelId: process.env.SPONTANE_PRUEFUNGEN_CHANNEL_ID
     }, req.session.user);
 
@@ -1122,12 +1123,12 @@ function buildSpontanePanelComponents() {
     const typeRow = new ActionRowBuilder().addComponents(
         new StringSelectMenuBuilder()
             .setCustomId(`spontan_type_${resetId}`)
-            .setPlaceholder("PrÃ¼fungsart auswÃ¤hlen")
+            .setPlaceholder("Prüfungsart auswählen")
             .addOptions(
                 {
-                    label: "SanitÃ¤ter PrÃ¼fung",
-                    value: "SanitÃ¤ter PrÃ¼fung",
-                    emoji: "ğŸš‘"
+                    label: "Sanitäter Prüfung",
+                    value: "Sanitäter Prüfung",
+                    emoji: "??"
                 }
             )
     );
@@ -1136,7 +1137,7 @@ function buildSpontanePanelComponents() {
         new ButtonBuilder()
             .setCustomId("spontan_submit")
             .setLabel("Antrag erstellen")
-            .setEmoji("ğŸ“¨")
+            .setEmoji("??")
             .setStyle(ButtonStyle.Primary)
     );
 
