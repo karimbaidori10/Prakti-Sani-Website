@@ -54,7 +54,8 @@ const ROLE_LEITUNG = process.env.ROLE_LEITUNG;
 
 const botClient = new Client({
     intents: [
-        GatewayIntentBits.Guilds
+        GatewayIntentBits.Guilds,
+        GatewayIntentBits.GuildMembers
     ]
 });
 
@@ -587,6 +588,100 @@ async function getAllPoints() {
     pointsListCacheTime = Date.now();
 
     return enrichedUsers;
+}
+
+let teamListUpdateTimer = null;
+
+function scheduleTeamListUpdate() {
+    clearTimeout(teamListUpdateTimer);
+
+    teamListUpdateTimer = setTimeout(() => {
+        updateTeamListMessage().catch((err) => {
+            console.error("Teamliste konnte nicht aktualisiert werden:", err);
+        });
+    }, 2500);
+}
+
+function hasRole(member, roleId) {
+    return roleId && member.roles.cache.has(roleId);
+}
+
+function memberLine(member) {
+    return `<@${member.id}>`;
+}
+
+function buildRoleGroup(title, members) {
+    if (!members || members.length === 0) {
+        return `**${title}**\n-\n`;
+    }
+
+    return `**${title}**\n${members.map(memberLine).join(",\n")}\n`;
+}
+
+async function updateTeamListMessage() {
+    if (!process.env.TEAM_LIST_CHANNEL_ID) {
+        console.log("TEAM_LIST_CHANNEL_ID fehlt");
+        return;
+    }
+
+    const guild = await botClient.guilds.fetch(process.env.DISCORD_GUILD_ID);
+    await guild.members.fetch();
+
+    const allMembers = Array.from(guild.members.cache.values())
+        .filter(member => !member.user.bot);
+
+    const head = allMembers.filter(member => hasRole(member, process.env.ROLE_HEAD_PRAKTI_SANI));
+    const leitung = allMembers.filter(member => hasRole(member, process.env.ROLE_LEITUNG));
+    const stvLeitung = allMembers.filter(member => hasRole(member, process.env.ROLE_STV_LEITUNG));
+    const untereLeitung = allMembers.filter(member => hasRole(member, process.env.ROLE_UNTERE_LEITUNG));
+    const seniorAusbilder = allMembers.filter(member => hasRole(member, process.env.ROLE_SENIOR));
+    const festeMitarbeiter = allMembers.filter(member => hasRole(member, process.env.ROLE_FESTES_MITGLIED));
+    const testphase = allMembers.filter(member => hasRole(member, process.env.ROLE_TESTPHASE));
+    const aushilfen = allMembers.filter(member => hasRole(member, process.env.ROLE_AUSHILFE));
+
+    const text =
+        "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n" +
+        "**Aktuelles Team**\n\n" +
+
+        buildRoleGroup("Head of Prakti-Sani", head) + "\n" +
+        buildRoleGroup("Prakti-Sani Leitung", leitung) + "\n" +
+        buildRoleGroup("Prakti-Sani Stv. Leitung", stvLeitung) + "\n" +
+        buildRoleGroup("Prakti-Sani Untere Leitung", untereLeitung) + "\n" +
+        buildRoleGroup("Prakti-Sani Sr. Ausbilder", seniorAusbilder) + "\n" +
+        buildRoleGroup("Prakti-Sani feste Mitarbeiter", festeMitarbeiter) + "\n" +
+        buildRoleGroup("Prakti-Sani Testphase", testphase) + "\n" +
+        buildRoleGroup("Prakti-Sani Aushilfen", aushilfen) + "\n" +
+
+        "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━";
+
+    const channel = await botClient.channels.fetch(process.env.TEAM_LIST_CHANNEL_ID);
+
+    if (!channel) {
+        console.log("Teamliste Channel nicht gefunden");
+        return;
+    }
+
+    if (process.env.TEAM_LIST_MESSAGE_ID) {
+        const message = await channel.messages.fetch(process.env.TEAM_LIST_MESSAGE_ID);
+        await message.edit({
+            content: text,
+            allowedMentions: {
+                parse: []
+            }
+        });
+
+        console.log("Teamliste aktualisiert");
+        return;
+    }
+
+    const message = await channel.send({
+        content: text,
+        allowedMentions: {
+            parse: []
+        }
+    });
+
+    console.log("TEAM_LIST_MESSAGE_ID bitte in Railway eintragen:", message.id);
 }
 
 botClient.on(Events.InteractionCreate, async (interaction) => {
