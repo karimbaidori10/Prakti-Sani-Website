@@ -6,6 +6,7 @@ const expressLayouts = require("express-ejs-layouts");
 const session = require("express-session");
 const { MongoClient, ObjectId } = require("mongodb");
 const passport = require("passport");
+const compression = require("compression");
 const DiscordStrategy = require("passport-discord").Strategy;
 
 const app = express();
@@ -33,9 +34,15 @@ app.set("view engine", "ejs");
 app.use(expressLayouts);
 app.set("layout", "layout");
 
+app.use(compression());
+
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
-app.use(express.static("public"));
+
+app.use(express.static("public", {
+    maxAge: "7d",
+    etag: true
+}));
 
 app.use(session({
     secret: process.env.SESSION_SECRET || "lsmd-dashboard-secret",
