@@ -1,240 +1,312 @@
 ﻿<%
-const allTermine = Array.isArray(termine) ? termine : [];
+    const allTermine = termine || [];
 
-function formatDate(dateValue) {
-    if (!dateValue) return "-";
-
-    const date = new Date(dateValue + "T00:00:00");
-
-    if (isNaN(date.getTime())) {
-        return dateValue;
+    function parseDate(value) {
+        if (!value) return null;
+        return new Date(value + "T00:00:00");
     }
 
-    return date.toLocaleDateString("de-DE");
-}
+    function getWeekNumber(date) {
+        if (!date || isNaN(date)) return "-";
+        const tempDate = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
+        const dayNum = tempDate.getUTCDay() || 7;
+        tempDate.setUTCDate(tempDate.getUTCDate() + 4 - dayNum);
+        const yearStart = new Date(Date.UTC(tempDate.getUTCFullYear(), 0, 1));
+        return Math.ceil((((tempDate - yearStart) / 86400000) + 1) / 7);
+    }
 
-const saniCount = allTermine.filter(t => t.examType === "Sanitaeter-Pruefung").length;
-const fahrCount = allTermine.filter(t => t.examType === "Darf alleine fahren").length;
+    function formatDate(value) {
+        const date = parseDate(value);
+        if (!date || isNaN(date)) return "-";
+
+        const day = String(date.getDate()).padStart(2, "0");
+        const month = String(date.getMonth() + 1).padStart(2, "0");
+        const year = date.getFullYear();
+
+        return day + "." + month + "." + year;
+    }
+
+    function getDayName(value) {
+        const date = parseDate(value);
+        if (!date || isNaN(date)) return "-";
+
+        const days = ["Sonntag", "Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag", "Samstag"];
+        return days[date.getDay()];
+    }
+
+    const groupedWeeks = {};
+
+    allTermine.forEach((item) => {
+        const itemDate = parseDate(item.date);
+        const year = itemDate && !isNaN(itemDate) ? itemDate.getFullYear() : "Unbekannt";
+        const week = "KW " + getWeekNumber(itemDate) + " / " + year;
+
+        if (!groupedWeeks[week]) {
+            groupedWeeks[week] = [];
+        }
+
+        groupedWeeks[week].push(item);
+    });
+
+    const weekKeys = Object.keys(groupedWeeks);
+
+    const ausbilderStats = {};
+
+    allTermine.forEach((item) => {
+        const name = item.examiner || "Nicht eingetragen";
+
+        if (!ausbilderStats[name]) {
+            ausbilderStats[name] = 0;
+        }
+
+        ausbilderStats[name]++;
+    });
+
+    const ausbilderList = Object.entries(ausbilderStats);
+
+    const saniCount = allTermine.filter(t => t.examType === "Sanitaeter-Pruefung").length;
+    const fahrCount = allTermine.filter(t => t.examType === "Darf alleine fahren").length;
 %>
 
-<section class="page-header sheet-hero">
+<div class="page-header sheet-hero">
     <div>
         <h1>Ausbildungstermine</h1>
-        <p>Verwalte Sanitäter-Prüfungen und Fahrfreigaben.</p>
+        <p>MD-System f&uuml;r Fahrfreigaben, Sanit&auml;ter-Pr&uuml;fungen und Ausbildungsdokumentation.</p>
     </div>
 
     <div class="sheet-hero-count">
         <strong><%= allTermine.length %></strong>
-        <span>Einträge</span>
+        <span>Eintr&auml;ge</span>
     </div>
+</div>
+
+<section class="card md-small-entry-card admin-glow">
+    <div class="card-header">
+        <div>
+            <h2>Neuen Eintrag erstellen</h2>
+            <p class="card-subtitle">Schnell-Eingabe f&uuml;r Ausbilder und Leitung.</p>
+        </div>
+
+        <span class="chip blue">Eintragen</span>
+    </div>
+
+    <form method="POST" action="/termine/create" class="md-small-form">
+        <input name="name" placeholder="Name des Teilnehmers" required>
+
+        <select name="examType" required>
+            <option value="">Art w&auml;hlen</option>
+            <option value="Darf alleine fahren">Darf alleine fahren</option>
+            <option value="Sanitaeter-Pruefung">Sanit&auml;ter-Pr&uuml;fung</option>
+        </select>
+
+        <input type="date" name="date" required>
+        <input type="time" name="time">
+
+        <input name="examiner" placeholder="Ausbilder / Pr&uuml;fer" required>
+
+        <textarea name="notes" placeholder="Notiz optional"></textarea>
+
+        <button type="submit">Eintrag speichern</button>
+    </form>
 </section>
 
 <section class="stats-grid">
     <div class="stat-card stat-blue">
-        <div class="stat-icon">🚑</div>
+        <div class="stat-icon">📋</div>
         <div>
-            <h2><%= saniCount %></h2>
-            <p>Sanitäter-Prüfungen</p>
+            <h2><%= allTermine.length %></h2>
+            <strong>Gesamt</strong>
+            <p>Dokumentierte Eintr&auml;ge</p>
         </div>
     </div>
 
     <div class="stat-card stat-green">
-        <div class="stat-icon">🚗</div>
+        <div class="stat-icon">🚑</div>
         <div>
-            <h2><%= fahrCount %></h2>
-            <p>Fahrfreigaben</p>
+            <h2><%= saniCount %></h2>
+            <strong>Sanit&auml;ter</strong>
+            <p>Sanit&auml;ter-Pr&uuml;fungen</p>
         </div>
     </div>
 
     <div class="stat-card stat-yellow">
-        <div class="stat-icon">📅</div>
+        <div class="stat-icon">🚗</div>
         <div>
-            <h2><%= allTermine.length %></h2>
-            <p>Gesamt</p>
+            <h2><%= fahrCount %></h2>
+            <strong>Fahrfreigaben</strong>
+            <p>Darf alleine fahren</p>
         </div>
     </div>
 
     <div class="stat-card stat-red">
-        <div class="stat-icon">⚡</div>
+        <div class="stat-icon">👨‍🏫</div>
         <div>
-            <h2>Live</h2>
-            <p>Status</p>
+            <h2><%= ausbilderList.length %></h2>
+            <strong>Ausbilder</strong>
+            <p>Aktive Ausbilder</p>
         </div>
     </div>
 </section>
 
 <section class="sheet-layout">
-    <div class="card clean-panel">
+    <div class="card sheet-main">
         <div class="card-header">
             <div>
-                <h2>Einträge</h2>
-                <p class="card-subtitle">Alle geplanten Ausbildungstermine.</p>
+                <h2>Wochen-Dokumentation</h2>
+                <p class="card-subtitle">Alle Eintr&auml;ge werden automatisch nach Kalenderwoche sortiert.</p>
             </div>
 
-            <span class="chip blue"><%= allTermine.length %> Termine</span>
+            <span class="chip blue"><%= allTermine.length %> Eintr&auml;ge</span>
         </div>
-
-        <% if (allTermine.length > 0) { %>
-            <div class="pro-searchbar">
-                <input
-                    type="text"
-                    id="terminSearch"
-                    placeholder="Eintrag suchen..."
-                    autocomplete="off"
-                >
-
-                <select id="terminFilter">
-                    <option value="all">Alle Arten</option>
-                    <option value="sani">Sanitäter-Prüfung</option>
-                    <option value="fahr">Fahrfreigabe</option>
-                </select>
-            </div>
-        <% } %>
 
         <% if (allTermine.length === 0) { %>
             <div class="empty-state">
                 <div>📅</div>
-                <h3>Keine Termine vorhanden</h3>
-                <p>Erstelle rechts einen neuen Ausbildungstermin.</p>
+                <h3>Keine Ausbildungstermine vorhanden</h3>
+                <p>Trage oben den ersten Eintrag ein.</p>
             </div>
         <% } else { %>
-            <div class="training-board">
-                <% allTermine.forEach((termin, index) => { %>
-                    <div
-                        class="training-entry termin-filter-row"
-                        data-search="<%= [
-                            termin.name || '',
-                            termin.examType || '',
-                            termin.date || '',
-                            termin.time || '',
-                            termin.examiner || '',
-                            termin.notes || ''
-                        ].join(' ').toLowerCase() %>"
-                        data-type="<%= termin.examType === 'Darf alleine fahren' ? 'fahr' : 'sani' %>"
-                    >
-                        <div class="training-number">
-                            <span>#</span>
-                            <strong><%= index + 1 %></strong>
+
+            <div class="sheet-week-list">
+                <% weekKeys.forEach((week) => { %>
+                    <div class="sheet-week-card">
+                        <div class="sheet-week-header">
+                            <h3><%= week %></h3>
+                            <span><%= groupedWeeks[week].length %> Eintrag(e)</span>
                         </div>
 
-                        <div class="training-date-box">
-                            <span>Datum</span>
-                            <strong><%= formatDate(termin.date) %></strong>
-                            <small><%= termin.time || "-" %></small>
+                        <div class="sheet-table">
+                            <div class="sheet-table-head sheet-table-head-clean">
+                                <span>Wochentag</span>
+                                <span>Datum</span>
+                                <span>Uhrzeit</span>
+                                <span>Teilnehmer</span>
+                                <span>Ausbilder</span>
+                                <span>Art</span>
+                            </div>
+
+                            <% groupedWeeks[week].forEach((termin) => { %>
+                                <div class="sheet-table-row sheet-table-row-clean">
+                                    <div>
+                                        <small>Wochentag</small>
+                                        <strong><%= getDayName(termin.date) %></strong>
+                                    </div>
+
+                                    <div>
+                                        <small>Datum</small>
+                                        <strong><%= formatDate(termin.date) %></strong>
+                                    </div>
+
+                                    <div>
+                                        <small>Uhrzeit</small>
+                                        <strong><%= termin.time || "--:--" %></strong>
+                                    </div>
+
+                                    <div>
+                                        <small>Teilnehmer</small>
+                                        <strong><%= termin.name || "Unbekannt" %></strong>
+                                    </div>
+
+                                    <div>
+                                        <small>Ausbilder</small>
+                                        <strong><%= termin.examiner || "-" %></strong>
+                                    </div>
+
+                                    <div>
+                                        <small>Art</small>
+                                        <% if (termin.examType === "Darf alleine fahren") { %>
+                                            <span class="badge blue">Fahrfreigabe</span>
+                                        <% } else { %>
+                                            <span class="badge success">Sanit&auml;ter</span>
+                                        <% } %>
+                                    </div>
+
+                                    <% if (termin.notes) { %>
+                                        <div class="sheet-note">
+                                            <small>Notiz</small>
+                                            <p><%= termin.notes %></p>
+                                        </div>
+                                    <% } %>
+
+                                    <% if (isAdmin) { %>
+                                        <div class="sheet-actions">
+                                            <a href="/termine/edit/<%= termin._id %>" class="open-doc-btn">
+                                                Bearbeiten
+                                            </a>
+
+                                            <form method="POST" action="/termine/delete/<%= termin._id %>">
+                                                <button type="submit" class="danger-btn" onclick="return confirm('Eintrag wirklich l&ouml;schen?');">
+                                                    L&ouml;schen
+                                                </button>
+                                            </form>
+                                        </div>
+                                    <% } %>
+                                </div>
+                            <% }) %>
+                        </div>
+                    </div>
+                <% }) %>
+            </div>
+
+        <% } %>
+    </div>
+
+    <div class="card sheet-side">
+        <div class="card-header">
+            <div>
+                <h2>Ausbilder</h2>
+                <p class="card-subtitle">Eintr&auml;ge nach Ausbilder.</p>
+            </div>
+            <span class="chip green">Team</span>
+        </div>
+
+        <% if (ausbilderList.length === 0) { %>
+            <div class="empty-state">
+                <div>👨‍🏫</div>
+                <h3>Keine Ausbilder vorhanden</h3>
+                <p>Sobald Eintr&auml;ge erstellt werden, erscheint hier die Ausbilder-&Uuml;bersicht.</p>
+            </div>
+        <% } else { %>
+            <div class="trainer-list">
+                <% ausbilderList.forEach(([name, count]) => { %>
+                    <div class="trainer-row">
+                        <div class="trainer-avatar">
+                            <%= name.charAt(0).toUpperCase() %>
                         </div>
 
-                        <div class="training-content">
-                            <div class="training-topline">
-                                <h3><%= termin.name || "Unbekannt" %></h3>
-
-                                <% if (termin.examType === "Darf alleine fahren") { %>
-                                    <span class="badge blue">Fahrfreigabe</span>
-                                <% } else { %>
-                                    <span class="badge success">Sanitäter-Prüfung</span>
-                                <% } %>
-                            </div>
-
-                            <div class="training-info-grid">
-                                <div>
-                                    <span>Art</span>
-                                    <strong>
-                                        <%= termin.examType === "Sanitaeter-Pruefung" ? "Sanitäter-Prüfung" : termin.examType %>
-                                    </strong>
-                                </div>
-
-                                <div>
-                                    <span>Ausbilder / Prüfer</span>
-                                    <strong><%= termin.examiner || "-" %></strong>
-                                </div>
-
-                                <div>
-                                    <span>Status</span>
-                                    <strong><%= termin.status || "Offen" %></strong>
-                                </div>
-
-                                <div>
-                                    <span>Quelle</span>
-                                    <strong><%= termin.source || "Website" %></strong>
-                                </div>
-                            </div>
-
-                            <% if (termin.notes) { %>
-                                <div class="training-note-box">
-                                    <span>Notiz</span>
-                                    <p><%= termin.notes %></p>
-                                </div>
-                            <% } %>
+                        <div>
+                            <strong><%= name %></strong>
+                            <span><%= count %> Eintrag(e)</span>
                         </div>
-
-                        <% if (isAdmin) { %>
-                            <div class="training-actions">
-                                <a class="mini-btn" href="/termine/edit/<%= termin._id %>">Bearbeiten</a>
-
-                                <form method="POST" action="/termine/delete/<%= termin._id %>">
-                                    <button class="danger-btn" type="submit">Löschen</button>
-                                </form>
-                            </div>
-                        <% } %>
                     </div>
                 <% }) %>
             </div>
         <% } %>
-    </div>
 
-    <% if (isAdmin) { %>
-        <aside class="card clean-panel training-doc-side">
-            <div class="card-header">
-                <div>
-                    <h2>Neuer Termin</h2>
-                    <p class="card-subtitle">Ausbildungstermin erstellen.</p>
-                </div>
+        <div class="clean-divider"></div>
+
+        <div class="sheet-help">
+            <h3>System</h3>
+            <p>Pr&uuml;fungen wurden entfernt. Alles wird direkt hier bei Ausbildungstermine eingetragen.</p>
+        </div>
+
+        <div class="clean-divider"></div>
+
+        <div class="clean-status-list">
+            <div>
+                <span>Sanit&auml;ter-Pr&uuml;fungen</span>
+                <strong><%= saniCount %></strong>
             </div>
 
-            <form class="form" method="POST" action="/termine/create">
-                <input type="text" name="name" placeholder="Name / Teilnehmer" required>
+            <div>
+                <span>Fahrfreigaben</span>
+                <strong><%= fahrCount %></strong>
+            </div>
 
-                <select name="examType" required>
-                    <option value="Sanitaeter-Pruefung">Sanitäter-Prüfung</option>
-                    <option value="Darf alleine fahren">Fahrfreigabe</option>
-                </select>
-
-                <input type="date" name="date" required>
-                <input type="time" name="time">
-                <input type="text" name="examiner" placeholder="Ausbilder / Prüfer" required>
-
-                <textarea name="notes" placeholder="Notiz optional"></textarea>
-
-                <button type="submit">Termin erstellen</button>
-            </form>
-        </aside>
-    <% } %>
+            <div>
+                <span>Kalenderwochen</span>
+                <strong><%= weekKeys.length %></strong>
+            </div>
+        </div>
+    </div>
 </section>
-
-<script>
-    const terminSearch = document.getElementById("terminSearch");
-    const terminFilter = document.getElementById("terminFilter");
-    const terminRows = Array.from(document.querySelectorAll(".termin-filter-row"));
-
-    function filterTermine() {
-        const query = (terminSearch?.value || "").toLowerCase().trim();
-        const filter = terminFilter?.value || "all";
-
-        terminRows.forEach(row => {
-            const searchText = row.dataset.search || "";
-            const type = row.dataset.type || "";
-
-            const matchesSearch = searchText.includes(query);
-            const matchesFilter = filter === "all" || type === filter;
-
-            row.style.display = matchesSearch && matchesFilter ? "" : "none";
-        });
-    }
-
-    if (terminSearch) {
-        terminSearch.addEventListener("input", filterTermine);
-    }
-
-    if (terminFilter) {
-        terminFilter.addEventListener("change", filterTermine);
-    }
-</script>
