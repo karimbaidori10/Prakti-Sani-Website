@@ -1183,17 +1183,6 @@ app.get("/users", requireLogin, async (req, res) => {
 });
 
 app.get("/termine", requireLogin, async (req, res) => {
-    const termine = await termineCollection.find({}).sort({ date: 1, time: 1 }).toArray();
-
-const selectedMonth = Number(req.query.month);
-const selectedYear = Number(req.query.year);
-
-const today = new Date();
-
-const calendarMonth = !isNaN(selectedMonth) ? selectedMonth : today.getMonth();
-const calendarYear = !isNaN(selectedYear) ? selectedYear : today.getFullYear();
-
-app.get("/termine", requireLogin, async (req, res) => {
     try {
         const termine = await termineCollection
             .find({})
