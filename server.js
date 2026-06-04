@@ -404,29 +404,15 @@ async function getAllPoints() {
         }
 
         await pointsCollection.updateOne(
-    { userId: req.user.id },
-    {
-        $set: {
-            userId: req.user.id,
-            displayName: req.user.username,
-            rank: req.user.rank
-        },
-        $setOnInsert: {
-            points: 0
-        }
-    },
-    { upsert: true }
-);
-
-await addLog("Login", {
-    userId: req.user.id,
-    name: req.user.username
-}, {
-    discordId: req.user.id,
-    username: req.user.username
-});
-
-res.redirect("/dashboard");
+            { userId: user.userId },
+            {
+                $set: {
+                    displayName: discordInfo.displayName,
+                    rank: discordInfo.rank,
+                    avatarUrl: discordInfo.avatarUrl
+                }
+            }
+        );
 
         return {
             ...user,
