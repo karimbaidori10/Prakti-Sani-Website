@@ -1,4 +1,4 @@
-<%
+﻿<%
     const allTermine = termine || [];
 
     function parseDate(value) {
@@ -68,21 +68,22 @@
     const fahrCount = allTermine.filter(t => t.examType === "Darf alleine fahren").length;
 %>
 
-const today = new Date();
+<%
+const safeToday = new Date();
 
 const selectedCalendarYear = typeof calendarYear !== "undefined"
     ? Number(calendarYear)
-    : today.getFullYear();
+    : safeToday.getFullYear();
 
 const selectedCalendarMonth = typeof calendarMonth !== "undefined"
     ? Number(calendarMonth)
-    : today.getMonth();
+    : safeToday.getMonth();
 
 const prevMonthDate = new Date(selectedCalendarYear, selectedCalendarMonth - 1, 1);
 const nextMonthDate = new Date(selectedCalendarYear, selectedCalendarMonth + 1, 1);
 
 const monthNames = [
-    "Januar", "Februar", "März", "April", "Mai", "Juni",
+    "Januar", "Februar", "MÃ¤rz", "April", "Mai", "Juni",
     "Juli", "August", "September", "Oktober", "November", "Dezember"
 ];
 
@@ -117,6 +118,7 @@ for (let i = 0; i < firstDayIndex; i++) {
 for (let day = 1; day <= daysInMonth; day++) {
     calendarCells.push(new Date(selectedCalendarYear, selectedCalendarMonth, day));
 }
+%>
 
 <div class="page-header sheet-hero">
     <div>
@@ -162,7 +164,7 @@ for (let day = 1; day <= daysInMonth; day++) {
 
 <section class="stats-grid">
     <div class="stat-card stat-blue">
-        <div class="stat-icon">📋</div>
+        <div class="stat-icon">ðŸ“‹</div>
         <div>
             <h2><%= allTermine.length %></h2>
             <strong>Gesamt</strong>
@@ -171,7 +173,7 @@ for (let day = 1; day <= daysInMonth; day++) {
     </div>
 
     <div class="stat-card stat-green">
-        <div class="stat-icon">🚑</div>
+        <div class="stat-icon">ðŸš‘</div>
         <div>
             <h2><%= saniCount %></h2>
             <strong>Sanit&auml;ter</strong>
@@ -180,7 +182,7 @@ for (let day = 1; day <= daysInMonth; day++) {
     </div>
 
     <div class="stat-card stat-yellow">
-        <div class="stat-icon">🚗</div>
+        <div class="stat-icon">ðŸš—</div>
         <div>
             <h2><%= fahrCount %></h2>
             <strong>Fahrfreigaben</strong>
@@ -189,7 +191,7 @@ for (let day = 1; day <= daysInMonth; day++) {
     </div>
 
     <div class="stat-card stat-red">
-        <div class="stat-icon">👨‍🏫</div>
+        <div class="stat-icon">ðŸ‘¨â€ðŸ«</div>
         <div>
             <h2><%= ausbilderList.length %></h2>
             <strong>Ausbilder</strong>
@@ -202,12 +204,12 @@ for (let day = 1; day <= daysInMonth; day++) {
     <div class="card-header">
         <div>
             <h2>Kalenderansicht</h2>
-            <p class="card-subtitle">Aktueller Monat mit allen Ausbildungseinträgen.</p>
+            <p class="card-subtitle">Aktueller Monat mit allen AusbildungseintrÃ¤gen.</p>
         </div>
 
         <div class="calendar-nav">
     <a href="/termine?month=<%= prevMonthDate.getMonth() %>&year=<%= prevMonthDate.getFullYear() %>">
-        ← Vorheriger Monat
+        â† Vorheriger Monat
     </a>
 
     <span class="chip blue">
@@ -215,7 +217,7 @@ for (let day = 1; day <= daysInMonth; day++) {
     </span>
 
     <a href="/termine?month=<%= nextMonthDate.getMonth() %>&year=<%= nextMonthDate.getFullYear() %>">
-        Nächster Monat →
+        NÃ¤chster Monat â†’
     </a>
 </div>
     </div>
@@ -238,7 +240,7 @@ for (let day = 1; day <= daysInMonth; day++) {
                 <%
                     const key = dateKeyFromDate(cell);
                     const dayTermine = termineByDate[key] || [];
-                    const isToday = key === dateKeyFromDate(today);
+                    const isToday = key === dateKeyFromDate(safeToday);
                 %>
 
                 <div class="pro-calendar-day <%= isToday ? 'is-today' : '' %>">
@@ -248,7 +250,7 @@ for (let day = 1; day <= daysInMonth; day++) {
 
                     <div class="pro-calendar-events">
                         <% if (dayTermine.length === 0) { %>
-                            <small>Keine Einträge</small>
+                            <small>Keine EintrÃ¤ge</small>
                         <% } else { %>
                             <% dayTermine.slice(0, 3).forEach((termin) => { %>
                                 <% if (termin.examType === "Darf alleine fahren") { %>
@@ -258,7 +260,7 @@ for (let day = 1; day <= daysInMonth; day++) {
                                     </div>
                                 <% } else { %>
                                     <div class="pro-calendar-event event-success">
-                                        <strong>Sanitäter</strong>
+                                        <strong>SanitÃ¤ter</strong>
                                         <span><%= termin.name || "Unbekannt" %></span>
                                     </div>
                                 <% } %>
@@ -305,7 +307,7 @@ for (let day = 1; day <= daysInMonth; day++) {
 
         <% if (allTermine.length === 0) { %>
             <div class="empty-state">
-                <div>📅</div>
+                <div>ðŸ“…</div>
                 <h3>Keine Ausbildungstermine vorhanden</h3>
                 <p>Trage oben den ersten Eintrag ein.</p>
             </div>
@@ -417,7 +419,7 @@ for (let day = 1; day <= daysInMonth; day++) {
 
         <% if (ausbilderList.length === 0) { %>
             <div class="empty-state">
-                <div>👨‍🏫</div>
+                <div>ðŸ‘¨â€ðŸ«</div>
                 <h3>Keine Ausbilder vorhanden</h3>
                 <p>Sobald Eintr&auml;ge erstellt werden, erscheint hier die Ausbilder-&Uuml;bersicht.</p>
             </div>
@@ -494,3 +496,4 @@ for (let day = 1; day <= daysInMonth; day++) {
         terminFilter.addEventListener("change", filterTermine);
     }
 </script>
+
