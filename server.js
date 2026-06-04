@@ -297,8 +297,9 @@ async function sendSpontanePruefungenPanel() {
         .setColor(0x2563eb)
         .setTitle("🚑 Spontane Prüfung eintragen")
         .setDescription(
-            "Wähle einen Prüfling aus, wähle die Prüfungsart und entscheide anschließend, ob die Prüfung genehmigt oder abgelehnt wird."
-        )
+    "Wähle einen Prüfling aus und wähle anschließend die Prüfungsart aus.\n\n" +
+    "Erstelle danach den Antrag und warte, bis eine Leitung den Antrag genehmigt oder ablehnt."
+)
         .addFields(
             {
                 name: "Schritt 1",
@@ -311,10 +312,10 @@ async function sendSpontanePruefungenPanel() {
                 inline: true
             },
             {
-                name: "Schritt 3",
-                value: "Genehmigen oder ablehnen.",
-                inline: true
-            }
+    name: "Schritt 3",
+    value: "Warten auf Entscheidung der Leitung.",
+    inline: true
+}
         )
         .setFooter({ text: "LSMD Ausbildungssystem" })
         .setTimestamp();
@@ -350,9 +351,9 @@ const buttonRow = new ActionRowBuilder().addComponents(
 );
 
     await channel.send({
-        embeds: [embed],
-        components: [userRow, typeRow, buttonRow]
-    });
+    embeds: [embed],
+    components: buildSpontanePanelComponents()
+});
 }
 
 async function addLog(action, data = {}, actor = null) {
@@ -730,13 +731,17 @@ botClient.on(Events.InteractionCreate, async (interaction) => {
             );
 
             const requestMessage = await interaction.channel.send({
-                content: `<@${state.targetId}>`,
-                allowedMentions: {
-                    users: [state.targetId]
-                },
-                embeds: [embed],
-                components: [decisionRow]
-            });
+    embeds: [embed],
+    components: [decisionRow],
+    allowedMentions: {
+        parse: []
+    }
+});
+
+await interaction.message.edit({
+    embeds: interaction.message.embeds,
+    components: buildSpontanePanelComponents()
+});
 
             spontaneRequests.set(requestId, {
                 id: requestId,
@@ -1085,6 +1090,39 @@ app.post("/admin/spontane-panel", requireLogin, requireAdmin, async (req, res) =
 
     res.redirect("/admin");
 });
+
+function buildSpontanePanelComponents() {
+    const userRow = new ActionRowBuilder().addComponents(
+        new UserSelectMenuBuilder()
+            .setCustomId("spontan_user")
+            .setPlaceholder("Prüfling auswählen")
+            .setMinValues(1)
+            .setMaxValues(1)
+    );
+
+    const typeRow = new ActionRowBuilder().addComponents(
+        new StringSelectMenuBuilder()
+            .setCustomId("spontan_type")
+            .setPlaceholder("Prüfungsart auswählen")
+            .addOptions(
+                {
+                    label: "Sanitäter Prüfung",
+                    value: "Sanitäter Prüfung",
+                    emoji: "🚑"
+                }
+            )
+    );
+
+    const buttonRow = new ActionRowBuilder().addComponents(
+        new ButtonBuilder()
+            .setCustomId("spontan_submit")
+            .setLabel("Antrag erstellen")
+            .setEmoji("📨")
+            .setStyle(ButtonStyle.Primary)
+    );
+
+    return [userRow, typeRow, buttonRow];
+}
 
 // =====================
 // POINTS
