@@ -610,40 +610,137 @@ function memberLine(member) {
     return `<@${member.id}>`;
 }
 
-function buildRoleGroup(title, members) {
-    if (!members || members.length === 0) {
-        return `**${title}**\n-\n`;
+function sortMembers(members) {
+    return members.sort((a, b) => {
+        const nameA = a.displayName || a.user.username || "";
+        const nameB = b.displayName || b.user.username || "";
+        return nameA.localeCompare(nameB, "de");
+    });
+}
+
+function buildRoleField(title, members) {
+    const sorted = sortMembers(members || []);
+
+    return {
+        name: `${title} (${sorted.length})`,
+        value: sorted.length > 0
+            ? sorted.map(memberLine).join("\n").slice(0, 1000)
+            : "—",
+        inline: false
+    };
+}
+
+function hasRole(member, roleId) {
+    return roleId && member.roles.cache.has(roleId);
+}
+
+async function updateTeamListMessage() {
+    if (!process.env.TEAM_LIST_CHANNEL_ID) {
+        console.log("TEAM_LIST_CHANNEL_ID fehlt");
+        return;
     }
 
-    return `**${title}**\n${members.map(memberLine).join(",\n")}\n`;
-}
+    const channel = await botClient.channels.fetch(process.env.TEAM_LIST_CHANNEL_ID);
 
-function memberLine(member) {
-    return `<@${member.id}>`;
-}
+    if (!channel) {
+        console.log("Teamliste Channel nicht gefunden");
+        return;
+    }
 
-function buildRoleField(title, members) {
-    return {
-        name: title,
-        value: members && members.length > 0
-            ? members.map(memberLine).join("\n")
-            : "—",
-        inline: false
-    };
-}
+    const guild = await botClient.guilds.fetch(process.env.DISCORD_GUILD_ID);
 
-function memberLine(member) {
-    return `<@${member.id}>`;
-}
+    console.log("Lade alle Discord Mitglieder...");
+    await guild.members.fetch();
 
-function buildRoleField(title, members) {
-    return {
-        name: title,
-        value: members && members.length > 0
-            ? members.map(memberLine).join("\n")
-            : "—",
-        inline: false
-    };
+    const allMembers = Array.from(guild.members.cache.values())
+        .filter(member => !member.user.bot);
+
+    const head = allMembers.filter(member => hasRole(member, process.env.ROLE_HEAD_PRAKTI_SANI));
+    const leitung = allMembers.filter(member => hasRole(member, process.env.ROLE_LEITUNG));
+    const stvLeitung = allMembers.filter(member => hasRole(member, process.env.ROLE_STV_LEITUNG));
+    const untereLeitung = allMembers.filter(member => hasRole(member, process.env.ROLE_UNTERE_LEITUNG));
+    const seniorAusbilder = allMembers.filter(member => hasRole(member, process.env.ROLE_SENIOR));
+    const festeMitarbeiter = allMembers.filter(member => hasRole(member, process.env.ROLE_FESTES_MITGLIED));
+    const testphase = allMembers.filter(member => hasRole(member, process.env.ROLE_TESTPHASE));
+    const aushilfen = allMembers.filter(member => hasRole(member, process.env.ROLE_AUSHILFE));
+
+    const groupedIds = new Set([
+        ...head.map(m => m.id),
+        ...leitung.map(m => m.id),
+        ...stvLeitung.map(m => m.id),
+        ...untereLeitung.map(m => m.id),
+        ...seniorAusbilder.map(m => m.id),
+        ...festeMitarbeiter.map(m => m.id),
+        ...testphase.map(m => m.id),
+        ...aushilfen.map(m => m.id)
+    ]);
+
+    const weiterePraktiSani = allMembers.filter(member =>
+        hasRole(member, process.env.PRAKTI_SANI_ROLE_ID) &&
+        !groupedIds.has(member.id)
+    );
+
+    const allTeamIds = new Set([
+        ...groupedIds,
+        ...weiterePraktiSani.map(m => m.id)
+    ]);
+
+    const embed = new EmbedBuilder()
+        .setColor(0xef233c)
+        .setTitle("🚑 LSMD Prakti-Sani Teamliste")
+        .setDescription(
+            "**Aktuelle Mitgliederübersicht der Abteilung**\n\n" +
+            "Diese Liste wird automatisch aktualisiert und zeigt alle Mitglieder mit Abteilungsrolle."
+        )
+        .addFields(
+            {
+                name: "📊 Übersicht",
+                value:
+                    `**Teammitglieder gesamt:** ${allTeamIds.size}\n` +
+                    `**Letzte Aktualisierung:** <t:${Math.floor(Date.now() / 1000)}:R>`,
+                inline: false
+            },
+            buildRoleField("👑 Head of Prakti-Sani", head),
+            buildRoleField("🛡️ Prakti-Sani Leitung", leitung),
+            buildRoleField("⚜️ Prakti-Sani Stv. Leitung", stvLeitung),
+            buildRoleField("🔰 Prakti-Sani Untere Leitung", untereLeitung),
+            buildRoleField("⭐ Prakti-Sani Sr. Ausbilder", seniorAusbilder),
+            buildRoleField("✅ Prakti-Sani feste Mitarbeiter", festeMitarbeiter),
+            buildRoleField("🧪 Prakti-Sani Testphase", testphase),
+            buildRoleField("🤝 Prakti-Sani Aushilfen", aushilfen),
+            buildRoleField("🚑 Weitere Prakti-Sani Mitglieder", weiterePraktiSani)
+        )
+        .setFooter({ text: "LSMD Ausbildungssystem • Automatische Teamliste" })
+        .setTimestamp();
+
+    if (process.env.TEAM_LIST_MESSAGE_ID) {
+        try {
+            const message = await channel.messages.fetch(process.env.TEAM_LIST_MESSAGE_ID);
+
+            await message.edit({
+                content: "",
+                embeds: [embed],
+                allowedMentions: {
+                    parse: []
+                }
+            });
+
+            console.log("Teamliste als Embed aktualisiert");
+            return;
+        } catch (err) {
+            console.error("TEAM_LIST_MESSAGE_ID falsch oder Nachricht gelöscht:", err);
+        }
+    }
+
+    const message = await channel.send({
+        content: "",
+        embeds: [embed],
+        allowedMentions: {
+            parse: []
+        }
+    });
+
+    console.log("TEAM_LIST_MESSAGE_ID bitte in Railway eintragen:", message.id);
 }
 
 async function updateTeamListMessage() {
