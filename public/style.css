@@ -7073,3 +7073,149 @@ textarea:focus {
         display: none;
     }
 }
+
+/* =====================
+   FINAL POLISH
+   GLOBAL DESIGN
+===================== */
+
+button,
+.open-doc-btn,
+.mini-btn,
+.logout,
+.discord-login {
+    transition: 0.2s ease;
+}
+
+button:hover,
+.open-doc-btn:hover,
+.mini-btn:hover,
+.logout:hover {
+    transform: translateY(-2px);
+    opacity: 0.96;
+}
+
+.card,
+.stat-card,
+.clean-stat-card,
+.doc-card,
+.sheet-week-card,
+.member-table-row,
+.clean-entry-row,
+.clean-quick-card,
+.clean-member-row,
+.trainer-row {
+    box-shadow: 0 14px 44px rgba(0,0,0,0.18);
+}
+
+.card:hover,
+.stat-card:hover,
+.clean-stat-card:hover,
+.doc-card:hover,
+.sheet-week-card:hover {
+    box-shadow: 0 18px 55px rgba(0,0,0,0.28);
+}
+
+input,
+select,
+textarea {
+    transition: 0.2s ease;
+}
+
+input:hover,
+select:hover,
+textarea:hover {
+    border-color: rgba(148,163,184,0.35);
+}
+
+.page-header {
+    position: relative;
+    overflow: hidden;
+}
+
+.page-header::after {
+    content: "";
+    position: absolute;
+    right: -50px;
+    top: -50px;
+    width: 180px;
+    height: 180px;
+    border-radius: 50%;
+    background: rgba(37,99,235,0.12);
+    pointer-events: none;
+}
+
+.page-header > * {
+    position: relative;
+    z-index: 1;
+}
+
+.chip,
+.badge {
+    white-space: nowrap;
+}
+
+.card-subtitle {
+    line-height: 1.45;
+}
+
+.clean-panel {
+    background:
+        radial-gradient(circle at top right, rgba(37,99,235,0.08), transparent 34%),
+        rgba(15,23,42,0.74);
+}
+
+.admin-glow {
+    background:
+        radial-gradient(circle at top left, rgba(239,35,60,0.10), transparent 36%),
+        rgba(15,23,42,0.78);
+}
+
+.empty-state {
+    border-radius: 18px;
+    background: rgba(2,6,23,0.22);
+    border: 1px dashed rgba(148,163,184,0.18);
+}
+
+.form button,
+.edit-actions button,
+.md-small-form button {
+    background: linear-gradient(135deg, #2563eb, #1d4ed8);
+    box-shadow: 0 0 24px rgba(37,99,235,0.22);
+}
+
+.danger-btn {
+    background: linear-gradient(135deg, #ef233c, #991b1b) !important;
+    box-shadow: 0 0 24px rgba(239,35,60,0.22);
+}
+
+.open-doc-btn {
+    border: 1px solid rgba(37,99,235,0.35);
+}
+
+@media (max-width: 780px) {
+    .page-header h1,
+    .clean-dashboard-hero h1 {
+        font-size: 31px;
+    }
+
+    .card {
+        padding: 18px;
+    }
+
+    .card-header {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .stats-grid,
+    .clean-stats-grid {
+        gap: 12px;
+    }
+
+    .stat-card,
+    .clean-stat-card {
+        padding: 18px;
+    }
+}
