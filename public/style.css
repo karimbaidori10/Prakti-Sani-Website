@@ -5371,3 +5371,88 @@ img {
         transform: none !important;
     }
 }
+
+/* =====================
+   PRO APP BACKGROUND DEPTH
+===================== */
+
+body {
+    background:
+        radial-gradient(circle at top left, rgba(37, 99, 235, 0.18), transparent 28%),
+        radial-gradient(circle at bottom right, rgba(239, 35, 60, 0.14), transparent 28%),
+        linear-gradient(135deg, #020617, #0f172a 45%, #020617) !important;
+    background-attachment: fixed;
+}
+
+body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    background-image:
+        linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px);
+    background-size: 44px 44px;
+    mask-image: linear-gradient(to bottom, rgba(0,0,0,0.55), transparent 85%);
+    pointer-events: none;
+    z-index: -1;
+}
+
+main,
+.content,
+.main-content {
+    position: relative;
+}
+
+main::before,
+.content::before,
+.main-content::before {
+    content: "";
+    position: fixed;
+    top: 0;
+    left: 260px;
+    right: 0;
+    height: 160px;
+    background: linear-gradient(to bottom, rgba(2, 6, 23, 0.72), transparent);
+    pointer-events: none;
+    z-index: -1;
+}
+
+.card,
+.stat-card,
+.doc-card,
+.quick-card,
+.points-box {
+    background:
+        linear-gradient(135deg, rgba(15, 23, 42, 0.82), rgba(2, 6, 23, 0.68)) !important;
+}
+
+.card::after,
+.doc-card::after,
+.quick-card::after,
+.points-box::after {
+    pointer-events: none;
+}
+
+.page-header {
+    padding: 18px 0 10px !important;
+}
+
+.page-header h1 {
+    filter: drop-shadow(0 18px 38px rgba(37,99,235,0.18));
+}
+
+.page-header p {
+    max-width: 860px;
+}
+
+@media (max-width: 800px) {
+    main::before,
+    .content::before,
+    .main-content::before {
+        left: 0;
+    }
+
+    body {
+        background-attachment: scroll;
+    }
+}
