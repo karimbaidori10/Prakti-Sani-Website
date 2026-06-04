@@ -297,71 +297,35 @@ async function sendSpontanePruefungenPanel() {
         .setColor(0x2563eb)
         .setTitle("🚑 Spontane Prüfung eintragen")
         .setDescription(
-    "Wähle zuerst die Prüfungsart aus.\n\n" +
-    "Klicke danach auf **Antrag erstellen** und trage im Fenster die **DN** und den **Namen** des Prüflings ein.\n\n" +
-    "Anschließend wartet der Antrag auf die Entscheidung der Leitung."
-)
+            "Wähle zuerst die Prüfungsart aus.\n\n" +
+            "Klicke danach auf **Antrag erstellen** und trage im Fenster die **DN** und den **Namen** des Prüflings ein.\n\n" +
+            "Anschließend wartet der Antrag auf die Entscheidung der Leitung."
+        )
         .addFields(
             {
-    name: "Schritt 1",
-    value: "Prüfungsart auswählen.",
-    inline: true
-},
-{
-    name: "Schritt 2",
-    value: "Auf Antrag erstellen klicken und DN + Name eintragen.",
-    inline: true
-},
-{
-    name: "Schritt 3",
-    value: "Auf Entscheidung der Leitung warten.",
-    inline: true
-}
+                name: "Schritt 1",
+                value: "Prüfungsart auswählen.",
+                inline: true
+            },
             {
-    name: "Schritt 3",
-    value: "Warten auf Entscheidung der Leitung.",
-    inline: true
-}
+                name: "Schritt 2",
+                value: "Auf Antrag erstellen klicken und DN + Name eintragen.",
+                inline: true
+            },
+            {
+                name: "Schritt 3",
+                value: "Auf Entscheidung der Leitung warten.",
+                inline: true
+            }
         )
         .setFooter({ text: "LSMD Ausbildungssystem" })
         .setTimestamp();
 
-    const userRow = new ActionRowBuilder().addComponents(
-        new UserSelectMenuBuilder()
-            .setCustomId("spontan_user")
-            .setPlaceholder("Prüfling auswählen")
-            .setMinValues(1)
-            .setMaxValues(1)
-    );
-
-    const typeRow = new ActionRowBuilder().addComponents(
-        new StringSelectMenuBuilder()
-            .setCustomId("spontan_type")
-            .setPlaceholder("Prüfungsart auswählen")
-            .addOptions(
-                {
-                    label: "Sanitäter Prüfung",
-                    value: "Sanitäter Prüfung",
-                    emoji: "🚑"
-
-                }
-            )
-    );
-
-const buttonRow = new ActionRowBuilder().addComponents(
-    new ButtonBuilder()
-        .setCustomId("spontan_submit")
-        .setLabel("Antrag erstellen")
-        .setEmoji("📨")
-        .setStyle(ButtonStyle.Primary)
-);
-
     await channel.send({
-    embeds: [embed],
-    components: buildSpontanePanelComponents()
-});
+        embeds: [embed],
+        components: buildSpontanePanelComponents()
+    });
 }
-
 async function addLog(action, data = {}, actor = null) {
     const createdAt = new Date();
 
@@ -1507,4 +1471,5 @@ if (process.env.DISCORD_BOT_TOKEN) {
 }
 
 start().catch(console.error);
+
 
