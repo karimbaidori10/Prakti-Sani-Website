@@ -34,6 +34,8 @@
 
     const saniCount = termineAll.filter(t => t.examType === "Sanitaeter-Pruefung").length;
     const fahrCount = termineAll.filter(t => t.examType === "Darf alleine fahren").length;
+    const goalDoneCount = allUsers.filter(u => Number(u.points || 0) >= 5).length;
+    const topPoints = allUsers.length > 0 ? Number(allUsers[0].points || 0) : 0;
 %>
 
 <section class="clean-dashboard-hero">
@@ -41,58 +43,58 @@
         <span class="clean-dashboard-label">LSMD Zentrale</span>
         <h1>Willkommen zur&uuml;ck,<br><%= displayName %></h1>
         <p>
-            Ausbildungstermine, Mitglieder, Dokumente und MD-Verwaltung auf einen Blick
+            Ausbildungstermine, Mitglieder, Dokumente und MD-Verwaltung auf einen Blick.
         </p>
 
         <div class="clean-dashboard-pills">
             <span>Alle Systeme online</span>
             <span>Woche <%= currentWeek %></span>
             <% if (isAdmin) { %>
-                <span>Admin</span>
+                <span>Admin-Modus</span>
             <% } %>
         </div>
     </div>
 
     <div class="clean-dashboard-visual">
         <div class="clean-pulse"></div>
-        <div class="clean-ambulance">+</div>
+        <div class="clean-ambulance">🚑</div>
     </div>
 </section>
 
 <section class="clean-stats-grid">
     <div class="clean-stat-card">
-        <div class="clean-stat-icon red">US</div>
+        <div class="clean-stat-icon red">👥</div>
         <div>
             <h2><%= allUsers.length %></h2>
             <strong>Mitglieder</strong>
-            <p>Aktive Mitglieder</p>
+            <p>Aktive Punkte-Eintr&auml;ge</p>
         </div>
     </div>
 
     <div class="clean-stat-card">
-        <div class="clean-stat-icon blue">TE</div>
+        <div class="clean-stat-icon blue">📅</div>
         <div>
             <h2><%= termineAll.length %></h2>
-            <strong>Ausbildungstermine</strong>
-            <p>Gespeicherte Eintr&auml;ge</p>
+            <strong>Termine</strong>
+            <p>Ausbildungen und Pr&uuml;fungen</p>
         </div>
     </div>
 
     <div class="clean-stat-card">
-        <div class="clean-stat-icon green">SP</div>
+        <div class="clean-stat-icon green">✅</div>
         <div>
-            <h2><%= saniCount %></h2>
-            <strong>Sanit&auml;ter</strong>
-            <p>Sanit&auml;ter-Pr&uuml;fungen</p>
+            <h2><%= goalDoneCount %></h2>
+            <strong>Wochenziel</strong>
+            <p>Mitglieder mit 5+ Punkten</p>
         </div>
     </div>
 
     <div class="clean-stat-card">
-        <div class="clean-stat-icon yellow">DF</div>
+        <div class="clean-stat-icon yellow">🏆</div>
         <div>
-            <h2><%= fahrCount %></h2>
-            <strong>Fahrfreigaben</strong>
-            <p>Darf alleine fahren</p>
+            <h2><%= topPoints %></h2>
+            <strong>Top Punkte</strong>
+            <p>St&auml;rkster Eintrag</p>
         </div>
     </div>
 </section>
@@ -105,12 +107,12 @@
                 <p class="card-subtitle">Neueste MD-Eintr&auml;ge aus Ausbildungstermine.</p>
             </div>
 
-            <a href="/termine" class="open-doc-btn">Alle anzeigen</a>
+            <a href="/termine" class="mini-btn">Alle anzeigen</a>
         </div>
 
         <% if (latestTermine.length === 0) { %>
             <div class="empty-state">
-                <div>Keine Daten</div>
+                <div>📅</div>
                 <h3>Keine Eintr&auml;ge vorhanden</h3>
                 <p>Erstelle den ersten Eintrag bei Ausbildungstermine.</p>
             </div>
@@ -125,7 +127,7 @@
 
                         <div class="clean-entry-main">
                             <h3><%= termin.name || "Unbekannt" %></h3>
-                            <p><%= termin.examiner || "Kein Ausbilder" %></p>
+                            <p>Ausbilder: <%= termin.examiner || "Nicht eingetragen" %></p>
                         </div>
 
                         <% if (termin.examType === "Darf alleine fahren") { %>
@@ -151,7 +153,7 @@
             <a href="/users" class="clean-quick-card red">
                 <div>
                     <strong>Mitglieder</strong>
-                    <span>Benutzer verwalten</span>
+                    <span>Punkte und Wochenziel</span>
                 </div>
                 <b>&rsaquo;</b>
             </a>
@@ -159,7 +161,7 @@
             <a href="/termine" class="clean-quick-card blue">
                 <div>
                     <strong>Ausbildungstermine</strong>
-                    <span>Eintr&auml;ge verwalten</span>
+                    <span>MD-Eintr&auml;ge verwalten</span>
                 </div>
                 <b>&rsaquo;</b>
             </a>
@@ -167,7 +169,7 @@
             <a href="/dokumente" class="clean-quick-card yellow">
                 <div>
                     <strong>Dokumente</strong>
-                    <span>Dateien verwalten</span>
+                    <span>Leitf&auml;den und Regelwerke</span>
                 </div>
                 <b>&rsaquo;</b>
             </a>
@@ -176,7 +178,7 @@
                 <a href="/admin" class="clean-quick-card green">
                     <div>
                         <strong>Admin</strong>
-                        <span>System verwalten</span>
+                        <span>Leitungsbereich &ouml;ffnen</span>
                     </div>
                     <b>&rsaquo;</b>
                 </a>
@@ -193,23 +195,68 @@
                 <p class="card-subtitle">Mitglieder mit den meisten Punkten.</p>
             </div>
 
-            <a href="/users" class="open-doc-btn">Alle anzeigen</a>
+            <a href="/users" class="mini-btn">Alle anzeigen</a>
         </div>
 
-        <div class="clean-member-list">
-            <% allUsers.slice(0, 5).forEach((member, index) => { %>
-                <div class="clean-member-row">
-                    <span class="clean-rank">#<%= index + 1 %></span>
+        <% if (allUsers.length === 0) { %>
+            <div class="empty-state">
+                <div>👥</div>
+                <h3>Keine Mitglieder vorhanden</h3>
+                <p>Sobald Punkte vergeben werden, erscheinen Mitglieder hier.</p>
+            </div>
+        <% } else { %>
+            <div class="clean-member-list">
+                <% allUsers.slice(0, 5).forEach((member, index) => { %>
+                    <div class="clean-member-row">
+                        <span class="clean-rank">
+                            <% if (index === 0) { %>
+                                🏆
+                            <% } else { %>
+                                #<%= index + 1 %>
+                            <% } %>
+                        </span>
 
-                    <div>
-                        <strong><%= member.displayName || member.username || member.userId || "Unbekannt" %></strong>
-                        <p><%= member.rank || "Kein Rang" %></p>
+                        <div>
+                            <strong><%= member.displayName || member.username || member.userId || "Unbekannt" %></strong>
+                            <p><%= member.rank || "Kein Rang" %></p>
+                        </div>
+
+                        <b><%= member.points || 0 %> P</b>
                     </div>
-
-                    <b><%= member.points || 0 %> P</b>
-                </div>
-            <% }) %>
-        </div>
+                <% }) %>
+            </div>
+        <% } %>
     </div>
 
+    <div class="card clean-panel">
+        <div class="card-header">
+            <div>
+                <h2>&Uuml;bersicht</h2>
+                <p class="card-subtitle">Kurzer Stand vom Ausbildungssystem.</p>
+            </div>
+            <span class="chip green">Aktiv</span>
+        </div>
+
+        <div class="clean-status-list">
+            <div>
+                <span>Sanit&auml;ter-Pr&uuml;fungen</span>
+                <strong><%= saniCount %></strong>
+            </div>
+
+            <div>
+                <span>Fahrfreigaben</span>
+                <strong><%= fahrCount %></strong>
+            </div>
+
+            <div>
+                <span>Dokumente</span>
+                <strong><%= docsAll.length %></strong>
+            </div>
+
+            <div>
+                <span>Wochenziel erreicht</span>
+                <strong><%= goalDoneCount %> / <%= allUsers.length %></strong>
+            </div>
+        </div>
+    </div>
 </section>
