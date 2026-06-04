@@ -2,6 +2,7 @@
 <html lang="de">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>LSMD Dashboard</title>
     <link rel="stylesheet" href="/style.css">
 </head>
@@ -11,52 +12,63 @@
 
     <aside class="sidebar">
         <div class="brand">
-            <div class="brand-icon">+</div>
+            <div class="brand-icon">🚑</div>
             <div>
                 <h2>LSMD</h2>
-                <p>Prakti-Sani</p>
+                <p>Prakti-Sani System</p>
             </div>
         </div>
 
         <nav class="nav">
             <a class="<%= (typeof active !== 'undefined' && active === 'dashboard') ? 'active' : '' %>" href="/dashboard">
-                <span>DB</span> Dashboard
+                <span>🏠</span>
+                <strong>Dashboard</strong>
             </a>
 
             <a class="<%= (typeof active !== 'undefined' && active === 'users') ? 'active' : '' %>" href="/users">
-                <span>US</span> Mitglieder
+                <span>👥</span>
+                <strong>Mitglieder</strong>
             </a>
 
             <a class="<%= (typeof active !== 'undefined' && active === 'termine') ? 'active' : '' %>" href="/termine">
-                <span>TE</span> Termine
+                <span>📅</span>
+                <strong>Termine</strong>
             </a>
 
-
             <a class="<%= (typeof active !== 'undefined' && active === 'dokumente') ? 'active' : '' %>" href="/dokumente">
-                <span>DO</span> Dokumente
+                <span>📄</span>
+                <strong>Dokumente</strong>
             </a>
 
             <% if (typeof isAdmin !== 'undefined' && isAdmin) { %>
                 <a class="<%= (typeof active !== 'undefined' && active === 'admin') ? 'active' : '' %>" href="/admin">
-                    <span>AD</span> Admin
+                    <span>🛡️</span>
+                    <strong>Admin</strong>
                 </a>
             <% } %>
         </nav>
 
         <div class="sidebar-bottom">
+            <div class="sidebar-status-box">
+                <span class="online-dot"></span>
+                <div>
+                    <strong>System Online</strong>
+                    <p>LSMD Dashboard aktiv</p>
+                </div>
+            </div>
+
             <div class="user-card">
                 <div class="avatar">
                     <% if (typeof user !== "undefined" && user && user.avatar) { %>
                         <img src="<%= user.avatar %>" alt="Avatar">
                     <% } else { %>
-                        +
+                        <%= (typeof user !== "undefined" && user && user.username) ? user.username.charAt(0).toUpperCase() : "L" %>
                     <% } %>
                 </div>
 
                 <div>
                     <strong><%= (typeof user !== "undefined" && user && user.username) ? user.username : "Leitung" %></strong>
                     <p>
-                        <span class="online-dot"></span>
                         <%= (typeof user !== "undefined" && user && user.role) ? user.role : "Online" %>
                     </p>
                 </div>
@@ -68,14 +80,20 @@
 
     <main class="main">
         <div class="topbar">
-            <button class="menu-btn">Menu</button>
+            <button class="menu-btn" type="button">☰</button>
+
+            <div class="topbar-title">
+                <strong>LSMD Ausbildungssystem</strong>
+                <span>Prakti-Sani Verwaltung</span>
+            </div>
 
             <div class="topbar-right">
-                <div class="search-box">Suchen...</div>
-
-                <div class="bell">
-                    Info
-                    <span>3</span>
+                <div class="topbar-chip">
+                    <% if (typeof isAdmin !== 'undefined' && isAdmin) { %>
+                        Admin-Modus
+                    <% } else { %>
+                        Mitglied
+                    <% } %>
                 </div>
 
                 <div class="profile-circle">

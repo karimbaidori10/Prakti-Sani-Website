@@ -6946,3 +6946,130 @@ textarea:focus {
         grid-template-columns: 1fr;
     }
 }
+
+/* =====================
+   LAYOUT / SIDEBAR PHASE 3
+===================== */
+
+.brand-icon {
+    font-size: 27px;
+}
+
+.nav a {
+    position: relative;
+}
+
+.nav a strong {
+    font-size: 15px;
+}
+
+.nav a.active::before {
+    content: "";
+    position: absolute;
+    left: -24px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 4px;
+    height: 30px;
+    border-radius: 999px;
+    background: var(--red);
+    box-shadow: 0 0 18px rgba(239,35,60,0.75);
+}
+
+.sidebar-status-box {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px;
+    margin-bottom: 12px;
+    border-radius: 16px;
+    background: rgba(34,197,94,0.08);
+    border: 1px solid rgba(34,197,94,0.22);
+}
+
+.sidebar-status-box strong {
+    display: block;
+    font-size: 13px;
+    color: #bbf7d0;
+}
+
+.sidebar-status-box p {
+    color: var(--muted);
+    font-size: 12px;
+    margin-top: 3px;
+}
+
+.topbar {
+    gap: 14px;
+}
+
+.topbar-title {
+    display: grid;
+    gap: 3px;
+}
+
+.topbar-title strong {
+    font-size: 16px;
+}
+
+.topbar-title span {
+    color: var(--muted);
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.topbar-chip {
+    padding: 10px 13px;
+    border-radius: 999px;
+    background: rgba(37,99,235,0.14);
+    border: 1px solid rgba(37,99,235,0.32);
+    color: #93c5fd;
+    font-size: 13px;
+    font-weight: 900;
+}
+
+.menu-btn {
+    font-size: 18px;
+    font-weight: 900;
+}
+
+.logout {
+    transition: 0.2s ease;
+}
+
+.logout:hover {
+    transform: translateY(-2px);
+    opacity: 0.95;
+}
+
+@media (max-width: 780px) {
+    .brand {
+        margin-bottom: 22px;
+    }
+
+    .nav {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .sidebar-bottom {
+        margin-top: 18px;
+    }
+
+    .topbar-title {
+        display: none;
+    }
+
+    .topbar {
+        justify-content: space-between;
+    }
+}
+
+@media (max-width: 520px) {
+    .nav {
+        grid-template-columns: 1fr;
+    }
+
+    .topbar-chip {
+        display: none;
+    }
+}
