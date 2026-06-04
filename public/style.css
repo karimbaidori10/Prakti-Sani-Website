@@ -6009,3 +6009,26 @@ textarea:focus {
         grid-template-columns: 1fr !important;
     }
 }
+
+/* =====================
+   PRO SEARCH BARS
+===================== */
+
+.pro-searchbar {
+    display: grid;
+    grid-template-columns: 1fr 240px;
+    gap: 12px;
+    margin-bottom: 18px;
+}
+
+.pro-searchbar input,
+.pro-searchbar select {
+    min-height: 46px !important;
+    border-radius: 15px !important;
+}
+
+@media (max-width: 700px) {
+    .pro-searchbar {
+        grid-template-columns: 1fr;
+    }
+}

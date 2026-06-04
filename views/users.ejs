@@ -43,8 +43,14 @@
 
 <section class="card">
     <div class="card-header">
-        <h2>Mitglieder&uuml;bersicht</h2>
-        <span class="chip blue"><%= users ? users.length : 0 %> Mitglieder</span>
+        <div>
+            <h2>Mitglieder&uuml;bersicht</h2>
+            <p class="card-subtitle">Suche nach Name, Rang oder Discord ID.</p>
+        </div>
+
+        <span class="chip blue">
+            <span id="memberCount"><%= users ? users.length : 0 %></span> Mitglieder
+        </span>
     </div>
 
     <% if (!users || users.length === 0) { %>
@@ -54,6 +60,21 @@
             <p>Sobald Punkte vergeben werden, erscheinen Mitglieder hier automatisch.</p>
         </div>
     <% } else { %>
+
+        <div class="pro-searchbar">
+            <input
+                type="text"
+                id="memberSearch"
+                placeholder="Mitglied suchen..."
+                autocomplete="off"
+            >
+
+            <select id="memberFilter">
+                <option value="all">Alle Mitglieder</option>
+                <option value="done">Wochenziel erreicht</option>
+                <option value="open">Wochenziel offen</option>
+            </select>
+        </div>
 
         <div class="member-table">
             <div class="member-table-head">
@@ -65,7 +86,16 @@
             </div>
 
             <% users.forEach((member, index) => { %>
-                <div class="member-table-row <%= index === 0 ? 'top-member-row' : '' %>">
+                <div
+                    class="member-table-row <%= index === 0 ? 'top-member-row' : '' %>"
+                    data-search="<%= [
+                        member.displayName || '',
+                        member.rank || '',
+                        member.userId || '',
+                        member.points || 0
+                    ].join(' ').toLowerCase() %>"
+                    data-goal="<%= Number(member.points || 0) >= 5 ? 'done' : 'open' %>"
+                >
                     <div class="member-place">
                         <%= index + 1 %>
                     </div>
@@ -105,5 +135,58 @@
             <% }) %>
         </div>
 
+        <div id="memberEmptySearch" class="empty-state" style="display:none; margin-top: 16px;">
+            <div>Keine Treffer</div>
+            <h3>Kein Mitglied gefunden</h3>
+            <p>Versuche einen anderen Namen, Rang oder eine Discord ID.</p>
+        </div>
+
     <% } %>
 </section>
+
+<script>
+    const memberSearch = document.getElementById("memberSearch");
+    const memberFilter = document.getElementById("memberFilter");
+    const memberRows = Array.from(document.querySelectorAll(".member-table-row"));
+    const memberCount = document.getElementById("memberCount");
+    const memberEmptySearch = document.getElementById("memberEmptySearch");
+
+    function filterMembers() {
+        const query = (memberSearch?.value || "").toLowerCase().trim();
+        const filter = memberFilter?.value || "all";
+
+        let visible = 0;
+
+        memberRows.forEach(row => {
+            const searchText = row.dataset.search || "";
+            const goal = row.dataset.goal || "open";
+
+            const matchesSearch = searchText.includes(query);
+            const matchesFilter = filter === "all" || goal === filter;
+
+            const show = matchesSearch && matchesFilter;
+
+            row.style.display = show ? "" : "none";
+
+            if (show) {
+                visible++;
+            }
+        });
+
+        if (memberCount) {
+            memberCount.textContent = visible;
+        }
+
+        if (memberEmptySearch) {
+            memberEmptySearch.style.display = visible === 0 ? "block" : "none";
+        }
+    }
+
+    if (memberSearch) {
+        memberSearch.addEventListener("input", filterMembers);
+    }
+
+    if (memberFilter) {
+        memberFilter.addEventListener("change", filterMembers);
+    }
+</script>
