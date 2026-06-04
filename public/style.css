@@ -4144,3 +4144,104 @@ textarea:focus {
     background: rgba(2, 6, 23, 0.42);
     border: 1px dashed rgba(148, 163, 184, 0.18);
 }
+
+/* =====================
+   PRO DASHBOARD HERO
+===================== */
+
+.dashboard-hero,
+.hero-card,
+.welcome-card {
+    position: relative;
+    overflow: hidden;
+}
+
+.dashboard-hero::before,
+.hero-card::before,
+.welcome-card::before {
+    content: "";
+    position: absolute;
+    inset: -80px;
+    background:
+        radial-gradient(circle at top left, rgba(37, 99, 235, 0.22), transparent 36%),
+        radial-gradient(circle at bottom right, rgba(239, 35, 60, 0.18), transparent 34%);
+    pointer-events: none;
+    z-index: 0;
+}
+
+.dashboard-hero > *,
+.hero-card > *,
+.welcome-card > * {
+    position: relative;
+    z-index: 1;
+}
+
+.dashboard-hero h1,
+.hero-card h1,
+.welcome-card h1 {
+    font-size: clamp(34px, 5vw, 62px) !important;
+    line-height: 0.95 !important;
+    letter-spacing: -0.07em !important;
+}
+
+.dashboard-hero p,
+.hero-card p,
+.welcome-card p {
+    max-width: 720px;
+    font-size: 16px !important;
+    color: rgba(226, 232, 240, 0.82) !important;
+}
+
+.dashboard-grid .card {
+    animation: proFadeUp 0.35s ease both;
+}
+
+.stats-grid .stat-card {
+    animation: proFadeUp 0.35s ease both;
+}
+
+@keyframes proFadeUp {
+    from {
+        opacity: 0;
+        transform: translateY(8px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.stat-card h2 {
+    font-size: 34px !important;
+    letter-spacing: -0.05em;
+}
+
+.stat-card strong {
+    font-size: 15px;
+}
+
+.clean-status-list div {
+    transition: 0.2s ease;
+}
+
+.clean-status-list div:hover {
+    transform: translateX(3px);
+    background: rgba(37, 99, 235, 0.08);
+}
+
+.leaderboard-row,
+.admin-member-row,
+.sheet-table-row,
+.sheet-table-row-clean {
+    transition: 0.2s ease;
+}
+
+.leaderboard-row:hover,
+.admin-member-row:hover,
+.sheet-table-row:hover,
+.sheet-table-row-clean:hover {
+    transform: translateY(-1px);
+    background: rgba(37, 99, 235, 0.08) !important;
+    border-color: rgba(59, 130, 246, 0.22) !important;
+}
