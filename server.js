@@ -20,6 +20,9 @@ let examsCollection;
 let docsCollection;
 let logsCollection;
 
+const discordMemberCache = new Map();
+const DISCORD_CACHE_TIME = 1000 * 60 * 10;
+
 const ADMIN_ROLE_ID = process.env.ADMIN_ROLE_ID;
 const PRAKTI_SANI_ROLE_ID = process.env.PRAKTI_SANI_ROLE_ID;
 const ROLE_TESTPHASE = process.env.PRAKTI_SANI_ROLE_ID;
@@ -177,6 +180,12 @@ async function getDiscordMemberInfo(userId) {
             return null;
         }
 
+        const cached = discordMemberCache.get(userId);
+
+        if (cached && Date.now() - cached.time < DISCORD_CACHE_TIME) {
+            return cached.data;
+        }
+
         const response = await fetch(
             `https://discord.com/api/v10/guilds/${process.env.DISCORD_GUILD_ID}/members/${userId}`,
             {
@@ -205,11 +214,18 @@ async function getDiscordMemberInfo(userId) {
         const roles = member.roles || [];
         const rank = getRankFromRoles(roles);
 
-        return {
+        const data = {
             displayName,
             rank,
             avatarUrl
         };
+
+        discordMemberCache.set(userId, {
+            data,
+            time: Date.now()
+        });
+
+        return data;
     } catch (err) {
         console.error("Fehler beim Laden des Discord Users:", err);
         return null;
