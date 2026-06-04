@@ -643,7 +643,7 @@ botClient.on(Events.InteractionCreate, async (interaction) => {
         const adminId = interaction.user.id;
         const current = spontaneSelections.get(adminId) || {};
 
-        if (interaction.customId === "spontan_user") {
+        if (interaction.customId.startsWith("spontan_user_")) {
             const selectedUser = interaction.users.first();
 
             spontaneSelections.set(adminId, {
@@ -658,7 +658,7 @@ botClient.on(Events.InteractionCreate, async (interaction) => {
             });
         }
 
-        if (interaction.customId === "spontan_type") {
+        if (interaction.customId.startsWith("spontan_type_")) {
             const examType = interaction.values[0];
 
             spontaneSelections.set(adminId, {
@@ -1092,9 +1092,11 @@ app.post("/admin/spontane-panel", requireLogin, requireAdmin, async (req, res) =
 });
 
 function buildSpontanePanelComponents() {
+    const resetId = Date.now();
+
     const userRow = new ActionRowBuilder().addComponents(
         new UserSelectMenuBuilder()
-            .setCustomId("spontan_user")
+            .setCustomId(`spontan_user_${resetId}`)
             .setPlaceholder("Prüfling auswählen")
             .setMinValues(1)
             .setMaxValues(1)
@@ -1102,7 +1104,7 @@ function buildSpontanePanelComponents() {
 
     const typeRow = new ActionRowBuilder().addComponents(
         new StringSelectMenuBuilder()
-            .setCustomId("spontan_type")
+            .setCustomId(`spontan_type_${resetId}`)
             .setPlaceholder("Prüfungsart auswählen")
             .addOptions(
                 {
