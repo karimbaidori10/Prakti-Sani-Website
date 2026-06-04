@@ -4896,3 +4896,131 @@ textarea:focus {
     background: rgba(37,99,235,0.14) !important;
     border: 1px solid rgba(96,165,250,0.24) !important;
 }
+
+/* =====================
+   PRO FINAL POLISH
+===================== */
+
+* {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(96, 165, 250, 0.55) rgba(15, 23, 42, 0.7);
+}
+
+*::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+}
+
+*::-webkit-scrollbar-track {
+    background: rgba(15, 23, 42, 0.7);
+    border-radius: 999px;
+}
+
+*::-webkit-scrollbar-thumb {
+    background: linear-gradient(180deg, #2563eb, #ef233c);
+    border-radius: 999px;
+    border: 2px solid rgba(15, 23, 42, 0.9);
+}
+
+::selection {
+    background: rgba(37, 99, 235, 0.45);
+    color: #ffffff;
+}
+
+main,
+.content,
+.main-content {
+    animation: pageFadeIn 0.28s ease both;
+}
+
+@keyframes pageFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(6px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.card,
+.stat-card,
+.doc-card,
+.quick-card,
+.points-box,
+.leaderboard-row,
+.admin-member-row,
+.sheet-table-row-clean {
+    will-change: transform;
+}
+
+input::placeholder,
+textarea::placeholder {
+    color: rgba(148, 163, 184, 0.72) !important;
+}
+
+select {
+    cursor: pointer;
+}
+
+button,
+.open-doc-btn,
+.danger-btn,
+.quick-card,
+.sidebar nav a {
+    cursor: pointer;
+}
+
+button:active,
+.open-doc-btn:active,
+.danger-btn:active,
+.quick-card:active {
+    transform: scale(0.98) !important;
+}
+
+.badge,
+.chip {
+    text-transform: none !important;
+    white-space: nowrap;
+}
+
+.card-header {
+    gap: 12px;
+}
+
+.card-header .chip {
+    flex-shrink: 0;
+}
+
+.empty-state h3 {
+    color: #ffffff;
+    letter-spacing: -0.04em;
+}
+
+.empty-state p {
+    color: rgba(203, 213, 225, 0.75) !important;
+}
+
+@media (max-width: 900px) {
+    .stats-grid,
+    .dashboard-grid,
+    .docs-grid,
+    .quick-grid {
+        grid-template-columns: 1fr !important;
+    }
+
+    .card-header {
+        align-items: flex-start !important;
+        flex-direction: column;
+    }
+
+    .page-header h1 {
+        font-size: 36px !important;
+    }
+
+    .page-header p {
+        font-size: 14px !important;
+    }
+}
