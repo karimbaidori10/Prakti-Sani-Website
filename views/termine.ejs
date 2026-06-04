@@ -68,6 +68,47 @@
     const fahrCount = allTermine.filter(t => t.examType === "Darf alleine fahren").length;
 %>
 
+const today = new Date();
+const calendarYear = today.getFullYear();
+const calendarMonth = today.getMonth();
+
+const monthNames = [
+    "Januar", "Februar", "März", "April", "Mai", "Juni",
+    "Juli", "August", "September", "Oktober", "November", "Dezember"
+];
+
+function dateKeyFromDate(date) {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+    return year + "-" + month + "-" + day;
+}
+
+const daysInMonth = new Date(calendarYear, calendarMonth + 1, 0).getDate();
+const firstDayIndex = (new Date(calendarYear, calendarMonth, 1).getDay() + 6) % 7;
+
+const termineByDate = {};
+
+allTermine.forEach((termin) => {
+    if (!termin.date) return;
+
+    if (!termineByDate[termin.date]) {
+        termineByDate[termin.date] = [];
+    }
+
+    termineByDate[termin.date].push(termin);
+});
+
+const calendarCells = [];
+
+for (let i = 0; i < firstDayIndex; i++) {
+    calendarCells.push(null);
+}
+
+for (let day = 1; day <= daysInMonth; day++) {
+    calendarCells.push(new Date(calendarYear, calendarMonth, day));
+}
+
 <div class="page-header sheet-hero">
     <div>
         <h1>Ausbildungstermine</h1>
@@ -145,6 +186,71 @@
             <strong>Ausbilder</strong>
             <p>Aktive Ausbilder</p>
         </div>
+    </div>
+</section>
+
+<section class="card clean-panel calendar-pro-card">
+    <div class="card-header">
+        <div>
+            <h2>Kalenderansicht</h2>
+            <p class="card-subtitle">Aktueller Monat mit allen Ausbildungseinträgen.</p>
+        </div>
+
+        <span class="chip blue"><%= monthNames[calendarMonth] %> <%= calendarYear %></span>
+    </div>
+
+    <div class="pro-calendar-weekdays">
+        <div>Mo</div>
+        <div>Di</div>
+        <div>Mi</div>
+        <div>Do</div>
+        <div>Fr</div>
+        <div>Sa</div>
+        <div>So</div>
+    </div>
+
+    <div class="pro-calendar-grid">
+        <% calendarCells.forEach((cell) => { %>
+            <% if (!cell) { %>
+                <div class="pro-calendar-day is-empty"></div>
+            <% } else { %>
+                <%
+                    const key = dateKeyFromDate(cell);
+                    const dayTermine = termineByDate[key] || [];
+                    const isToday = key === dateKeyFromDate(today);
+                %>
+
+                <div class="pro-calendar-day <%= isToday ? 'is-today' : '' %>">
+                    <div class="pro-calendar-number">
+                        <%= cell.getDate() %>
+                    </div>
+
+                    <div class="pro-calendar-events">
+                        <% if (dayTermine.length === 0) { %>
+                            <small>Keine Einträge</small>
+                        <% } else { %>
+                            <% dayTermine.slice(0, 3).forEach((termin) => { %>
+                                <% if (termin.examType === "Darf alleine fahren") { %>
+                                    <div class="pro-calendar-event event-blue">
+                                        <strong>Fahrfreigabe</strong>
+                                        <span><%= termin.name || "Unbekannt" %></span>
+                                    </div>
+                                <% } else { %>
+                                    <div class="pro-calendar-event event-success">
+                                        <strong>Sanitäter</strong>
+                                        <span><%= termin.name || "Unbekannt" %></span>
+                                    </div>
+                                <% } %>
+                            <% }) %>
+
+                            <% if (dayTermine.length > 3) { %>
+                                <small>+<%= dayTermine.length - 3 %> weitere</small>
+                            <% } %>
+                        <% } %>
+                    </div>
+                </div>
+            <% } %>
+        <% }) %>
     </div>
 </section>
 
