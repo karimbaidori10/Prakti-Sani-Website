@@ -929,6 +929,16 @@ async function start() {
     docsCollection = db.collection("documents");
     logsCollection = db.collection("dashboardLogs");
 
+await pointsCollection.createIndex({ points: -1 });
+await pointsCollection.createIndex({ userId: 1 });
+
+await termineCollection.createIndex({ date: 1, time: 1 });
+await termineCollection.createIndex({ createdAt: -1 });
+
+await docsCollection.createIndex({ createdAt: -1 });
+
+await logsCollection.createIndex({ createdAt: -1 });
+
     app.listen(PORT, () => {
         console.log(`LSMD Website laeuft auf Port ${PORT}`);
     });
