@@ -459,16 +459,22 @@ async function getAllPoints() {
             return user;
         }
 
-        await pointsCollection.updateOne(
-            { userId: user.userId },
-            {
-                $set: {
-                    displayName: discordInfo.displayName,
-                    rank: discordInfo.rank,
-                    avatarUrl: discordInfo.avatarUrl
-                }
+if (
+    user.displayName !== discordInfo.displayName ||
+    user.rank !== discordInfo.rank ||
+    user.avatarUrl !== discordInfo.avatarUrl
+) {
+    await pointsCollection.updateOne(
+        { userId: user.userId },
+        {
+            $set: {
+                displayName: discordInfo.displayName,
+                rank: discordInfo.rank,
+                avatarUrl: discordInfo.avatarUrl
             }
-        );
+        }
+    );
+}
 
         return {
             ...user,
