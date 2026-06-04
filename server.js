@@ -271,12 +271,17 @@ function isDiscordAdmin(interaction) {
         return false;
     }
 
+    const allowedRoles = [
+        ADMIN_ROLE_ID,
+        PRAKTI_SANI_ROLE_ID
+    ].filter(Boolean);
+
     if (roles.cache) {
-        return roles.cache.has(ADMIN_ROLE_ID);
+        return allowedRoles.some(roleId => roles.cache.has(roleId));
     }
 
     if (Array.isArray(roles)) {
-        return roles.includes(ADMIN_ROLE_ID);
+        return allowedRoles.some(roleId => roles.includes(roleId));
     }
 
     return false;
