@@ -9,6 +9,18 @@ const passport = require("passport");
 const compression = require("compression");
 const DiscordStrategy = require("passport-discord").Strategy;
 
+const {
+    Client,
+    GatewayIntentBits,
+    EmbedBuilder,
+    ActionRowBuilder,
+    UserSelectMenuBuilder,
+    StringSelectMenuBuilder,
+    ButtonBuilder,
+    ButtonStyle,
+    Events
+} = require("discord.js");
+
 const app = express();
 const PORT = process.env.PORT || 3000;
 
@@ -35,6 +47,8 @@ const ROLE_SENIOR = process.env.ROLE_SENIOR;
 const ROLE_UNTERE_LEITUNG = process.env.ROLE_UNTERE_LEITUNG;
 const ROLE_STV_LEITUNG = process.env.ROLE_STV_LEITUNG;
 const ROLE_LEITUNG = process.env.ROLE_LEITUNG;
+
+
 
 app.set("view engine", "ejs");
 
@@ -234,6 +248,114 @@ async function getDiscordMemberInfo(userId) {
         console.error("Fehler beim Laden des Discord Users:", err);
         return null;
     }
+}
+
+function isDiscordAdmin(interaction) {
+    const roles = interaction.member?.roles;
+
+    if (!roles) {
+        return false;
+    }
+
+    if (roles.cache) {
+        return roles.cache.has(ADMIN_ROLE_ID);
+    }
+
+    if (Array.isArray(roles)) {
+        return roles.includes(ADMIN_ROLE_ID);
+    }
+
+    return false;
+}
+
+async function sendSpontanePruefungenPanel() {
+    if (!process.env.SPONTANE_PRUEFUNGEN_CHANNEL_ID) {
+        console.log("SPONTANE_PRUEFUNGEN_CHANNEL_ID fehlt");
+        return;
+    }
+
+    const channel = await botClient.channels.fetch(process.env.SPONTANE_PRUEFUNGEN_CHANNEL_ID);
+
+    if (!channel) {
+        console.log("Spontane Prüfungen Channel nicht gefunden");
+        return;
+    }
+
+    const embed = new EmbedBuilder()
+        .setColor(0x2563eb)
+        .setTitle("🚑 Spontane Prüfung eintragen")
+        .setDescription(
+            "Wähle einen Prüfling aus, wähle die Prüfungsart und entscheide anschließend, ob die Prüfung genehmigt oder abgelehnt wird."
+        )
+        .addFields(
+            {
+                name: "Schritt 1",
+                value: "Prüfling über das Dropdown auswählen.",
+                inline: true
+            },
+            {
+                name: "Schritt 2",
+                value: "Prüfungsart auswählen.",
+                inline: true
+            },
+            {
+                name: "Schritt 3",
+                value: "Genehmigen oder ablehnen.",
+                inline: true
+            }
+        )
+        .setFooter({ text: "LSMD Ausbildungssystem" })
+        .setTimestamp();
+
+    const userRow = new ActionRowBuilder().addComponents(
+        new UserSelectMenuBuilder()
+            .setCustomId("spontan_user")
+            .setPlaceholder("Prüfling auswählen")
+            .setMinValues(1)
+            .setMaxValues(1)
+    );
+
+    const typeRow = new ActionRowBuilder().addComponents(
+        new StringSelectMenuBuilder()
+            .setCustomId("spontan_type")
+            .setPlaceholder("Prüfungsart auswählen")
+            .addOptions(
+                {
+                    label: "Sanitäter",
+                    value: "Sanitäter",
+                    emoji: "🚑"
+                },
+                {
+                    label: "Darf alleine fahren",
+                    value: "Darf alleine fahren",
+                    emoji: "✅"
+                },
+                {
+                    label: "Theorieprüfung",
+                    value: "Theorieprüfung",
+                    emoji: "📘"
+                }
+            )
+    );
+
+    const buttonRow = new ActionRowBuilder().addComponents(
+        new ButtonBuilder()
+            .setCustomId("spontan_approve")
+            .setLabel("Genehmigen")
+            .setEmoji("✅")
+            .setStyle(ButtonStyle.Success),
+
+        new ButtonBuilder()
+            .setCustomId("spontan_reject")
+            .setLabel("Ablehnen")
+            .setEmoji("❌")
+            .setStyle(ButtonStyle.Danger)
+    );
+
+    await channel.send({
+        embeds: [embed],
+        components: [userRow, typeRow, buttonRow]
+    });
 }
 
 async function addLog(action, data = {}, actor = null) {
@@ -497,6 +619,129 @@ async function getAllPoints() {
 
     return enrichedUsers;
 }
+
+botClient.on(Events.InteractionCreate, async (interaction) => {
+    try {
+        if (
+            !interaction.isUserSelectMenu() &&
+            !interaction.isStringSelectMenu() &&
+            !interaction.isButton()
+        ) {
+            return;
+        }
+
+        if (!interaction.customId.startsWith("spontan_")) {
+            return;
+        }
+
+        if (!isDiscordAdmin(interaction)) {
+            return interaction.reply({
+                content: "Du hast keine Berechtigung für dieses Prüfungs-Panel.",
+                ephemeral: true
+            });
+        }
+
+        const adminId = interaction.user.id;
+        const current = spontaneSelections.get(adminId) || {};
+
+        if (interaction.customId === "spontan_user") {
+            const selectedUser = interaction.users.first();
+
+            spontaneSelections.set(adminId, {
+                ...current,
+                targetId: selectedUser.id,
+                targetName: selectedUser.username
+            });
+
+            return interaction.reply({
+                content: `Prüfling ausgewählt: <@${selectedUser.id}>`,
+                ephemeral: true
+            });
+        }
+
+        if (interaction.customId === "spontan_type") {
+            const examType = interaction.values[0];
+
+            spontaneSelections.set(adminId, {
+                ...current,
+                examType
+            });
+
+            return interaction.reply({
+                content: `Prüfungsart ausgewählt: **${examType}**`,
+                ephemeral: true
+            });
+        }
+
+        if (interaction.customId === "spontan_approve" || interaction.customId === "spontan_reject") {
+            const state = spontaneSelections.get(adminId);
+
+            if (!state || !state.targetId || !state.examType) {
+                return interaction.reply({
+                    content: "Bitte zuerst Prüfling und Prüfungsart auswählen.",
+                    ephemeral: true
+                });
+            }
+
+            const approved = interaction.customId === "spontan_approve";
+
+            const embed = new EmbedBuilder()
+                .setColor(approved ? 0x22c55e : 0xef233c)
+                .setTitle(approved ? "✅ Spontane Prüfung genehmigt" : "❌ Spontane Prüfung abgelehnt")
+                .setDescription(
+                    approved
+                        ? "Eine spontane Prüfung wurde genehmigt."
+                        : "Eine spontane Prüfung wurde abgelehnt."
+                )
+                .addFields(
+                    {
+                        name: "Prüfling",
+                        value: `<@${state.targetId}>`,
+                        inline: true
+                    },
+                    {
+                        name: "Prüfung",
+                        value: state.examType,
+                        inline: true
+                    },
+                    {
+                        name: approved ? "Genehmigt von" : "Abgelehnt von",
+                        value: `<@${interaction.user.id}>`,
+                        inline: true
+                    }
+                )
+                .setFooter({ text: "LSMD Ausbildungssystem" })
+                .setTimestamp();
+
+            await interaction.channel.send({
+                content: `<@${state.targetId}>`,
+                allowedMentions: {
+                    users: [state.targetId]
+                },
+                embeds: [embed]
+            });
+
+            spontaneSelections.delete(adminId);
+
+            return interaction.reply({
+                content: approved
+                    ? "Spontane Prüfung wurde genehmigt und gepostet."
+                    : "Spontane Prüfung wurde abgelehnt und gepostet.",
+                ephemeral: true
+            });
+        }
+    } catch (err) {
+        console.error("Fehler bei Spontane-Prüfungen Interaction:", err);
+
+        if (!interaction.replied) {
+            await interaction.reply({
+                content: "Es ist ein Fehler aufgetreten.",
+                ephemeral: true
+            });
+        }
+    }
+});
+
 // =====================
 // LOGIN
 // =====================
@@ -644,6 +889,16 @@ app.get("/admin", requireLogin, requireAdmin, async (req, res) => {
         users,
         logs
     }));
+});
+
+app.post("/admin/spontane-panel", requireLogin, requireAdmin, async (req, res) => {
+    await sendSpontanePruefungenPanel();
+
+    await addLog("Spontane Prüfungen Panel gesendet", {
+        channelId: process.env.SPONTANE_PRUEFUNGEN_CHANNEL_ID
+    }, req.session.user);
+
+    res.redirect("/admin");
 });
 
 // =====================

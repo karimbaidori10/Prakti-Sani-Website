@@ -91,7 +91,13 @@
                             Datei
                         </div>
 
-                        <span class="badge warning"><%= doc.type || "Dokument" %></span>
+                        <span class="badge warning">
+    <% if (doc.type === "Sanitaeter Theorie") { %>
+        Sanit&auml;ter Theorie
+    <% } else { %>
+        <%= doc.type || "Dokument" %>
+    <% } %>
+</span>
                     </div>
 
                     <h3><%= doc.title %></h3>
