@@ -813,7 +813,7 @@ botClient.on(Events.InteractionCreate, async (interaction) => {
             });
 
             return interaction.reply({
-                content: `Prüfungsart ausgew hlt: **${examType}**. Klicke jetzt auf **Antrag erstellen**.`,
+                content: `Prüfungsart ausgewählt: **${examType}**. Klicke jetzt auf **Antrag erstellen**.`,
                 flags: MessageFlags.Ephemeral
             });
         }
@@ -840,7 +840,7 @@ botClient.on(Events.InteractionCreate, async (interaction) => {
 
             const dnInput = new TextInputBuilder()
                 .setCustomId("pruefling_dn")
-                .setLabel("DN des Prüfungs")
+                .setLabel("DN des Prüflings")
                 .setStyle(TextInputStyle.Short)
                 .setRequired(true)
                 .setMaxLength(30)
@@ -848,7 +848,7 @@ botClient.on(Events.InteractionCreate, async (interaction) => {
 
             const nameInput = new TextInputBuilder()
                 .setCustomId("pruefling_name")
-                .setLabel("Name des Prüfungs")
+                .setLabel("Name des Prüflings")
                 .setStyle(TextInputStyle.Short)
                 .setRequired(true)
                 .setMaxLength(80)
@@ -956,7 +956,7 @@ botClient.on(Events.InteractionCreate, async (interaction) => {
         }
 
         if (interaction.customId.startsWith("spontan_request_approve_")) {
-            const requestId = Number(interaction.customId.replace("spontan_request_approve_", ""));
+            const requestId = interaction.customId.replace("spontan_request_approve_", "");
             const request = spontaneRequests.get(requestId);
 
             if (!request || request.status !== "offen") {
@@ -1020,7 +1020,7 @@ botClient.on(Events.InteractionCreate, async (interaction) => {
         }
 
         if (interaction.customId.startsWith("spontan_request_reject_")) {
-            const requestId = Number(interaction.customId.replace("spontan_request_reject_", ""));
+            const requestId = interaction.customId.replace("spontan_request_reject_", "");
             const request = spontaneRequests.get(requestId);
 
             if (!request || request.status !== "offen") {
