@@ -6896,3 +6896,53 @@ textarea:focus {
         grid-template-columns: 1fr;
     }
 }
+
+/* =====================
+   EDIT-SEITEN PHASE 3
+===================== */
+
+.edit-page-layout {
+    display: grid;
+    grid-template-columns: 1fr 330px;
+    gap: 18px;
+    align-items: start;
+}
+
+.edit-main-card,
+.edit-side-card {
+    height: fit-content;
+}
+
+.edit-form label {
+    display: grid;
+    gap: 7px;
+}
+
+.edit-form label span {
+    color: var(--muted);
+    font-size: 13px;
+    font-weight: 900;
+}
+
+.edit-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+
+.edit-actions button,
+.edit-actions .open-doc-btn {
+    min-height: 46px;
+}
+
+@media (max-width: 1000px) {
+    .edit-page-layout {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 600px) {
+    .edit-actions {
+        grid-template-columns: 1fr;
+    }
+}
