@@ -5292,3 +5292,82 @@ option {
         width: 100% !important;
     }
 }
+
+/* =====================
+   PRO PERFORMANCE / STABILITY
+===================== */
+
+.card,
+.stat-card,
+.doc-card,
+.quick-card,
+.points-box,
+.admin-member-row,
+.leaderboard-row,
+.sheet-table-row-clean {
+    backface-visibility: hidden;
+    transform: translateZ(0);
+}
+
+.card:hover,
+.stat-card:hover,
+.doc-card:hover,
+.quick-card:hover,
+.points-box:hover,
+.admin-member-row:hover,
+.leaderboard-row:hover,
+.sheet-table-row-clean:hover {
+    will-change: transform, box-shadow;
+}
+
+.sidebar,
+.card,
+.stat-card,
+.doc-card,
+.quick-card,
+.points-box {
+    contain: layout paint;
+}
+
+img {
+    max-width: 100%;
+    height: auto;
+}
+
+.leader-avatar img,
+.avatar img,
+.user-avatar img,
+.profile-avatar img {
+    display: block;
+}
+
+@media (max-width: 900px) {
+    .card:hover,
+    .stat-card:hover,
+    .doc-card:hover,
+    .quick-card:hover,
+    .points-box:hover,
+    .admin-member-row:hover,
+    .leaderboard-row:hover,
+    .sheet-table-row-clean:hover {
+        transform: none !important;
+    }
+
+    .dashboard-grid .card,
+    .stats-grid .stat-card {
+        animation: none !important;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .card:hover,
+    .stat-card:hover,
+    .doc-card:hover,
+    .quick-card:hover,
+    .points-box:hover,
+    .admin-member-row:hover,
+    .leaderboard-row:hover,
+    .sheet-table-row-clean:hover {
+        transform: none !important;
+    }
+}
