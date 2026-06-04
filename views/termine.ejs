@@ -37,8 +37,9 @@
     const groupedWeeks = {};
 
     allTermine.forEach((item) => {
-    const currentDate = new Date();
-    const week = "Woche " + getWeekNumber(currentDate);
+        const itemDate = parseDate(item.date);
+        const year = itemDate && !isNaN(itemDate) ? itemDate.getFullYear() : "Unbekannt";
+        const week = "KW " + getWeekNumber(itemDate) + " / " + year;
 
         if (!groupedWeeks[week]) {
             groupedWeeks[week] = [];
@@ -62,6 +63,9 @@
     });
 
     const ausbilderList = Object.entries(ausbilderStats);
+
+    const saniCount = allTermine.filter(t => t.examType === "Sanitaeter-Pruefung").length;
+    const fahrCount = allTermine.filter(t => t.examType === "Darf alleine fahren").length;
 %>
 
 <div class="page-header sheet-hero">
@@ -76,11 +80,11 @@
     </div>
 </div>
 
-<section class="card md-small-entry-card">
+<section class="card md-small-entry-card admin-glow">
     <div class="card-header">
         <div>
             <h2>Neuen Eintrag erstellen</h2>
-            <p class="card-subtitle">Kleine Schnell-Eingabe f&uuml;r Ausbilder.</p>
+            <p class="card-subtitle">Schnell-Eingabe f&uuml;r Ausbilder und Leitung.</p>
         </div>
 
         <span class="chip blue">Eintragen</span>
@@ -102,13 +106,13 @@
 
         <textarea name="notes" placeholder="Notiz optional"></textarea>
 
-        <button type="submit">Speichern</button>
+        <button type="submit">Eintrag speichern</button>
     </form>
 </section>
 
 <section class="stats-grid">
     <div class="stat-card stat-blue">
-        <div class="stat-icon">AZ</div>
+        <div class="stat-icon">📋</div>
         <div>
             <h2><%= allTermine.length %></h2>
             <strong>Gesamt</strong>
@@ -117,25 +121,25 @@
     </div>
 
     <div class="stat-card stat-green">
-        <div class="stat-icon">SP</div>
+        <div class="stat-icon">🚑</div>
         <div>
-            <h2><%= allTermine.filter(t => t.examType === "Sanitaeter-Pruefung").length %></h2>
+            <h2><%= saniCount %></h2>
             <strong>Sanit&auml;ter</strong>
             <p>Sanit&auml;ter-Pr&uuml;fungen</p>
         </div>
     </div>
 
     <div class="stat-card stat-yellow">
-        <div class="stat-icon">DF</div>
+        <div class="stat-icon">🚗</div>
         <div>
-            <h2><%= allTermine.filter(t => t.examType === "Darf alleine fahren").length %></h2>
+            <h2><%= fahrCount %></h2>
             <strong>Fahrfreigaben</strong>
             <p>Darf alleine fahren</p>
         </div>
     </div>
 
     <div class="stat-card stat-red">
-        <div class="stat-icon">AB</div>
+        <div class="stat-icon">👨‍🏫</div>
         <div>
             <h2><%= ausbilderList.length %></h2>
             <strong>Ausbilder</strong>
@@ -149,7 +153,7 @@
         <div class="card-header">
             <div>
                 <h2>Wochen-Dokumentation</h2>
-                <p class="card-subtitle">Alle Eintr&auml;ge werden nach Kalenderwoche sortiert.</p>
+                <p class="card-subtitle">Alle Eintr&auml;ge werden automatisch nach Kalenderwoche sortiert.</p>
             </div>
 
             <span class="chip blue"><%= allTermine.length %> Eintr&auml;ge</span>
@@ -157,7 +161,7 @@
 
         <% if (allTermine.length === 0) { %>
             <div class="empty-state">
-                <div>Keine Daten</div>
+                <div>📅</div>
                 <h3>Keine Ausbildungstermine vorhanden</h3>
                 <p>Trage oben den ersten Eintrag ein.</p>
             </div>
@@ -249,14 +253,18 @@
 
     <div class="card sheet-side">
         <div class="card-header">
-            <h2>Ausbilder</h2>
+            <div>
+                <h2>Ausbilder</h2>
+                <p class="card-subtitle">Eintr&auml;ge nach Ausbilder.</p>
+            </div>
             <span class="chip green">Team</span>
         </div>
 
         <% if (ausbilderList.length === 0) { %>
             <div class="empty-state">
-                <div>Keine Daten</div>
+                <div>👨‍🏫</div>
                 <h3>Keine Ausbilder vorhanden</h3>
+                <p>Sobald Eintr&auml;ge erstellt werden, erscheint hier die Ausbilder-&Uuml;bersicht.</p>
             </div>
         <% } else { %>
             <div class="trainer-list">
@@ -279,7 +287,26 @@
 
         <div class="sheet-help">
             <h3>System</h3>
-            <p>Pr&uuml;fungen wurden entfernt. Alles wird jetzt direkt hier bei Ausbildungstermine eingetragen.</p>
+            <p>Pr&uuml;fungen wurden entfernt. Alles wird direkt hier bei Ausbildungstermine eingetragen.</p>
+        </div>
+
+        <div class="clean-divider"></div>
+
+        <div class="clean-status-list">
+            <div>
+                <span>Sanit&auml;ter-Pr&uuml;fungen</span>
+                <strong><%= saniCount %></strong>
+            </div>
+
+            <div>
+                <span>Fahrfreigaben</span>
+                <strong><%= fahrCount %></strong>
+            </div>
+
+            <div>
+                <span>Kalenderwochen</span>
+                <strong><%= weekKeys.length %></strong>
+            </div>
         </div>
     </div>
 </section>
