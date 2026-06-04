@@ -621,7 +621,6 @@ async function getAllPoints() {
 botClient.on(Events.InteractionCreate, async (interaction) => {
     try {
         if (
-            !interaction.isUserSelectMenu() &&
             !interaction.isStringSelectMenu() &&
             !interaction.isButton() &&
             !interaction.isModalSubmit()
@@ -658,156 +657,155 @@ botClient.on(Events.InteractionCreate, async (interaction) => {
         }
 
         if (interaction.customId === "spontan_submit") {
-    const state = spontaneSelections.get(adminId);
+            const state = spontaneSelections.get(adminId);
 
-    if (!state || !state.examType) {
-        return interaction.reply({
-            content: "Bitte zuerst die Prüfungsart auswählen.",
-            ephemeral: true
-        });
-    }
-
-    spontaneSelections.set(adminId, {
-        ...state,
-        panelChannelId: interaction.channel.id,
-        panelMessageId: interaction.message.id
-    });
-
-    const modal = new ModalBuilder()
-        .setCustomId("spontan_submit_modal")
-        .setTitle("Spontane Prüfung eintragen");
-
-    const dnInput = new TextInputBuilder()
-        .setCustomId("pruefling_dn")
-        .setLabel("DN des Prüflings")
-        .setStyle(TextInputStyle.Short)
-        .setRequired(true)
-        .setMaxLength(30)
-        .setPlaceholder("z.B. 1234");
-
-    const nameInput = new TextInputBuilder()
-        .setCustomId("pruefling_name")
-        .setLabel("Name des Prüflings")
-        .setStyle(TextInputStyle.Short)
-        .setRequired(true)
-        .setMaxLength(80)
-        .setPlaceholder("z.B. Max Mustermann");
-
-    modal.addComponents(
-        new ActionRowBuilder().addComponents(dnInput),
-        new ActionRowBuilder().addComponents(nameInput)
-    );
-
-    return interaction.showModal(modal);
-}
-
-if (interaction.customId === "spontan_submit_modal") {
-    const state = spontaneSelections.get(adminId);
-
-    if (!state || !state.examType) {
-        return interaction.reply({
-            content: "Die Prüfungsart fehlt. Bitte Antrag nochmal neu erstellen.",
-            ephemeral: true
-        });
-    }
-
-    const prueflingDn = interaction.fields.getTextInputValue("pruefling_dn");
-    const prueflingName = interaction.fields.getTextInputValue("pruefling_name");
-
-    const requestId = spontaneRequestCounter++;
-
-    const embed = new EmbedBuilder()
-        .setColor(0xf59e0b)
-        .setTitle("📋 Neuer Antrag: Spontane Prüfung")
-        .setDescription(
-            "Ein Prüfling wurde für eine spontane Prüfung eingetragen.\n\n" +
-            "Die Leitung kann diesen Antrag jetzt genehmigen oder ablehnen."
-        )
-        .addFields(
-            {
-                name: "Prüfling",
-                value: `**${prueflingName}**`,
-                inline: true
-            },
-            {
-                name: "DN",
-                value: `**${prueflingDn}**`,
-                inline: true
-            },
-            {
-                name: "Prüfung",
-                value: state.examType,
-                inline: true
-            },
-            {
-                name: "Eingetragen von",
-                value: `<@${interaction.user.id}>`,
-                inline: true
-            },
-            {
-                name: "Status",
-                value: "⏳ Wartet auf Entscheidung der Leitung",
-                inline: false
+            if (!state || !state.examType) {
+                return interaction.reply({
+                    content: "Bitte zuerst die Prüfungsart auswählen.",
+                    ephemeral: true
+                });
             }
-        )
-        .setFooter({ text: `LSMD Ausbildungssystem • Antrag #${requestId}` })
-        .setTimestamp();
 
-    const decisionRow = new ActionRowBuilder().addComponents(
-        new ButtonBuilder()
-            .setCustomId(`spontan_request_approve_${requestId}`)
-            .setLabel("Genehmigen")
-            .setEmoji("✅")
-            .setStyle(ButtonStyle.Success),
+            spontaneSelections.set(adminId, {
+                ...state,
+                panelChannelId: interaction.channel.id,
+                panelMessageId: interaction.message.id
+            });
 
-        new ButtonBuilder()
-            .setCustomId(`spontan_request_reject_${requestId}`)
-            .setLabel("Ablehnen")
-            .setEmoji("❌")
-            .setStyle(ButtonStyle.Danger)
-    );
+            const modal = new ModalBuilder()
+                .setCustomId("spontan_submit_modal")
+                .setTitle("Spontane Prüfung eintragen");
 
-    const requestMessage = await interaction.channel.send({
-        embeds: [embed],
-        components: [decisionRow],
-        allowedMentions: {
-            parse: []
+            const dnInput = new TextInputBuilder()
+                .setCustomId("pruefling_dn")
+                .setLabel("DN des Prüflings")
+                .setStyle(TextInputStyle.Short)
+                .setRequired(true)
+                .setMaxLength(30)
+                .setPlaceholder("z.B. 1234");
+
+            const nameInput = new TextInputBuilder()
+                .setCustomId("pruefling_name")
+                .setLabel("Name des Prüflings")
+                .setStyle(TextInputStyle.Short)
+                .setRequired(true)
+                .setMaxLength(80)
+                .setPlaceholder("z.B. Max Mustermann");
+
+            modal.addComponents(
+                new ActionRowBuilder().addComponents(dnInput),
+                new ActionRowBuilder().addComponents(nameInput)
+            );
+
+            return interaction.showModal(modal);
         }
-    });
 
-    spontaneRequests.set(requestId, {
-        id: requestId,
-        targetId: null,
-        targetName: prueflingName,
-        targetDn: prueflingDn,
-        examType: state.examType,
-        createdBy: interaction.user.id,
-        channelId: interaction.channel.id,
-        messageId: requestMessage.id,
-        status: "offen"
-    });
+        if (interaction.customId === "spontan_submit_modal") {
+            const state = spontaneSelections.get(adminId);
 
-    try {
-        if (state.panelChannelId && state.panelMessageId) {
-            const panelChannel = await botClient.channels.fetch(state.panelChannelId);
-            const panelMessage = await panelChannel.messages.fetch(state.panelMessageId);
+            if (!state || !state.examType) {
+                return interaction.reply({
+                    content: "Die Prüfungsart fehlt. Bitte Antrag nochmal neu erstellen.",
+                    ephemeral: true
+                });
+            }
 
-            await panelMessage.edit({
-                embeds: panelMessage.embeds,
-                components: buildSpontanePanelComponents()
+            const prueflingDn = interaction.fields.getTextInputValue("pruefling_dn");
+            const prueflingName = interaction.fields.getTextInputValue("pruefling_name");
+
+            const requestId = spontaneRequestCounter++;
+
+            const embed = new EmbedBuilder()
+                .setColor(0xf59e0b)
+                .setTitle("📋 Neuer Antrag: Spontane Prüfung")
+                .setDescription(
+                    "Ein Prüfling wurde für eine spontane Prüfung eingetragen.\n\n" +
+                    "Die Leitung kann diesen Antrag jetzt genehmigen oder ablehnen."
+                )
+                .addFields(
+                    {
+                        name: "Prüfling",
+                        value: `**${prueflingName}**`,
+                        inline: true
+                    },
+                    {
+                        name: "DN",
+                        value: `**${prueflingDn}**`,
+                        inline: true
+                    },
+                    {
+                        name: "Prüfung",
+                        value: state.examType,
+                        inline: true
+                    },
+                    {
+                        name: "Eingetragen von",
+                        value: `<@${interaction.user.id}>`,
+                        inline: true
+                    },
+                    {
+                        name: "Status",
+                        value: "⏳ Wartet auf Entscheidung der Leitung",
+                        inline: false
+                    }
+                )
+                .setFooter({ text: `LSMD Ausbildungssystem • Antrag #${requestId}` })
+                .setTimestamp();
+
+            const decisionRow = new ActionRowBuilder().addComponents(
+                new ButtonBuilder()
+                    .setCustomId(`spontan_request_approve_${requestId}`)
+                    .setLabel("Genehmigen")
+                    .setEmoji("✅")
+                    .setStyle(ButtonStyle.Success),
+
+                new ButtonBuilder()
+                    .setCustomId(`spontan_request_reject_${requestId}`)
+                    .setLabel("Ablehnen")
+                    .setEmoji("❌")
+                    .setStyle(ButtonStyle.Danger)
+            );
+
+            const requestMessage = await interaction.channel.send({
+                embeds: [embed],
+                components: [decisionRow],
+                allowedMentions: {
+                    parse: []
+                }
+            });
+
+            spontaneRequests.set(requestId, {
+                id: requestId,
+                targetName: prueflingName,
+                targetDn: prueflingDn,
+                examType: state.examType,
+                createdBy: interaction.user.id,
+                channelId: interaction.channel.id,
+                messageId: requestMessage.id,
+                status: "offen"
+            });
+
+            try {
+                if (state.panelChannelId && state.panelMessageId) {
+                    const panelChannel = await botClient.channels.fetch(state.panelChannelId);
+                    const panelMessage = await panelChannel.messages.fetch(state.panelMessageId);
+
+                    await panelMessage.edit({
+                        embeds: panelMessage.embeds,
+                        components: buildSpontanePanelComponents()
+                    });
+                }
+            } catch (err) {
+                console.error("Panel konnte nicht zurückgesetzt werden:", err);
+            }
+
+            spontaneSelections.delete(adminId);
+
+            return interaction.reply({
+                content: "Der Antrag wurde unten als neue Nachricht erstellt.",
+                ephemeral: true
             });
         }
-    } catch (err) {
-        console.error("Panel konnte nicht zurückgesetzt werden:", err);
-    }
-
-    spontaneSelections.delete(adminId);
-
-    return interaction.reply({
-        content: "Der Antrag wurde unten als neue Nachricht erstellt.",
-        ephemeral: true
-    });
-}
 
         if (interaction.customId.startsWith("spontan_request_approve_")) {
             const requestId = Number(interaction.customId.replace("spontan_request_approve_", ""));
@@ -829,16 +827,15 @@ if (interaction.customId === "spontan_submit_modal") {
                 .setDescription("Die Leitung hat den Antrag genehmigt.")
                 .addFields(
                     {
-    name: "Prüfling",
-    value: `**${request.targetName}**`,
-    inline: true
-},
-{
-    name: "DN",
-    value: `**${request.targetDn}**`,
-    inline: true
-},
-
+                        name: "Prüfling",
+                        value: `**${request.targetName}**`,
+                        inline: true
+                    },
+                    {
+                        name: "DN",
+                        value: `**${request.targetDn}**`,
+                        inline: true
+                    },
                     {
                         name: "Prüfung",
                         value: request.examType,
@@ -930,15 +927,15 @@ if (interaction.customId === "spontan_submit_modal") {
                 .setDescription("Die Leitung hat den Antrag abgelehnt.")
                 .addFields(
                     {
-    name: "Prüfling",
-    value: `**${request.targetName}**`,
-    inline: true
-},
-{
-    name: "DN",
-    value: `**${request.targetDn}**`,
-    inline: true
-},
+                        name: "Prüfling",
+                        value: `**${request.targetName}**`,
+                        inline: true
+                    },
+                    {
+                        name: "DN",
+                        value: `**${request.targetDn}**`,
+                        inline: true
+                    },
                     {
                         name: "Prüfung",
                         value: request.examType,
@@ -1504,3 +1501,4 @@ if (process.env.DISCORD_BOT_TOKEN) {
 }
 
 start().catch(console.error);
+
