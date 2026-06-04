@@ -4605,3 +4605,94 @@ textarea:focus {
     border-radius: 14px !important;
     font-weight: 1000 !important;
 }
+
+/* =====================
+   PRO MITGLIEDER SYSTEM
+===================== */
+
+.member-card,
+.user-card,
+.leaderboard-row {
+    position: relative;
+    overflow: hidden;
+}
+
+.member-card::before,
+.user-card::before,
+.leaderboard-row::before {
+    content: "";
+    position: absolute;
+    inset: -90px;
+    background:
+        radial-gradient(circle at top left, rgba(37, 99, 235, 0.16), transparent 34%),
+        radial-gradient(circle at bottom right, rgba(239, 35, 60, 0.10), transparent 32%);
+    pointer-events: none;
+}
+
+.member-card > *,
+.user-card > *,
+.leaderboard-row > * {
+    position: relative;
+    z-index: 1;
+}
+
+.leaderboard-row {
+    border-radius: 20px !important;
+    padding: 14px 16px !important;
+    background:
+        linear-gradient(135deg, rgba(15, 23, 42, 0.78), rgba(2, 6, 23, 0.62)) !important;
+    border: 1px solid rgba(255,255,255,0.07) !important;
+}
+
+.leader-avatar {
+    box-shadow:
+        0 14px 28px rgba(0,0,0,0.28),
+        0 0 24px rgba(37,99,235,0.14);
+}
+
+.leaderboard-row h3,
+.member-card h3,
+.user-card h3 {
+    letter-spacing: -0.04em;
+    color: #ffffff;
+}
+
+.leaderboard-row p,
+.member-card p,
+.user-card p {
+    color: rgba(203, 213, 225, 0.78) !important;
+}
+
+.rank-number {
+    min-width: 42px;
+    height: 42px;
+    border-radius: 14px;
+    display: grid;
+    place-items: center;
+    background: rgba(37, 99, 235, 0.12);
+    border: 1px solid rgba(96, 165, 250, 0.22);
+}
+
+.leader-points {
+    min-width: 90px;
+}
+
+.leader-points strong {
+    color: #ffffff;
+}
+
+.leader-points span {
+    color: rgba(203, 213, 225, 0.72);
+}
+
+@media (max-width: 800px) {
+    .leaderboard-row {
+        grid-template-columns: 1fr !important;
+        gap: 10px !important;
+    }
+
+    .rank-number,
+    .leader-points {
+        min-width: auto;
+    }
+}
