@@ -159,6 +159,23 @@
             <span class="chip blue"><%= allTermine.length %> Eintr&auml;ge</span>
         </div>
 
+<% if (allTermine.length > 0) { %>
+    <div class="pro-searchbar">
+        <input
+            type="text"
+            id="terminSearch"
+            placeholder="Eintrag suchen..."
+            autocomplete="off"
+        >
+
+        <select id="terminFilter">
+            <option value="all">Alle Arten</option>
+            <option value="sani">Sanit&auml;ter-Pr&uuml;fung</option>
+            <option value="fahr">Fahrfreigabe</option>
+        </select>
+    </div>
+<% } %>
+
         <% if (allTermine.length === 0) { %>
             <div class="empty-state">
                 <div>📅</div>
@@ -186,7 +203,18 @@
                             </div>
 
                             <% groupedWeeks[week].forEach((termin) => { %>
-                                <div class="sheet-table-row sheet-table-row-clean">
+                                <div
+    class="sheet-table-row sheet-table-row-clean termin-filter-row"
+    data-search="<%= [
+        termin.name || '',
+        termin.examiner || '',
+        termin.examType || '',
+        termin.date || '',
+        termin.time || '',
+        termin.notes || ''
+    ].join(' ').toLowerCase() %>"
+    data-type="<%= termin.examType === 'Darf alleine fahren' ? 'fahr' : 'sani' %>"
+>
                                     <div>
                                         <small>Wochentag</small>
                                         <strong><%= getDayName(termin.date) %></strong>
@@ -310,3 +338,32 @@
         </div>
     </div>
 </section>
+
+<script>
+    const terminSearch = document.getElementById("terminSearch");
+    const terminFilter = document.getElementById("terminFilter");
+    const terminRows = Array.from(document.querySelectorAll(".termin-filter-row"));
+
+    function filterTermine() {
+        const query = (terminSearch?.value || "").toLowerCase().trim();
+        const filter = terminFilter?.value || "all";
+
+        terminRows.forEach(row => {
+            const searchText = row.dataset.search || "";
+            const type = row.dataset.type || "";
+
+            const matchesSearch = searchText.includes(query);
+            const matchesFilter = filter === "all" || type === filter;
+
+            row.style.display = matchesSearch && matchesFilter ? "" : "none";
+        });
+    }
+
+    if (terminSearch) {
+        terminSearch.addEventListener("input", filterTermine);
+    }
+
+    if (terminFilter) {
+        terminFilter.addEventListener("change", filterTermine);
+    }
+</script>
