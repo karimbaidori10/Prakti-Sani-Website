@@ -352,66 +352,95 @@ async function addLog(action, data = {}, actor = null) {
             data?.name ||
             "Unbekannt";
 
-        let title = "LSMD Dashboard";
-        let description = `${actorName} hat eine Aktion ausgeführt.`;
-        let color = 3447003;
-        let emoji = "??";
+        const cleanExamType = data.examType === "Sanitaeter-Pruefung"
+            ? "Sanitäter-Prüfung"
+            : (data.examType || null);
 
-        if (action === "Login") {
-            title = "Login";
-            description = `${actorName} hat sich im LSMD Dashboard eingeloggt.`;
-            color = 5763719;
-            emoji = "??";
-        }
+        const logTypes = {
+            "Login": {
+                emoji: "🔐",
+                title: "Login",
+                description: `${actorName} hat sich im LSMD Dashboard eingeloggt.`,
+                color: 0x22c55e
+            },
 
-        if (action === "Ausbildungstermin erstellt") {
-            title = "Ausbildungstermin erstellt";
-            description = `${actorName} hat einen neuen Ausbildungstermin eingetragen.`;
-            color = 3447003;
-            emoji = "??";
-        }
+            "Ausbildungstermin erstellt": {
+                emoji: "📅",
+                title: "Ausbildungstermin erstellt",
+                description: `${actorName} hat einen neuen Ausbildungstermin eingetragen.`,
+                color: 0x2563eb
+            },
 
-        if (action === "Ausbildungstermin bearbeitet") {
-            title = "Ausbildungstermin bearbeitet";
-            description = `${actorName} hat einen Ausbildungstermin bearbeitet.`;
-            color = 16705372;
-            emoji = "???";
-        }
+            "Ausbildungstermin bearbeitet": {
+                emoji: "✏️",
+                title: "Ausbildungstermin bearbeitet",
+                description: `${actorName} hat einen Ausbildungstermin bearbeitet.`,
+                color: 0xfacc15
+            },
 
-        if (action === "Termin geloescht") {
-            title = "Ausbildungstermin gelöscht";
-            description = `${actorName} hat einen Ausbildungstermin gelöscht.`;
-            color = 15158332;
-            emoji = "???";
-        }
+            "Termin geloescht": {
+                emoji: "🗑️",
+                title: "Ausbildungstermin gelöscht",
+                description: `${actorName} hat einen Ausbildungstermin gelöscht.`,
+                color: 0xef233c
+            },
 
-        if (action === "Dokument hinzugefuegt") {
-            title = "Dokument hinzugefügt";
-            description = `${actorName} hat ein neues Dokument hinzugefügt.`;
-            color = 3066993;
-            emoji = "??";
-        }
+            "Dokument hinzugefuegt": {
+                emoji: "📄",
+                title: "Dokument hinzugefügt",
+                description: `${actorName} hat ein neues Dokument hinzugefügt.`,
+                color: 0x22c55e
+            },
 
-        if (action === "Dokument bearbeitet") {
-            title = "Dokument bearbeitet";
-            description = `${actorName} hat ein Dokument bearbeitet.`;
-            color = 16705372;
-            emoji = "??";
-        }
+            "Dokument bearbeitet": {
+                emoji: "✏️",
+                title: "Dokument bearbeitet",
+                description: `${actorName} hat ein Dokument bearbeitet.`,
+                color: 0xfacc15
+            },
 
-        if (action === "Dokument geloescht") {
-            title = "Dokument gelöscht";
-            description = `${actorName} hat ein Dokument gelöscht.`;
-            color = 15158332;
-            emoji = "???";
-        }
+            "Dokument geloescht": {
+                emoji: "🗑️",
+                title: "Dokument gelöscht",
+                description: `${actorName} hat ein Dokument gelöscht.`,
+                color: 0xef233c
+            },
 
-        if (action === "Punkte hinzugefuegt" || action === "Punkte entfernt" || action === "Punkte gesetzt") {
-            title = "Punkteverwaltung";
-            description = `${actorName} hat Punkte im Dashboard geändert.`;
-            color = 10181046;
-            emoji = "??";
-        }
+            "Punkte hinzugefuegt": {
+                emoji: "➕",
+                title: "Punkte hinzugefügt",
+                description: `${actorName} hat Punkte hinzugefügt.`,
+                color: 0x22c55e
+            },
+
+            "Punkte entfernt": {
+                emoji: "➖",
+                title: "Punkte entfernt",
+                description: `${actorName} hat Punkte entfernt.`,
+                color: 0xef233c
+            },
+
+            "Punkte gesetzt": {
+                emoji: "🎯",
+                title: "Punkte gesetzt",
+                description: `${actorName} hat Punkte neu gesetzt.`,
+                color: 0x2563eb
+            },
+
+            "Spontane Prüfungen Panel gesendet": {
+                emoji: "🚑",
+                title: "Spontane-Prüfungen Panel gesendet",
+                description: `${actorName} hat das Discord-Panel für spontane Prüfungen gesendet.`,
+                color: 0x2563eb
+            }
+        };
+
+        const config = logTypes[action] || {
+            emoji: "📌",
+            title: "LSMD Dashboard",
+            description: `${actorName} hat eine Aktion ausgeführt.`,
+            color: 0x2563eb
+        };
 
         const fields = [];
 
@@ -434,15 +463,15 @@ async function addLog(action, data = {}, actor = null) {
         if (data.type) {
             fields.push({
                 name: "Kategorie",
-                value: String(data.type),
+                value: data.type === "Sanitaeter Theorie" ? "Sanitäter Theorie" : String(data.type),
                 inline: true
             });
         }
 
-        if (data.examType) {
+        if (cleanExamType) {
             fields.push({
                 name: "Art",
-                value: String(data.examType),
+                value: String(cleanExamType),
                 inline: true
             });
         }
@@ -507,25 +536,21 @@ async function addLog(action, data = {}, actor = null) {
             body: JSON.stringify({
                 username: "LSMD Dashboard Logs",
                 avatar_url: "https://cdn.discordapp.com/embed/avatars/0.png",
-
-                // EINMAL pingen, nicht doppelt
                 content: "",
-
                 allowed_mentions: {
                     parse: ["users"]
                 },
-
                 embeds: [
                     {
-                        color,
+                        color: config.color,
                         author: {
                             name: "LSMD Dashboard System"
                         },
-                        title: `${emoji} ${title}`,
-                        description,
+                        title: `${config.emoji} ${config.title}`,
+                        description: config.description,
                         fields,
                         footer: {
-                            text: "LSMD Dashboard"
+                            text: "LSMD Dashboard • Automatischer System-Log"
                         },
                         timestamp: createdAt.toISOString()
                     }
@@ -543,7 +568,6 @@ async function addLog(action, data = {}, actor = null) {
         console.error("Discord Log konnte nicht gesendet werden:", err);
     }
 }
-
 async function getAllPoints() {
     if (pointsListCache && Date.now() - pointsListCacheTime < POINTS_LIST_CACHE_TIME) {
         return pointsListCache;
@@ -1472,6 +1496,7 @@ if (process.env.DISCORD_BOT_TOKEN) {
 }
 
 start().catch(console.error);
+
 
 
 
