@@ -5,9 +5,12 @@
 
 <section class="dashboard-grid">
     <% if (isAdmin) { %>
-        <div class="card">
+        <div class="card admin-glow">
             <div class="card-header">
-                <h2>Dokument hinzuf&uuml;gen</h2>
+                <div>
+                    <h2>Dokument hinzuf&uuml;gen</h2>
+                    <p class="card-subtitle">Neue Unterlage oder Google-Docs-Link speichern.</p>
+                </div>
                 <span class="chip blue">Admin</span>
             </div>
 
@@ -36,7 +39,10 @@
 
     <div class="card">
         <div class="card-header">
-            <h2>Dokumentenstatus</h2>
+            <div>
+                <h2>Dokumentenstatus</h2>
+                <p class="card-subtitle">Aktueller Stand der gespeicherten Unterlagen.</p>
+            </div>
             <span class="chip green">Live</span>
         </div>
 
@@ -64,50 +70,94 @@
 
         <div class="clean-divider"></div>
 
-        <p style="color: var(--muted);">
-            Hier kannst du LSMD-Dokumente, Google-Docs-Links, Leitf&auml;den, Regelwerke und Checklisten sammeln.
-        </p>
+        <div class="clean-status-list">
+            <div>
+                <span>Mitglieder</span>
+                <strong>Nur &ouml;ffnen</strong>
+            </div>
+
+            <div>
+                <span>Admins</span>
+                <strong>Bearbeiten / L&ouml;schen</strong>
+            </div>
+
+            <div>
+                <span>Kategorien</span>
+                <strong>Aktiv</strong>
+            </div>
+        </div>
     </div>
 </section>
 
-<section class="card">
+<section class="card" style="margin-top: 18px;">
     <div class="card-header">
-        <h2>Gespeicherte Dokumente</h2>
+        <div>
+            <h2>Gespeicherte Dokumente</h2>
+            <p class="card-subtitle">Alle hinterlegten Dokumente und Links.</p>
+        </div>
         <span class="chip blue"><%= docs ? docs.length : 0 %> Dokumente</span>
     </div>
 
     <% if (!docs || docs.length === 0) { %>
         <div class="empty-state">
-            <div style="font-size: 42px;">Keine Dateien</div>
+            <div style="font-size: 42px;">📄</div>
             <h3>Keine Dokumente gespeichert</h3>
             <p>F&uuml;ge oben dein erstes Dokument oder einen Google-Docs-Link hinzu.</p>
         </div>
     <% } else { %>
         <div class="docs-grid">
             <% docs.forEach(doc => { %>
+                <%
+                    const cleanType = doc.type === "Sanitaeter Theorie" ? "Sanitäter Theorie" : (doc.type || "Dokument");
+
+                    let badgeClass = "warning";
+                    let icon = "📄";
+
+                    if (cleanType.includes("Leitfaden")) {
+                        badgeClass = "blue";
+                        icon = "📘";
+                    }
+
+                    if (cleanType.includes("Checkliste")) {
+                        badgeClass = "green";
+                        icon = "✅";
+                    }
+
+                    if (cleanType.includes("Regelwerk") || cleanType.includes("Dienstvorschrift")) {
+                        badgeClass = "red";
+                        icon = "⚖️";
+                    }
+
+                    if (cleanType.includes("Theorie")) {
+                        badgeClass = "yellow";
+                        icon = "🧠";
+                    }
+
+                    if (cleanType.includes("Dienstblatt")) {
+                        badgeClass = "blue";
+                        icon = "📌";
+                    }
+                %>
+
                 <div class="doc-card">
                     <div class="doc-top">
                         <div class="doc-icon">
-                            Datei
+                            <%= icon %>
                         </div>
 
-                        <span class="badge warning">
-    <% if (doc.type === "Sanitaeter Theorie") { %>
-        Sanit&auml;ter Theorie
-    <% } else { %>
-        <%= doc.type || "Dokument" %>
-    <% } %>
-</span>
+                        <span class="badge <%= badgeClass %>">
+                            <%= cleanType %>
+                        </span>
                     </div>
 
-                    <h3><%= doc.title %></h3>
+                    <h3><%= doc.title || "Unbenanntes Dokument" %></h3>
 
                     <p>
                         <%= doc.notes || "Keine Beschreibung hinterlegt." %>
                     </p>
 
                     <div class="doc-actions">
-                        <a href="<%= doc.url %>" target="_blank" class="open-doc-btn">
+                        <a href="<%= doc.url %>" target="_blank" rel="noopener noreferrer" class="open-doc-btn">
                             &Ouml;ffnen
                         </a>
 
