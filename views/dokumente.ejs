@@ -98,6 +98,26 @@
         <span class="chip blue"><%= docs ? docs.length : 0 %> Dokumente</span>
     </div>
 
+<% if (docs && docs.length > 0) { %>
+    <div class="pro-searchbar">
+        <input
+            type="text"
+            id="docSearch"
+            placeholder="Dokument suchen..."
+            autocomplete="off"
+        >
+
+        <select id="docFilter">
+            <option value="all">Alle Kategorien</option>
+            <option value="leitfaden">Leitf&auml;den</option>
+            <option value="checkliste">Checklisten</option>
+            <option value="regelwerk">Regelwerke</option>
+            <option value="theorie">Theorie</option>
+            <option value="dienstblatt">Dienstblatt</option>
+        </select>
+    </div>
+<% } %>
+
     <% if (!docs || docs.length === 0) { %>
         <div class="empty-state">
             <div style="font-size: 42px;">📄</div>
@@ -139,8 +159,17 @@
                     }
                 %>
 
-                <div class="doc-card">
-                    <div class="doc-top">
+                <div
+    class="doc-card"
+    data-search="<%= [
+        doc.title || '',
+        cleanType || '',
+        doc.notes || ''
+    ].join(' ').toLowerCase() %>"
+    data-category="<%= cleanType.toLowerCase() %>"
+
+> 
+                   <div class="doc-top">
                         <div class="doc-icon">
                             <%= icon %>
                         </div>
@@ -182,3 +211,61 @@
         </div>
     <% } %>
 </section>
+
+<script>
+    const docSearch = document.getElementById("docSearch");
+    const docFilter = document.getElementById("docFilter");
+    const docCards = Array.from(document.querySelectorAll(".doc-card"));
+
+    function filterDocs() {
+        const query = (docSearch?.value || "").toLowerCase().trim();
+        const filter = docFilter?.value || "all";
+
+        let visible = 0;
+
+        docCards.forEach(card => {
+            const searchText = card.dataset.search || "";
+            const category = card.dataset.category || "";
+
+            const matchesSearch = searchText.includes(query);
+
+            let matchesFilter = true;
+
+            if (filter === "leitfaden") {
+                matchesFilter = category.includes("leitfaden");
+            }
+
+            if (filter === "checkliste") {
+                matchesFilter = category.includes("checkliste");
+            }
+
+            if (filter === "regelwerk") {
+                matchesFilter = category.includes("regelwerk") || category.includes("dienstvorschrift");
+            }
+
+            if (filter === "theorie") {
+                matchesFilter = category.includes("theorie");
+            }
+
+            if (filter === "dienstblatt") {
+                matchesFilter = category.includes("dienstblatt");
+            }
+
+            const show = matchesSearch && matchesFilter;
+
+            card.style.display = show ? "" : "none";
+
+            if (show) {
+                visible++;
+            }
+        });
+    }
+
+    if (docSearch) {
+        docSearch.addEventListener("input", filterDocs);
+    }
+
+    if (docFilter) {
+        docFilter.addEventListener("change", filterDocs);
+    }
+</script>
