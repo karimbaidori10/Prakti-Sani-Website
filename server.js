@@ -1065,79 +1065,79 @@ try {
         }
 
         if (interaction.customId.startsWith("spontan_reject_modal_")) {
-            const requestId = Number(interaction.customId.replace("spontan_reject_modal_", ""));
-            const request = spontaneRequests.get(requestId);
+    const requestId = interaction.customId.replace("spontan_reject_modal_", "");
+    const request = spontaneRequests.get(String(requestId));
 
-            if (!request || request.status !== "offen") {
-                return interaction.reply({
-                    content: "Dieser Antrag wurde bereits bearbeitet oder nicht gefunden.",
-                    flags: MessageFlags.Ephemeral
-                });
+    if (!request || request.status !== "offen") {
+        return interaction.reply({
+            content: "Dieser Antrag wurde bereits bearbeitet oder nicht gefunden.",
+            flags: MessageFlags.Ephemeral
+        });
+    }
+
+    const reason = interaction.fields.getTextInputValue("reject_reason");
+
+    request.status = "abgelehnt";
+    request.decidedBy = interaction.user.id;
+    request.reason = reason;
+
+    const embed = new EmbedBuilder()
+        .setColor(0xef233c)
+        .setTitle("❌ Spontane Prüfung abgelehnt")
+        .setDescription("Die Leitung hat den Antrag abgelehnt.")
+        .addFields(
+            {
+                name: "Prüfling",
+                value: `**${request.targetName}**`,
+                inline: true
+            },
+            {
+                name: "DN",
+                value: `**${request.targetDn}**`,
+                inline: true
+            },
+            {
+                name: "Prüfung",
+                value: request.examType,
+                inline: true
+            },
+            {
+                name: "Eingetragen von",
+                value: `<@${request.createdBy}>`,
+                inline: true
+            },
+            {
+                name: "Abgelehnt von",
+                value: `<@${interaction.user.id}>`,
+                inline: true
+            },
+            {
+                name: "Grund",
+                value: reason,
+                inline: false
+            },
+            {
+                name: "Status",
+                value: "❌ Abgelehnt",
+                inline: false
             }
+        )
+        .setFooter({ text: `LSMD Ausbildungssystem • Antrag #${requestId}` })
+        .setTimestamp();
 
-            const reason = interaction.fields.getTextInputValue("reject_reason");
+    const channel = await botClient.channels.fetch(request.channelId);
+    const message = await channel.messages.fetch(request.messageId);
 
-            request.status = "abgelehnt";
-            request.decidedBy = interaction.user.id;
-            request.reason = reason;
+    await message.edit({
+        embeds: [embed],
+        components: []
+    });
 
-            const channel = await botClient.channels.fetch(request.channelId);
-            const requestMessage = await channel.messages.fetch(request.messageId);
-
-            const embed = new EmbedBuilder()
-                .setColor(0xef233c)
-                .setTitle("? Spontane Prüfung abgelehnt")
-                .setDescription("Die Leitung hat den Antrag abgelehnt.")
-                .addFields(
-                    {
-                        name: "Prüfung",
-                        value: `**${request.targetName}**`,
-                        inline: true
-                    },
-                    {
-                        name: "DN",
-                        value: `**${request.targetDn}**`,
-                        inline: true
-                    },
-                    {
-                        name: "Prüfung",
-                        value: request.examType,
-                        inline: true
-                    },
-                    {
-                        name: "Eingetragen von",
-                        value: `<@${request.createdBy}>`,
-                        inline: true
-                    },
-                    {
-                        name: "Abgelehnt von",
-                        value: `<@${interaction.user.id}>`,
-                        inline: true
-                    },
-                    {
-                        name: "Grund",
-                        value: reason,
-                        inline: false
-                    },
-                    {
-                        name: "Status",
-                        value: "? Abgelehnt",
-                        inline: false
-                    }
-                )
-                .setFooter({ text: `LSMD Ausbildungssystem   Antrag #${requestId}` })
-                .setTimestamp();
-
-            await requestMessage.edit({
-                embeds: [embed],
-                components: []
-            });
-
-            return interaction.reply({
-                content: "Der Antrag wurde abgelehnt und der Grund wurde eingetragen.",
-                flags: MessageFlags.Ephemeral
-            });
-        }
+    return interaction.reply({
+        content: "❌ Antrag wurde abgelehnt.",
+        flags: MessageFlags.Ephemeral
+    });
+}
     } catch (err) {
         console.error("Fehler bei Spontane-Prüfungen Interaction:", err);
 
