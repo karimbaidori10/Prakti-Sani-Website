@@ -297,20 +297,26 @@ async function sendSpontanePruefungenPanel() {
         .setColor(0x2563eb)
         .setTitle("🚑 Spontane Prüfung eintragen")
         .setDescription(
-    "Wähle einen Prüfling aus und wähle anschließend die Prüfungsart aus.\n\n" +
-    "Erstelle danach den Antrag und warte, bis eine Leitung den Antrag genehmigt oder ablehnt."
+    "Wähle zuerst die Prüfungsart aus.\n\n" +
+    "Klicke danach auf **Antrag erstellen** und trage im Fenster die **DN** und den **Namen** des Prüflings ein.\n\n" +
+    "Anschließend wartet der Antrag auf die Entscheidung der Leitung."
 )
         .addFields(
             {
-                name: "Schritt 1",
-                value: "Prüfling über das Dropdown auswählen.",
-                inline: true
-            },
-            {
-                name: "Schritt 2",
-                value: "Prüfungsart auswählen.",
-                inline: true
-            },
+    name: "Schritt 1",
+    value: "Prüfungsart auswählen.",
+    inline: true
+},
+{
+    name: "Schritt 2",
+    value: "Auf Antrag erstellen klicken und DN + Name eintragen.",
+    inline: true
+},
+{
+    name: "Schritt 3",
+    value: "Auf Entscheidung der Leitung warten.",
+    inline: true
+}
             {
     name: "Schritt 3",
     value: "Warten auf Entscheidung der Leitung.",
