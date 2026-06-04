@@ -618,6 +618,20 @@ function buildRoleGroup(title, members) {
     return `**${title}**\n${members.map(memberLine).join(",\n")}\n`;
 }
 
+function memberLine(member) {
+    return `<@${member.id}>`;
+}
+
+function buildRoleField(title, members) {
+    return {
+        name: title,
+        value: members && members.length > 0
+            ? members.map(memberLine).join("\n")
+            : "—",
+        inline: false
+    };
+}
+
 async function updateTeamListMessage() {
     if (!process.env.TEAM_LIST_CHANNEL_ID) {
         console.log("TEAM_LIST_CHANNEL_ID fehlt");
@@ -639,20 +653,42 @@ async function updateTeamListMessage() {
     const testphase = allMembers.filter(member => hasRole(member, process.env.ROLE_TESTPHASE));
     const aushilfen = allMembers.filter(member => hasRole(member, process.env.ROLE_AUSHILFE));
 
-    const text =
-        "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n" +
-        "**Aktuelles Team**\n\n" +
+    const total =
+        head.length +
+        leitung.length +
+        stvLeitung.length +
+        untereLeitung.length +
+        seniorAusbilder.length +
+        festeMitarbeiter.length +
+        testphase.length +
+        aushilfen.length;
 
-        buildRoleGroup("Head of Prakti-Sani", head) + "\n" +
-        buildRoleGroup("Prakti-Sani Leitung", leitung) + "\n" +
-        buildRoleGroup("Prakti-Sani Stv. Leitung", stvLeitung) + "\n" +
-        buildRoleGroup("Prakti-Sani Untere Leitung", untereLeitung) + "\n" +
-        buildRoleGroup("Prakti-Sani Sr. Ausbilder", seniorAusbilder) + "\n" +
-        buildRoleGroup("Prakti-Sani feste Mitarbeiter", festeMitarbeiter) + "\n" +
-        buildRoleGroup("Prakti-Sani Testphase", testphase) + "\n" +
-        buildRoleGroup("Prakti-Sani Aushilfen", aushilfen) + "\n" +
-
-        "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━";
+    const embed = new EmbedBuilder()
+        .setColor(0x2563eb)
+        .setTitle("🚑 LSMD Prakti-Sani Teamliste")
+        .setDescription(
+            "**Aktuelle Mitgliederübersicht nach Rollen**\n\n" +
+            "Diese Liste wird automatisch vom LSMD Bot aktualisiert."
+        )
+        .addFields(
+            {
+                name: "📊 Übersicht",
+                value:
+                    `**Gesamt gelistete Rollen-Einträge:** ${total}\n` +
+                    `**Letzte Aktualisierung:** <t:${Math.floor(Date.now() / 1000)}:R>`,
+                inline: false
+            },
+            buildRoleField("👑 Head of Prakti-Sani", head),
+            buildRoleField("🛡️ Prakti-Sani Leitung", leitung),
+            buildRoleField("⚜️ Prakti-Sani Stv. Leitung", stvLeitung),
+            buildRoleField("🔰 Prakti-Sani Untere Leitung", untereLeitung),
+            buildRoleField("⭐ Prakti-Sani Sr. Ausbilder", seniorAusbilder),
+            buildRoleField("✅ Prakti-Sani feste Mitarbeiter", festeMitarbeiter),
+            buildRoleField("🧪 Prakti-Sani Testphase", testphase),
+            buildRoleField("🤝 Prakti-Sani Aushilfen", aushilfen)
+        )
+        .setFooter({ text: "LSMD Ausbildungssystem • Automatische Teamliste" })
+        .setTimestamp();
 
     const channel = await botClient.channels.fetch(process.env.TEAM_LIST_CHANNEL_ID);
 
@@ -662,20 +698,27 @@ async function updateTeamListMessage() {
     }
 
     if (process.env.TEAM_LIST_MESSAGE_ID) {
-        const message = await channel.messages.fetch(process.env.TEAM_LIST_MESSAGE_ID);
-        await message.edit({
-            content: text,
-            allowedMentions: {
-                parse: []
-            }
-        });
+        try {
+            const message = await channel.messages.fetch(process.env.TEAM_LIST_MESSAGE_ID);
 
-        console.log("Teamliste aktualisiert");
-        return;
+            await message.edit({
+                content: "",
+                embeds: [embed],
+                allowedMentions: {
+                    parse: []
+                }
+            });
+
+            console.log("Teamliste aktualisiert");
+            return;
+        } catch (err) {
+            console.error("TEAM_LIST_MESSAGE_ID ist falsch oder Nachricht wurde gelöscht:", err);
+        }
     }
 
     const message = await channel.send({
-        content: text,
+        content: "",
+        embeds: [embed],
         allowedMentions: {
             parse: []
         }
