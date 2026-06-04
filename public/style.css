@@ -5154,3 +5154,141 @@ option {
         transition: none !important;
     }
 }
+
+/* =====================
+   PRO RESPONSIVE FIX
+===================== */
+
+@media (max-width: 1200px) {
+    .dashboard-grid {
+        grid-template-columns: 1fr !important;
+    }
+
+    .stats-grid {
+        grid-template-columns: repeat(2, 1fr) !important;
+    }
+}
+
+@media (max-width: 800px) {
+    body {
+        overflow-x: hidden;
+    }
+
+    .app,
+    .layout,
+    .main-layout {
+        grid-template-columns: 1fr !important;
+    }
+
+    .sidebar {
+        position: relative !important;
+        width: 100% !important;
+        min-height: auto !important;
+        border-right: none !important;
+        border-bottom: 1px solid rgba(255,255,255,0.08) !important;
+    }
+
+    .sidebar nav {
+        display: grid !important;
+        grid-template-columns: 1fr 1fr !important;
+        gap: 8px !important;
+    }
+
+    .sidebar nav a {
+        justify-content: center !important;
+        text-align: center !important;
+        padding: 12px !important;
+        font-size: 13px !important;
+    }
+
+    main,
+    .content,
+    .main-content {
+        padding: 18px !important;
+        width: 100% !important;
+    }
+
+    .stats-grid {
+        grid-template-columns: 1fr !important;
+    }
+
+    .stat-card {
+        min-height: auto !important;
+        padding: 18px !important;
+    }
+
+    .page-header h1 {
+        font-size: 34px !important;
+    }
+
+    .page-header p {
+        max-width: 100% !important;
+    }
+
+    .card {
+        padding: 18px !important;
+        border-radius: 22px !important;
+    }
+
+    .quick-grid,
+    .docs-grid,
+    .points-admin-grid {
+        grid-template-columns: 1fr !important;
+    }
+
+    .doc-card {
+        max-width: none !important;
+    }
+
+    .doc-actions {
+        grid-template-columns: 1fr !important;
+    }
+
+    .admin-member-row,
+    .leaderboard-row {
+        grid-template-columns: 1fr !important;
+        text-align: left !important;
+    }
+
+    .points-actions {
+        justify-content: flex-start !important;
+    }
+
+    .clean-status-list div {
+        flex-direction: column;
+        align-items: flex-start !important;
+        gap: 6px;
+    }
+}
+
+@media (max-width: 480px) {
+    main,
+    .content,
+    .main-content {
+        padding: 14px !important;
+    }
+
+    .sidebar nav {
+        grid-template-columns: 1fr !important;
+    }
+
+    .page-header h1 {
+        font-size: 30px !important;
+    }
+
+    .card-header {
+        gap: 8px !important;
+    }
+
+    button,
+    .open-doc-btn,
+    .danger-btn {
+        width: 100% !important;
+    }
+
+    input,
+    select,
+    textarea {
+        width: 100% !important;
+    }
+}
