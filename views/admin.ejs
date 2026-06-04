@@ -1,11 +1,11 @@
 <div class="page-header">
     <h1>Admin</h1>
-    <p>Leitungsbereich f&uuml;r Punkte, Mitglieder, Discord und Systemstatus.</p>
+    <p>Leitungsbereich f&uuml;r Punkte, Mitglieder, Discord, Spontane Pr&uuml;fungen und Systemstatus.</p>
 </div>
 
 <section class="stats-grid">
     <div class="stat-card stat-blue">
-        <div class="stat-icon">US</div>
+        <div class="stat-icon">👥</div>
         <div>
             <h2><%= users ? users.length : 0 %></h2>
             <strong>Mitglieder</strong>
@@ -14,29 +14,29 @@
     </div>
 
     <div class="stat-card stat-green">
-        <div class="stat-icon">OK</div>
+        <div class="stat-icon">🎯</div>
         <div>
             <h2><%= users ? users.filter(u => Number(u.points || 0) >= 5).length : 0 %></h2>
             <strong>Wochenziel</strong>
-            <p>Erreicht</p>
+            <p>Mitglieder mit 5+ Punkten</p>
         </div>
     </div>
 
     <div class="stat-card stat-yellow">
-    <div class="stat-icon">DC</div>
-    <div>
-        <h2>Aktiv</h2>
-        <strong>Discord</strong>
-        <p>Login verbunden</p>
+        <div class="stat-icon">🤖</div>
+        <div>
+            <h2>Online</h2>
+            <strong>Discord Bot</strong>
+            <p>Panel & Logs bereit</p>
+        </div>
     </div>
-</div>
 
     <div class="stat-card stat-red">
-        <div class="stat-icon">AD</div>
+        <div class="stat-icon">🛡️</div>
         <div>
             <h2>Admin</h2>
-            <strong>Modus</strong>
-            <p>Leitung aktiv</p>
+            <strong>Leitung</strong>
+            <p>Vollzugriff aktiv</p>
         </div>
     </div>
 </section>
@@ -54,7 +54,7 @@
         <div class="points-admin-grid">
             <form action="/points/set" method="POST" class="points-box">
                 <h3>Wert setzen</h3>
-                <p>Punkte eines Mitglieds direkt auf einen Wert setzen.</p>
+                <p>Punkte eines Mitglieds direkt auf einen festen Wert setzen.</p>
 
                 <input type="text" name="userId" placeholder="Discord User ID" required>
                 <input type="number" name="points" placeholder="Punkte" required>
@@ -100,8 +100,8 @@
             </a>
 
             <a href="/termine" class="quick-card blue">
-                <h3>Ausbildungstermine</h3>
-                <p>Eintr&auml;ge verwalten</p>
+                <h3>Termine</h3>
+                <p>Ausbildungen und Pr&uuml;fungen verwalten</p>
             </a>
 
             <a href="/dokumente" class="quick-card yellow">
@@ -121,8 +121,89 @@
     <div class="card">
         <div class="card-header">
             <div>
+                <h2>Spontane Pr&uuml;fungen</h2>
+                <p class="card-subtitle">Discord-Panel f&uuml;r spontane Sanit&auml;ter-Pr&uuml;fungen senden.</p>
+            </div>
+            <span class="chip green">Bereit</span>
+        </div>
+
+        <div class="clean-status-list">
+            <div>
+                <span>Pr&uuml;fungsart</span>
+                <strong>Sanit&auml;ter Pr&uuml;fung</strong>
+            </div>
+
+            <div>
+                <span>Eingabe</span>
+                <strong>DN + Name per Fenster</strong>
+            </div>
+
+            <div>
+                <span>Entscheidung</span>
+                <strong>Leitung genehmigt / lehnt ab</strong>
+            </div>
+
+            <div>
+                <span>Ablehnung</span>
+                <strong>Mit Grund</strong>
+            </div>
+        </div>
+
+        <form action="/admin/spontane-panel" method="POST" style="margin-top: 16px;">
+            <button type="submit">
+                🚑 Spontane-Pr&uuml;fungen Panel senden
+            </button>
+        </form>
+
+        <p class="card-subtitle" style="margin-top: 12px;">
+            Tipp: Altes Discord-Panel vorher l&ouml;schen, danach hier ein neues senden.
+        </p>
+    </div>
+
+    <div class="card">
+        <div class="card-header">
+            <div>
+                <h2>Discord</h2>
+                <p class="card-subtitle">Discord-Anbindung und Loginstatus.</p>
+            </div>
+            <span class="chip green">Verbunden</span>
+        </div>
+
+        <div class="clean-status-list">
+            <div>
+                <span>Discord Login</span>
+                <strong>Aktiv</strong>
+            </div>
+
+            <div>
+                <span>Rollenpr&uuml;fung</span>
+                <strong>Aktiv</strong>
+            </div>
+
+            <div>
+                <span>Admin-Erkennung</span>
+                <strong>Aktiv</strong>
+            </div>
+
+            <div>
+                <span>Discord Bot</span>
+                <strong>Online bei Token</strong>
+            </div>
+
+            <div>
+                <span>Webhook Logs</span>
+                <strong>Aktiv</strong>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="dashboard-grid">
+    <div class="card">
+        <div class="card-header">
+            <div>
                 <h2>Mitglieder / Punkte</h2>
-                <p class="card-subtitle">Alle Mitglieder mit Punkteverwaltung.</p>
+                <p class="card-subtitle">Alle Mitglieder mit schneller Punkteverwaltung.</p>
             </div>
             <span class="chip blue"><%= users ? users.length : 0 %> Mitglieder</span>
         </div>
@@ -160,107 +241,94 @@
                         </div>
 
                         <div class="points-actions">
-    <form action="/points/add" method="POST">
-        <input type="hidden" name="userId" value="<%= member.userId %>">
-        <input type="hidden" name="points" value="10">
-        <button type="submit">+10</button>
-    </form>
+                            <form action="/points/add" method="POST">
+                                <input type="hidden" name="userId" value="<%= member.userId %>">
+                                <input type="hidden" name="points" value="10">
+                                <button type="submit">+10</button>
+                            </form>
 
-    <form action="/points/remove" method="POST">
-        <input type="hidden" name="userId" value="<%= member.userId %>">
-        <input type="hidden" name="points" value="10">
-        <button type="submit" class="danger-btn">-10</button>
-    </form>
-</div>
+                            <form action="/points/remove" method="POST">
+                                <input type="hidden" name="userId" value="<%= member.userId %>">
+                                <input type="hidden" name="points" value="10">
+                                <button type="submit" class="danger-btn">-10</button>
+                            </form>
+                        </div>
                     </div>
                 <% }) %>
             </div>
         <% } %>
     </div>
 
-<div class="card">
-    <div class="card-header">
-        <div>
-            <h2>Discord</h2>
-            <p class="card-subtitle">Discord-Anbindung und Loginstatus.</p>
-        </div>
-        <span class="chip green">Verbunden</span>
-    </div>
+    <div class="card clean-panel">
+        <div class="card-header">
+            <div>
+                <h2>System Status</h2>
+                <p class="card-subtitle">Aktueller Zustand der Webseite.</p>
+            </div>
 
-    <div class="clean-status-list">
-        <div>
-            <span>Discord Login</span>
-            <strong>Aktiv</strong>
+            <span class="chip green">Online</span>
         </div>
 
-        <div>
-            <span>Rollenpr&uuml;fung</span>
-            <strong>Aktiv</strong>
-        </div>
+        <div class="clean-status-list">
+            <div>
+                <span>Dashboard</span>
+                <strong>Online</strong>
+            </div>
 
-        <div>
-            <span>Admin-Erkennung</span>
-            <strong>Aktiv</strong>
-        </div>
+            <div>
+                <span>Termine</span>
+                <strong>Online</strong>
+            </div>
 
-        <div>
-            <span>Mitglieder-Daten</span>
-            <strong>Aktiv</strong>
-        </div>
+            <div>
+                <span>Mitglieder</span>
+                <strong>Online</strong>
+            </div>
 
-        <div>
-            <span>Spontane-Pr&uuml;fungen Panel</span>
-            <strong>Bereit</strong>
-        </div>
-    </div>
+            <div>
+                <span>Dokumente</span>
+                <strong>Online</strong>
+            </div>
 
-    <form action="/admin/spontane-panel" method="POST" style="margin-top: 14px;">
-        <button type="submit">
-            Spontane-Pr&uuml;fungen Panel senden
-        </button>
-    </form>
-</div>   
-</section>
+            <div>
+                <span>Admin</span>
+                <strong>Online</strong>
+            </div>
 
-<section class="card clean-panel" style="margin-top: 18px;">
-    <div class="card-header">
-        <div>
-            <h2>System Status</h2>
-            <p class="card-subtitle">Aktueller Zustand der Webseite.</p>
-        </div>
-
-        <span class="chip green">Online</span>
-    </div>
-
-    <div class="clean-status-list">
-        <div>
-            <span>Dashboard</span>
-            <strong>Online</strong>
-        </div>
-
-        <div>
-            <span>Ausbildungstermine</span>
-            <strong>Online</strong>
-        </div>
-
-        <div>
-            <span>Mitglieder</span>
-            <strong>Online</strong>
-        </div>
-
-        <div>
-            <span>Dokumente</span>
-            <strong>Online</strong>
-        </div>
-
-        <div>
-            <span>Discord Login</span>
-            <strong>Online</strong>
-        </div>
-
-        <div>
-            <span>MongoDB</span>
-            <strong>Online</strong>
+            <div>
+                <span>MongoDB</span>
+                <strong>Verbunden</strong>
+            </div>
         </div>
     </div>
 </section>
+
+<% if (logs && logs.length > 0) { %>
+    <section class="card clean-panel" style="margin-top: 18px;">
+        <div class="card-header">
+            <div>
+                <h2>Letzte System-Logs</h2>
+                <p class="card-subtitle">Die letzten Aktionen im Dashboard.</p>
+            </div>
+
+            <span class="chip blue"><%= logs.length %> Logs</span>
+        </div>
+
+        <div class="clean-status-list">
+            <% logs.slice(0, 12).forEach((log) => { %>
+                <div>
+                    <span>
+                        <%= log.action || "Aktion" %>
+                    </span>
+                    <strong>
+                        <% if (log.createdAt) { %>
+                            <%= new Date(log.createdAt).toLocaleString("de-DE") %>
+                        <% } else { %>
+                            Unbekannte Zeit
+                        <% } %>
+                    </strong>
+                </div>
+            <% }) %>
+        </div>
+    </section>
+<% } %>
