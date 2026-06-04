@@ -611,7 +611,7 @@ function memberLine(member) {
 }
 
 function sortMembers(members) {
-    return members.sort((a, b) => {
+    return [...members].sort((a, b) => {
         const nameA = a.displayName || a.user.username || "";
         const nameB = b.displayName || b.user.username || "";
         return nameA.localeCompare(nameB, "de");
@@ -628,10 +628,6 @@ function buildRoleField(title, members) {
             : "—",
         inline: false
     };
-}
-
-function hasRole(member, roleId) {
-    return roleId && member.roles.cache.has(roleId);
 }
 
 async function updateTeamListMessage() {
@@ -742,117 +738,6 @@ async function updateTeamListMessage() {
 
     console.log("TEAM_LIST_MESSAGE_ID bitte in Railway eintragen:", message.id);
 }
-
-async function updateTeamListMessage() {
-    if (!process.env.TEAM_LIST_CHANNEL_ID) {
-        console.log("TEAM_LIST_CHANNEL_ID fehlt");
-        return;
-    }
-
-    const channel = await botClient.channels.fetch(process.env.TEAM_LIST_CHANNEL_ID);
-
-    if (!channel) {
-        console.log("Teamliste Channel nicht gefunden");
-        return;
-    }
-
-    const guild = await botClient.guilds.fetch(process.env.DISCORD_GUILD_ID);
-
-    console.log("Lade alle Discord Mitglieder...");
-    await guild.members.fetch();
-
-    const allMembers = Array.from(guild.members.cache.values())
-        .filter(member => !member.user.bot);
-
-    const head = allMembers.filter(member => hasRole(member, process.env.ROLE_HEAD_PRAKTI_SANI));
-    const leitung = allMembers.filter(member => hasRole(member, process.env.ROLE_LEITUNG));
-    const stvLeitung = allMembers.filter(member => hasRole(member, process.env.ROLE_STV_LEITUNG));
-    const untereLeitung = allMembers.filter(member => hasRole(member, process.env.ROLE_UNTERE_LEITUNG));
-    const seniorAusbilder = allMembers.filter(member => hasRole(member, process.env.ROLE_SENIOR));
-    const festeMitarbeiter = allMembers.filter(member => hasRole(member, process.env.ROLE_FESTES_MITGLIED));
-    const testphase = allMembers.filter(member => hasRole(member, process.env.ROLE_TESTPHASE));
-    const aushilfen = allMembers.filter(member => hasRole(member, process.env.ROLE_AUSHILFE));
-
-    const uniqueTeamMembers = new Set([
-        ...head.map(m => m.id),
-        ...leitung.map(m => m.id),
-        ...stvLeitung.map(m => m.id),
-        ...untereLeitung.map(m => m.id),
-        ...seniorAusbilder.map(m => m.id),
-        ...festeMitarbeiter.map(m => m.id),
-        ...testphase.map(m => m.id),
-        ...aushilfen.map(m => m.id)
-    ]);
-
-    const embed = new EmbedBuilder()
-        .setColor(0xef233c)
-        .setTitle("🚑 LSMD Prakti-Sani Teamliste")
-        .setDescription(
-            "**Aktuelle Mitgliederübersicht der Abteilung**\n\n" +
-            "Diese Liste wird automatisch vom LSMD Bot aktualisiert."
-        )
-        .addFields(
-            {
-                name: "📊 Übersicht",
-                value:
-                    `**Teammitglieder:** ${uniqueTeamMembers.size}\n` +
-                    `**Letzte Aktualisierung:** <t:${Math.floor(Date.now() / 1000)}:R>`,
-                inline: false
-            },
-            buildRoleField("👑 Head of Prakti-Sani", head),
-            buildRoleField("🛡️ Prakti-Sani Leitung", leitung),
-            buildRoleField("⚜️ Prakti-Sani Stv. Leitung", stvLeitung),
-            buildRoleField("🔰 Prakti-Sani Untere Leitung", untereLeitung),
-            buildRoleField("⭐ Prakti-Sani Sr. Ausbilder", seniorAusbilder),
-            buildRoleField("✅ Prakti-Sani feste Mitarbeiter", festeMitarbeiter),
-            buildRoleField("🧪 Prakti-Sani Testphase", testphase),
-            buildRoleField("🤝 Prakti-Sani Aushilfen", aushilfen)
-        )
-        .setFooter({ text: "LSMD Ausbildungssystem • Automatische Teamliste" })
-        .setTimestamp();
-
-    if (process.env.TEAM_LIST_MESSAGE_ID) {
-        try {
-            const message = await channel.messages.fetch(process.env.TEAM_LIST_MESSAGE_ID);
-
-            await message.edit({
-                content: "",
-                embeds: [embed],
-                allowedMentions: {
-                    parse: []
-                }
-            });
-
-            console.log("Teamliste als Embed aktualisiert");
-            return;
-        } catch (err) {
-            console.error("TEAM_LIST_MESSAGE_ID falsch oder Nachricht gelöscht:", err);
-        }
-    }
-
-    const message = await channel.send({
-        content: "",
-        embeds: [embed],
-        allowedMentions: {
-            parse: []
-        }
-    });
-
-    console.log("TEAM_LIST_MESSAGE_ID bitte in Railway eintragen:", message.id);
-}
-
-botClient.on(Events.GuildMemberAdd, () => {
-    scheduleTeamListUpdate();
-});
-
-botClient.on(Events.GuildMemberRemove, () => {
-    scheduleTeamListUpdate();
-});
-
-botClient.on(Events.GuildMemberUpdate, () => {
-    scheduleTeamListUpdate();
-});
-
 botClient.on(Events.InteractionCreate, async (interaction) => {
     try {
         if (
@@ -935,7 +820,7 @@ botClient.on(Events.InteractionCreate, async (interaction) => {
             return interaction.showModal(modal);
         }
 
-        if (interaction.customId === "spontan_submit_modal") {
+                if (interaction.customId === "spontan_submit_modal") {
             const state = spontaneSelections.get(adminId);
 
             if (!state || !state.examType) {
@@ -952,14 +837,14 @@ botClient.on(Events.InteractionCreate, async (interaction) => {
 
             const embed = new EmbedBuilder()
                 .setColor(0xf59e0b)
-                .setTitle("?? Neuer Antrag: Spontane Prüfung")
+                .setTitle("📝 Neuer Antrag: Spontane Prüfung")
                 .setDescription(
-                    "Ein Prüfung wurde für eine spontane Prüfung eingetragen.\n\n" +
+                    "Ein Prüfling wurde für eine spontane Prüfung eingetragen.\n\n" +
                     "Die Leitung kann diesen Antrag jetzt genehmigen oder ablehnen."
                 )
                 .addFields(
                     {
-                        name: "Prüfung",
+                        name: "Prüfling",
                         value: `**${prueflingName}**`,
                         inline: true
                     },
@@ -976,30 +861,30 @@ botClient.on(Events.InteractionCreate, async (interaction) => {
                     {
                         name: "Eingetragen von",
                         value: `<@${interaction.user.id}>`,
-                        inline: true
+                        inline: false
                     },
                     {
                         name: "Status",
-                        value: "? Wartet auf Entscheidung der Leitung",
+                        value: "⏳ Wartet auf Entscheidung der Leitung",
                         inline: false
                     }
                 )
-                .setFooter({ text: `LSMD Ausbildungssystem   Antrag #${requestId}` })
+                .setFooter({ text: `LSMD Ausbildungssystem • Antrag #${requestId}` })
                 .setTimestamp();
 
             const decisionRow = new ActionRowBuilder().addComponents(
-    new ButtonBuilder()
-        .setCustomId(`spontan_request_approve_${requestId}`)
-        .setLabel("Genehmigen")
-        .setEmoji("✅")
-        .setStyle(ButtonStyle.Success),
+                new ButtonBuilder()
+                    .setCustomId(`spontan_request_approve_${requestId}`)
+                    .setLabel("Genehmigen")
+                    .setEmoji("✅")
+                    .setStyle(ButtonStyle.Success),
 
-    new ButtonBuilder()
-        .setCustomId(`spontan_request_reject_${requestId}`)
-        .setLabel("Ablehnen")
-        .setEmoji("❌")
-        .setStyle(ButtonStyle.Danger)
-);
+                new ButtonBuilder()
+                    .setCustomId(`spontan_request_reject_${requestId}`)
+                    .setLabel("Ablehnen")
+                    .setEmoji("❌")
+                    .setStyle(ButtonStyle.Danger)
+            );
 
             const requestMessage = await interaction.channel.send({
                 embeds: [embed],
@@ -1009,8 +894,8 @@ botClient.on(Events.InteractionCreate, async (interaction) => {
                 }
             });
 
-            spontaneRequests.set(requestId, {
-                id: requestId,
+            spontaneRequests.set(String(requestId), {
+                requestId,
                 targetName: prueflingName,
                 targetDn: prueflingDn,
                 examType: state.examType,
@@ -1020,24 +905,10 @@ botClient.on(Events.InteractionCreate, async (interaction) => {
                 status: "offen"
             });
 
-            try {
-                if (state.panelChannelId && state.panelMessageId) {
-                    const panelChannel = await botClient.channels.fetch(state.panelChannelId);
-                    const panelMessage = await panelChannel.messages.fetch(state.panelMessageId);
-
-                    await panelMessage.edit({
-                        embeds: panelMessage.embeds,
-                        components: buildSpontanePanelComponents()
-                    });
-                }
-            } catch (err) {
-                console.error("Panel konnte nicht zurückgesetzt werden:", err);
-            }
-
             spontaneSelections.delete(adminId);
 
             return interaction.reply({
-                content: "Der Antrag wurde unten als neue Nachricht erstellt.",
+                content: "✅ Antrag wurde eingetragen und wartet auf Entscheidung der Leitung.",
                 flags: MessageFlags.Ephemeral
             });
         }
@@ -1387,6 +1258,16 @@ app.post("/admin/spontane-panel", requireLogin, requireAdmin, async (req, res) =
     }, req.session.user);
 
     res.redirect("/admin");
+});
+
+app.post("/admin/teamliste", requireLogin, requireAdmin, async (req, res) => {
+    try {
+        await updateTeamListMessage();
+        return res.redirect("/admin");
+    } catch (err) {
+        console.error("Teamliste konnte nicht gesendet werden:", err);
+        return res.status(500).send("Teamliste konnte nicht gesendet werden.");
+    }
 });
 
 function buildSpontanePanelComponents() {
