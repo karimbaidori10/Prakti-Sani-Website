@@ -684,6 +684,18 @@ async function updateTeamListMessage() {
     console.log("TEAM_LIST_MESSAGE_ID bitte in Railway eintragen:", message.id);
 }
 
+botClient.on(Events.GuildMemberAdd, () => {
+    scheduleTeamListUpdate();
+});
+
+botClient.on(Events.GuildMemberRemove, () => {
+    scheduleTeamListUpdate();
+});
+
+botClient.on(Events.GuildMemberUpdate, () => {
+    scheduleTeamListUpdate();
+});
+
 botClient.on(Events.InteractionCreate, async (interaction) => {
     try {
         if (
@@ -819,18 +831,18 @@ botClient.on(Events.InteractionCreate, async (interaction) => {
                 .setTimestamp();
 
             const decisionRow = new ActionRowBuilder().addComponents(
-                new ButtonBuilder()
-                    .setCustomId(`spontan_request_approve_${requestId}`)
-                    .setLabel("Genehmigen")
-                    .setEmoji("?")
-                    .setStyle(ButtonStyle.Success),
+    new ButtonBuilder()
+        .setCustomId(`spontan_request_approve_${requestId}`)
+        .setLabel("Genehmigen")
+        .setEmoji("✅")
+        .setStyle(ButtonStyle.Success),
 
-                new ButtonBuilder()
-                    .setCustomId(`spontan_request_reject_${requestId}`)
-                    .setLabel("Ablehnen")
-                    .setEmoji("?")
-                    .setStyle(ButtonStyle.Danger)
-            );
+    new ButtonBuilder()
+        .setCustomId(`spontan_request_reject_${requestId}`)
+        .setLabel("Ablehnen")
+        .setEmoji("❌")
+        .setStyle(ButtonStyle.Danger)
+);
 
             const requestMessage = await interaction.channel.send({
                 embeds: [embed],
@@ -888,10 +900,10 @@ botClient.on(Events.InteractionCreate, async (interaction) => {
             request.decidedBy = interaction.user.id;
 
             const embed = new EmbedBuilder()
-                .setColor(0x22c55e)
-                .setTitle("? Spontane Pr fung genehmigt")
-                .setDescription("Die Leitung hat den Antrag genehmigt.")
-                .addFields(
+    .setColor(0x22c55e)
+    .setTitle("✅ Spontane Prüfung genehmigt")
+    .setDescription("Die Leitung hat den Antrag genehmigt.")
+    .addFields(
                     {
                         name: "Pr fling",
                         value: `**${request.targetName}**`,
@@ -1181,17 +1193,21 @@ const today = new Date();
 const calendarMonth = !isNaN(selectedMonth) ? selectedMonth : today.getMonth();
 const calendarYear = !isNaN(selectedYear) ? selectedYear : today.getFullYear();
 
-res.render("termine", viewData(req, {
-    active: "termine",
-    termine,
-    calendarMonth,
-    calendarYear
-}));
+app.get("/termine", requireLogin, async (req, res) => {
+    try {
+        const termine = await termineCollection
+            .find({})
+            .sort({ date: 1, time: 1 })
+            .toArray();
 
-    res.render("termine", viewData(req, {
-        active: "termine",
-        termine
-    }));
+        return res.render("termine", viewData(req, {
+            active: "termine",
+            termine
+        }));
+    } catch (err) {
+        console.error("Fehler beim Laden der Termine:", err);
+        return res.status(500).send("Serverfehler");
+    }
 });
 
 
@@ -1245,10 +1261,10 @@ function buildSpontanePanelComponents() {
 
     const buttonRow = new ActionRowBuilder().addComponents(
         new ButtonBuilder()
-            .setCustomId("spontan_submit")
-            .setLabel("Antrag erstellen")
-            .setEmoji("??")
-            .setStyle(ButtonStyle.Primary)
+    .setCustomId(`spontan_request_reject_${requestId}`)
+    .setLabel("Ablehnen")
+    .setEmoji("❌")
+    .setStyle(ButtonStyle.Danger)
     );
 
     return [typeRow, buttonRow];
@@ -1594,6 +1610,7 @@ if (process.env.DISCORD_BOT_TOKEN) {
     botClient.login(process.env.DISCORD_BOT_TOKEN)
         .then(() => {
             console.log("Discord Bot ist online");
+            scheduleTeamListUpdate();
         })
         .catch((err) => {
             console.error("Discord Bot Login Fehler:", err);
