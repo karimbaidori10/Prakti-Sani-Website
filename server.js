@@ -222,117 +222,163 @@ async function addLog(action, data = {}, actor = null) {
     await logsCollection.insertOne(logEntry);
 
     if (!process.env.DISCORD_LOG_WEBHOOK) {
-        console.log("DISCORD_LOG_WEBHOOK fehlt in Railway Variables");
+        console.log("DISCORD_LOG_WEBHOOK fehlt");
         return;
     }
 
     try {
-        const actorId = actor?.discordId || data?.userId || null;
-        const actorName = actor?.username || actor?.displayName || data?.name || "Unbekannt";
-        const pingText = actorId ? `<@${actorId}>` : actorName;
+        const actorId = actor?.discordId || actor?.id || data?.userId || null;
+        const actorName =
+            actor?.username ||
+            actor?.displayName ||
+            data?.name ||
+            "Unbekannt";
 
-        let title = "LSMD Dashboard Log";
-        let description = `${pingText} hat eine Aktion ausgeführt.`;
+        let title = "LSMD Dashboard";
+        let description = `${actorName} hat eine Aktion ausgeführt.`;
         let color = 3447003;
+        let emoji = "📌";
 
-        if (action.includes("Login")) {
-            title = "Login erkannt";
-            description = `${pingText} hat sich im LSMD Dashboard eingeloggt.`;
+        if (action === "Login") {
+            title = "Login";
+            description = `${actorName} hat sich im LSMD Dashboard eingeloggt.`;
             color = 5763719;
+            emoji = "🔐";
         }
 
-        if (action.includes("Ausbildungstermin erstellt")) {
+        if (action === "Ausbildungstermin erstellt") {
             title = "Ausbildungstermin erstellt";
-            description = `${pingText} hat einen neuen Ausbildungstermin eingetragen.`;
+            description = `${actorName} hat einen neuen Ausbildungstermin eingetragen.`;
             color = 3447003;
+            emoji = "📅";
         }
 
-        if (action.includes("Ausbildungstermin bearbeitet")) {
+        if (action === "Ausbildungstermin bearbeitet") {
             title = "Ausbildungstermin bearbeitet";
-            description = `${pingText} hat einen Ausbildungstermin bearbeitet.`;
+            description = `${actorName} hat einen Ausbildungstermin bearbeitet.`;
             color = 16705372;
+            emoji = "🛠️";
         }
 
-        if (action.includes("Termin geloescht")) {
+        if (action === "Termin geloescht") {
             title = "Ausbildungstermin gelöscht";
-            description = `${pingText} hat einen Ausbildungstermin gelöscht.`;
-            color = 15548997;
+            description = `${actorName} hat einen Ausbildungstermin gelöscht.`;
+            color = 15158332;
+            emoji = "🗑️";
         }
 
-        if (action.includes("Dokument hinzugefuegt")) {
+        if (action === "Dokument hinzugefuegt") {
             title = "Dokument hinzugefügt";
-            description = `${pingText} hat ein neues Dokument hinzugefügt.`;
-            color = 3447003;
+            description = `${actorName} hat ein neues Dokument hinzugefügt.`;
+            color = 3066993;
+            emoji = "📄";
         }
 
-        if (action.includes("Dokument bearbeitet")) {
+        if (action === "Dokument bearbeitet") {
             title = "Dokument bearbeitet";
-            description = `${pingText} hat ein Dokument bearbeitet.`;
+            description = `${actorName} hat ein Dokument bearbeitet.`;
             color = 16705372;
+            emoji = "✏️";
         }
 
-        if (action.includes("Dokument geloescht")) {
+        if (action === "Dokument geloescht") {
             title = "Dokument gelöscht";
-            description = `${pingText} hat ein Dokument gelöscht.`;
-            color = 15548997;
+            description = `${actorName} hat ein Dokument gelöscht.`;
+            color = 15158332;
+            emoji = "🗑️";
         }
 
-        if (action.includes("Punkte")) {
+        if (action === "Punkte hinzugefuegt" || action === "Punkte entfernt" || action === "Punkte gesetzt") {
             title = "Punkteverwaltung";
-            description = `${pingText} hat Punkte im Dashboard geändert.`;
+            description = `${actorName} hat Punkte im Dashboard geändert.`;
             color = 10181046;
+            emoji = "🏆";
         }
 
         const fields = [];
 
         if (data.name) {
-            fields.push({ name: "Teilnehmer", value: String(data.name), inline: true });
-        }
-
-        if (data.title) {
-            fields.push({ name: "Dokument", value: String(data.title), inline: true });
-        }
-
-        if (data.examType) {
             fields.push({
-                name: "Art",
-                value: String(data.examType).replace("Sanitaeter", "Sanitäter"),
+                name: "Teilnehmer",
+                value: String(data.name),
                 inline: true
             });
         }
 
-        if (data.date) {
-            fields.push({ name: "Datum", value: String(data.date), inline: true });
-        }
-
-        if (data.time) {
-            fields.push({ name: "Uhrzeit", value: String(data.time), inline: true });
-        }
-
-        if (data.examiner) {
-            fields.push({ name: "Ausbilder", value: String(data.examiner), inline: true });
+        if (data.title) {
+            fields.push({
+                name: "Dokument",
+                value: String(data.title),
+                inline: true
+            });
         }
 
         if (data.type) {
             fields.push({
                 name: "Kategorie",
-                value: String(data.type).replace("Sanitaeter", "Sanitäter"),
+                value: String(data.type),
+                inline: true
+            });
+        }
+
+        if (data.examType) {
+            fields.push({
+                name: "Art",
+                value: String(data.examType),
+                inline: true
+            });
+        }
+
+        if (data.date) {
+            fields.push({
+                name: "Datum",
+                value: String(data.date),
+                inline: true
+            });
+        }
+
+        if (data.time) {
+            fields.push({
+                name: "Uhrzeit",
+                value: String(data.time),
+                inline: true
+            });
+        }
+
+        if (data.examiner) {
+            fields.push({
+                name: "Ausbilder / Prüfer",
+                value: String(data.examiner),
                 inline: true
             });
         }
 
         if (data.amount !== undefined) {
-            fields.push({ name: "Punkte", value: String(data.amount), inline: true });
+            fields.push({
+                name: "Punkte",
+                value: String(data.amount),
+                inline: true
+            });
         }
 
         if (data.userId) {
-            fields.push({ name: "Betroffener User", value: `<@${data.userId}>`, inline: true });
+            fields.push({
+                name: "Betroffener User",
+                value: `<@${data.userId}>`,
+                inline: true
+            });
         }
+
+        fields.push({
+            name: "Ausgeführt von",
+            value: actorId ? `<@${actorId}>` : actorName,
+            inline: true
+        });
 
         fields.push({
             name: "Zeit",
             value: createdAt.toLocaleString("de-DE"),
-            inline: false
+            inline: true
         });
 
         const response = await fetch(process.env.DISCORD_LOG_WEBHOOK, {
@@ -342,18 +388,26 @@ async function addLog(action, data = {}, actor = null) {
             },
             body: JSON.stringify({
                 username: "LSMD Dashboard Logs",
-                content: actorId ? `<@${actorId}>` : "",
+                avatar_url: "https://cdn.discordapp.com/embed/avatars/0.png",
+
+                // EINMAL pingen, nicht doppelt
+                content: "",
+
                 allowed_mentions: {
                     parse: ["users"]
                 },
+
                 embeds: [
                     {
-                        title,
-                        description,
                         color,
+                        author: {
+                            name: "LSMD Dashboard System"
+                        },
+                        title: `${emoji} ${title}`,
+                        description,
                         fields,
                         footer: {
-                            text: "LSMD Dashboard System"
+                            text: "LSMD Dashboard"
                         },
                         timestamp: createdAt.toISOString()
                     }
@@ -447,6 +501,11 @@ avatar: req.user.avatar || null
             },
             { upsert: true }
         );
+
+await addLog("Login", {
+    userId: req.user.id,
+    name: req.user.username
+}, req.session.user);
 
         res.redirect("/dashboard");
     }
