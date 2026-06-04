@@ -5653,3 +5653,118 @@ hr,
     margin-top: 16px !important;
     padding: 14px !important;
 }
+
+/* =====================
+   PERFORMANCE MODE - FLUESSIGER
+===================== */
+
+/* schwere Blur-Effekte stark reduzieren */
+.sidebar,
+.card,
+.stat-card,
+.doc-card,
+.quick-card,
+.points-box,
+.login-card,
+.auth-card,
+.clean-panel {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+}
+
+/* riesige Glow-Layer deaktivieren */
+.card::before,
+.card::after,
+.stat-card::before,
+.stat-card::after,
+.doc-card::before,
+.doc-card::after,
+.quick-card::before,
+.quick-card::after,
+.points-box::before,
+.points-box::after,
+.sidebar::before,
+.login-card::before,
+.auth-card::before,
+.dashboard-hero::before,
+.hero-card::before,
+.welcome-card::before,
+.admin-glow::before,
+.md-small-entry-card::before,
+.md-exam-form-card::before {
+    display: none !important;
+}
+
+/* weniger schwere Schatten */
+.card,
+.stat-card,
+.doc-card,
+.quick-card,
+.points-box,
+.clean-panel,
+.admin-member-row,
+.leaderboard-row,
+.sheet-table-row-clean {
+    box-shadow: 0 10px 28px rgba(0,0,0,0.22) !important;
+}
+
+/* hover bleibt, aber leichter */
+.card:hover,
+.stat-card:hover,
+.doc-card:hover,
+.quick-card:hover,
+.points-box:hover,
+.admin-member-row:hover,
+.leaderboard-row:hover,
+.sheet-table-row-clean:hover {
+    transform: translateY(-1px) !important;
+    box-shadow: 0 14px 34px rgba(0,0,0,0.26) !important;
+}
+
+/* Animationen fast komplett raus */
+.dashboard-grid .card,
+.stats-grid .stat-card,
+main,
+.content,
+.main-content {
+    animation: none !important;
+}
+
+/* fixed background raus = deutlich fluessiger */
+body {
+    background-attachment: scroll !important;
+}
+
+body::before,
+main::before,
+.content::before,
+.main-content::before {
+    display: none !important;
+}
+
+/* Button Shine Effekt raus */
+button::after,
+.open-doc-btn::after,
+.danger-btn::after {
+    display: none !important;
+}
+
+/* nur kurze Transitions */
+* {
+    transition-duration: 0.12s !important;
+}
+
+/* Mobile komplett ohne Hover-Bewegung */
+@media (max-width: 900px) {
+    .card:hover,
+    .stat-card:hover,
+    .doc-card:hover,
+    .quick-card:hover,
+    .points-box:hover,
+    .admin-member-row:hover,
+    .leaderboard-row:hover,
+    .sheet-table-row-clean:hover,
+    .sidebar nav a:hover {
+        transform: none !important;
+    }
+}
