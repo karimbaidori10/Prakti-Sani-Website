@@ -48,6 +48,13 @@ const ROLE_UNTERE_LEITUNG = process.env.ROLE_UNTERE_LEITUNG;
 const ROLE_STV_LEITUNG = process.env.ROLE_STV_LEITUNG;
 const ROLE_LEITUNG = process.env.ROLE_LEITUNG;
 
+const botClient = new Client({
+    intents: [
+        GatewayIntentBits.Guilds
+    ]
+});
+
+const spontaneSelections = new Map();
 
 
 app.set("view engine", "ejs");
@@ -1212,6 +1219,16 @@ await termineCollection.createIndex({ createdAt: -1 });
 await docsCollection.createIndex({ createdAt: -1 });
 
 await logsCollection.createIndex({ createdAt: -1 });
+
+if (process.env.DISCORD_BOT_TOKEN) {
+    botClient.login(process.env.DISCORD_BOT_TOKEN)
+        .then(() => {
+            console.log("Discord Bot ist online");
+        })
+        .catch((err) => {
+            console.error("Discord Bot Login Fehler:", err);
+        });
+}
 
     app.listen(PORT, () => {
         console.log(`LSMD Website laeuft auf Port ${PORT}`);
