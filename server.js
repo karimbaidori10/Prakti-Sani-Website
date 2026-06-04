@@ -671,24 +671,16 @@ async function updateTeamListMessage() {
         ...aushilfen.map(m => m.id)
     ]);
 
-    const weiterePraktiSani = allMembers.filter(member =>
-        hasRole(member, process.env.PRAKTI_SANI_ROLE_ID) &&
-        !groupedIds.has(member.id)
-    );
+    const allTeamIds = groupedIds;
 
-    const allTeamIds = new Set([
-        ...groupedIds,
-        ...weiterePraktiSani.map(m => m.id)
-    ]);
-
-    const embed = new EmbedBuilder()
-        .setColor(0xef233c)
-        .setTitle("🚑 LSMD Prakti-Sani Teamliste")
-        .setDescription(
-            "**Aktuelle Mitgliederübersicht der Abteilung**\n\n" +
-            "Diese Liste wird automatisch aktualisiert und zeigt alle Mitglieder mit Abteilungsrolle."
-        )
-        .addFields(
+const embed = new EmbedBuilder()
+    .setColor(0xef233c)
+    .setTitle("🚑 LSMD Prakti-Sani Teamliste")
+    .setDescription(
+        "**Aktuelle Mitgliederübersicht der Abteilung**\n\n" +
+        "Diese Liste wird automatisch aktualisiert und zeigt alle eingetragenen Teamrollen."
+    )
+    .addFields(
             {
                 name: "📊 Übersicht",
                 value:
@@ -704,7 +696,6 @@ async function updateTeamListMessage() {
             buildRoleField("✅ Prakti-Sani feste Mitarbeiter", festeMitarbeiter),
             buildRoleField("🧪 Prakti-Sani Testphase", testphase),
             buildRoleField("🤝 Prakti-Sani Aushilfen", aushilfen),
-            buildRoleField("🚑 Weitere Prakti-Sani Mitglieder", weiterePraktiSani)
         )
         .setFooter({ text: "LSMD Ausbildungssystem • Automatische Teamliste" })
         .setTimestamp();
@@ -738,6 +729,52 @@ async function updateTeamListMessage() {
 
     console.log("TEAM_LIST_MESSAGE_ID bitte in Railway eintragen:", message.id);
 }
+
+botClient.once(Events.ClientReady, async () => {
+    console.log("Discord Bot ist bereit");
+
+    try {
+        await updateTeamListMessage();
+    } catch (err) {
+        console.error("Teamliste konnte beim Start nicht aktualisiert werden:", err);
+    }
+});
+
+botClient.on(Events.GuildMemberUpdate, async (oldMember, newMember) => {
+    try {
+        const watchedRoles = [
+            process.env.ROLE_HEAD_PRAKTI_SANI,
+            process.env.ROLE_LEITUNG,
+            process.env.ROLE_STV_LEITUNG,
+            process.env.ROLE_UNTERE_LEITUNG,
+            process.env.ROLE_SENIOR,
+            process.env.ROLE_FESTES_MITGLIED,
+            process.env.ROLE_TESTPHASE,
+            process.env.ROLE_AUSHILFE
+        ].filter(Boolean);
+
+        const roleChanged = watchedRoles.some(roleId =>
+            oldMember.roles.cache.has(roleId) !== newMember.roles.cache.has(roleId)
+        );
+
+        if (!roleChanged) {
+            return;
+        }
+
+        scheduleTeamListUpdate();
+    } catch (err) {
+        console.error("Teamliste konnte nach Rollenänderung nicht geplant werden:", err);
+    }
+});
+
+botClient.on(Events.GuildMemberAdd, async () => {
+    scheduleTeamListUpdate();
+});
+
+botClient.on(Events.GuildMemberRemove, async () => {
+    scheduleTeamListUpdate();
+});
+
 botClient.on(Events.InteractionCreate, async (interaction) => {
     try {
         if (
