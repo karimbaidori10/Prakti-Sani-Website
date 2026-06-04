@@ -936,6 +936,21 @@ botClient.on(Events.InteractionCreate, async (interaction) => {
                 }
             });
 
+try {
+    if (state.panelChannelId && state.panelMessageId) {
+        const panelChannel = await botClient.channels.fetch(state.panelChannelId);
+        const panelMessage = await panelChannel.messages.fetch(state.panelMessageId);
+
+        await panelMessage.edit({
+            content: "",
+            embeds: [EmbedBuilder.from(panelMessage.embeds[0])],
+            components: buildSpontanePanelComponents()
+        });
+    }
+} catch (err) {
+    console.error("Spontane-Prüfungen Panel konnte nicht zurückgesetzt werden:", err);
+}
+
             spontaneRequests.set(String(requestId), {
                 requestId,
                 targetName: prueflingName,
@@ -1001,7 +1016,7 @@ botClient.on(Events.InteractionCreate, async (interaction) => {
                     },
                     {
                         name: "Status",
-                        value: "? Genehmigt",
+                        value: "✅ Genehmigt",
                         inline: false
                     }
                 )
