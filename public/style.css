@@ -7219,3 +7219,282 @@ textarea:hover {
         padding: 18px;
     }
 }
+
+/* =====================
+   LOGIN PAGE REWORK
+===================== */
+
+.login-body {
+    margin: 0;
+    min-height: 100vh;
+    font-family: inherit;
+    color: white;
+    background:
+        radial-gradient(circle at 20% 35%, rgba(239, 35, 60, 0.18), transparent 24%),
+        radial-gradient(circle at 75% 30%, rgba(37, 99, 235, 0.18), transparent 28%),
+        linear-gradient(135deg, #020617 0%, #08122b 55%, #030b1f 100%);
+    position: relative;
+    overflow: hidden;
+}
+
+.login-background-grid {
+    position: fixed;
+    inset: 0;
+    background-image:
+        linear-gradient(rgba(59, 130, 246, 0.05) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(59, 130, 246, 0.05) 1px, transparent 1px);
+    background-size: 42px 42px;
+    pointer-events: none;
+    opacity: 0.5;
+}
+
+.login-shell {
+    position: relative;
+    z-index: 1;
+    min-height: 100vh;
+    display: grid;
+    grid-template-columns: 520px 1fr;
+    align-items: center;
+    gap: 48px;
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 40px 24px;
+}
+
+.login-hero-card {
+    position: relative;
+    overflow: hidden;
+    padding: 38px 34px;
+    border-radius: 30px;
+    background:
+        radial-gradient(circle at top right, rgba(37, 99, 235, 0.16), transparent 35%),
+        rgba(8, 15, 35, 0.82);
+    border: 1px solid rgba(148, 163, 184, 0.16);
+    box-shadow: 0 30px 90px rgba(0, 0, 0, 0.35);
+    backdrop-filter: blur(16px);
+}
+
+.login-hero-card::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background:
+        radial-gradient(circle at top left, rgba(239, 35, 60, 0.12), transparent 28%);
+    pointer-events: none;
+}
+
+.login-hero-card > * {
+    position: relative;
+    z-index: 1;
+}
+
+.login-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 18px;
+    padding: 8px 14px;
+    border-radius: 999px;
+    background: rgba(239, 35, 60, 0.12);
+    border: 1px solid rgba(239, 35, 60, 0.28);
+    color: #fca5a5;
+    font-size: 12px;
+    font-weight: 1000;
+    letter-spacing: 0.08em;
+}
+
+.login-icon-box {
+    width: 72px;
+    height: 72px;
+    display: grid;
+    place-items: center;
+    margin-bottom: 22px;
+    border-radius: 22px;
+    background: linear-gradient(135deg, #ef233c, #b91c1c);
+    color: white;
+    font-size: 42px;
+    font-weight: 1000;
+    box-shadow: 0 18px 45px rgba(239, 35, 60, 0.34);
+}
+
+.login-hero-card h1 {
+    margin: 0 0 14px;
+    font-size: 66px;
+    line-height: 0.95;
+    letter-spacing: -0.04em;
+}
+
+.login-subtitle {
+    margin: 0 0 26px;
+    color: #cbd5e1;
+    font-size: 18px;
+    line-height: 1.6;
+    max-width: 440px;
+}
+
+.discord-login-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    min-height: 58px;
+    width: 100%;
+    border-radius: 18px;
+    text-decoration: none;
+    background: linear-gradient(135deg, #5865f2, #2563eb);
+    color: white;
+    font-size: 22px;
+    font-weight: 900;
+    box-shadow: 0 14px 40px rgba(88, 101, 242, 0.35);
+    transition: 0.2s ease;
+}
+
+.discord-login-btn:hover {
+    transform: translateY(-2px);
+    opacity: 0.96;
+}
+
+.login-info-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-top: 18px;
+}
+
+.login-info-card {
+    padding: 18px;
+    border-radius: 18px;
+    background: rgba(2, 6, 23, 0.42);
+    border: 1px solid rgba(148, 163, 184, 0.14);
+}
+
+.login-info-card strong,
+.login-info-card span {
+    display: block;
+}
+
+.login-info-card strong {
+    font-size: 24px;
+    margin-bottom: 5px;
+}
+
+.login-info-card span {
+    color: #cbd5e1;
+    font-size: 14px;
+}
+
+.login-note {
+    margin-top: 18px;
+    text-align: center;
+    color: #94a3b8;
+    font-size: 14px;
+}
+
+.login-side-content {
+    display: flex;
+    justify-content: center;
+}
+
+.login-side-box {
+    max-width: 520px;
+    padding: 20px;
+}
+
+.login-mini-label {
+    display: inline-block;
+    margin-bottom: 14px;
+    padding: 8px 12px;
+    border-radius: 999px;
+    background: rgba(37, 99, 235, 0.12);
+    border: 1px solid rgba(37, 99, 235, 0.28);
+    color: #93c5fd;
+    font-size: 12px;
+    font-weight: 1000;
+    letter-spacing: 0.08em;
+}
+
+.login-side-box h2 {
+    font-size: 42px;
+    line-height: 1.08;
+    margin-bottom: 14px;
+}
+
+.login-side-box p {
+    color: #cbd5e1;
+    font-size: 17px;
+    line-height: 1.6;
+}
+
+.login-feature-list {
+    display: grid;
+    gap: 14px;
+    margin-top: 26px;
+}
+
+.login-feature-list div {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 16px 18px;
+    border-radius: 18px;
+    background: rgba(8, 15, 35, 0.55);
+    border: 1px solid rgba(148, 163, 184, 0.14);
+}
+
+.login-feature-list span {
+    font-size: 22px;
+}
+
+.login-feature-list p {
+    margin: 0;
+    font-size: 15px;
+    color: #e2e8f0;
+}
+
+@media (max-width: 1100px) {
+    .login-shell {
+        grid-template-columns: 1fr;
+        gap: 28px;
+        max-width: 760px;
+    }
+
+    .login-side-content {
+        justify-content: stretch;
+    }
+
+    .login-side-box {
+        max-width: none;
+        padding: 0;
+    }
+}
+
+@media (max-width: 700px) {
+    .login-shell {
+        padding: 20px 16px;
+    }
+
+    .login-hero-card {
+        padding: 24px 20px;
+        border-radius: 24px;
+    }
+
+    .login-hero-card h1 {
+        font-size: 46px;
+    }
+
+    .login-subtitle {
+        font-size: 16px;
+    }
+
+    .discord-login-btn {
+        font-size: 18px;
+    }
+
+    .login-info-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .login-side-box h2 {
+        font-size: 30px;
+    }
+}

@@ -2,50 +2,85 @@
 <html lang="de">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>LSMD Login</title>
     <link rel="stylesheet" href="/style.css">
 </head>
-<body class="login-page">
+<body class="login-body">
 
-<div class="login-shell">
-    <div class="login-bg-orb orb-red"></div>
-    <div class="login-bg-orb orb-blue"></div>
+    <div class="login-background-grid"></div>
 
-    <div class="login-card pro-login">
-        <div class="login-logo">+</div>
-
-        <div class="login-title">
-            <span>LSMD ACCESS</span>
-            <h1>Prakti-Sani Dashboard</h1>
-            <p>Einloggen mit Discord-Rollenpruefung</p>
-        </div>
-
-        <% if (error) { %>
-            <div class="error"><%= error %></div>
-        <% } %>
-
-        <a href="/auth/discord" class="discord-login">
-            <span>Discord</span>
-            Mit Discord einloggen
-        </a>
-
-        <div class="login-access-box">
-            <div>
-                <strong>Admin</strong>
-                <p>Voller Zugriff</p>
+    <main class="login-shell">
+        <section class="login-hero-card">
+            <div class="login-badge">
+                <span>🚑</span>
+                <strong>LSMD ACCESS</strong>
             </div>
 
-            <div>
-                <strong>Prakti-Sani</strong>
-                <p>Dashboard Zugriff</p>
-            </div>
-        </div>
+            <div class="login-icon-box">+</div>
 
-        <div class="login-hint">
-            Zugriff nur mit gueltiger Discord-Rolle.
-        </div>
-    </div>
-</div>
+            <h1>Prakti-Sani<br>Dashboard</h1>
+
+            <p class="login-subtitle">
+                Melde dich mit deinem Discord-Account an, um auf das
+                LSMD Prakti-Sani System zuzugreifen.
+            </p>
+
+            <a href="/auth/discord" class="discord-login-btn">
+                <span>💬</span>
+                Mit Discord einloggen
+            </a>
+
+            <div class="login-info-grid">
+                <div class="login-info-card">
+                    <strong>Admin</strong>
+                    <span>Voller Zugriff</span>
+                </div>
+
+                <div class="login-info-card">
+                    <strong>Prakti-Sani</strong>
+                    <span>Dashboard Zugriff</span>
+                </div>
+            </div>
+
+            <div class="login-note">
+                Zugriff nur mit g&uuml;ltiger Discord-Rolle.
+            </div>
+        </section>
+
+        <section class="login-side-content">
+            <div class="login-side-box">
+                <span class="login-mini-label">LSMD SYSTEM</span>
+                <h2>Modernes Ausbildungs- und Verwaltungssystem</h2>
+                <p>
+                    Verwalte Mitglieder, Punkte, Dokumente, Ausbildungstermine
+                    und spontane Pr&uuml;fungen an einem zentralen Ort.
+                </p>
+
+                <div class="login-feature-list">
+                    <div>
+                        <span>✅</span>
+                        <p>Discord Login mit Rollenpr&uuml;fung</p>
+                    </div>
+
+                    <div>
+                        <span>📄</span>
+                        <p>Dokumente, Leitf&auml;den und Regelwerke</p>
+                    </div>
+
+                    <div>
+                        <span>📅</span>
+                        <p>Ausbildungstermine &amp; MD-System</p>
+                    </div>
+
+                    <div>
+                        <span>🛡️</span>
+                        <p>Admin-Bereich mit Spontane-Pr&uuml;fungen Panel</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
 
 </body>
 </html>
