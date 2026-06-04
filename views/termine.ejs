@@ -69,8 +69,17 @@
 %>
 
 const today = new Date();
-const calendarYear = today.getFullYear();
-const calendarMonth = today.getMonth();
+
+const selectedCalendarYear = typeof calendarYear !== "undefined"
+    ? Number(calendarYear)
+    : today.getFullYear();
+
+const selectedCalendarMonth = typeof calendarMonth !== "undefined"
+    ? Number(calendarMonth)
+    : today.getMonth();
+
+const prevMonthDate = new Date(selectedCalendarYear, selectedCalendarMonth - 1, 1);
+const nextMonthDate = new Date(selectedCalendarYear, selectedCalendarMonth + 1, 1);
 
 const monthNames = [
     "Januar", "Februar", "März", "April", "Mai", "Juni",
@@ -84,8 +93,8 @@ function dateKeyFromDate(date) {
     return year + "-" + month + "-" + day;
 }
 
-const daysInMonth = new Date(calendarYear, calendarMonth + 1, 0).getDate();
-const firstDayIndex = (new Date(calendarYear, calendarMonth, 1).getDay() + 6) % 7;
+const daysInMonth = new Date(selectedCalendarYear, selectedCalendarMonth + 1, 0).getDate();
+const firstDayIndex = (new Date(selectedCalendarYear, selectedCalendarMonth, 1).getDay() + 6) % 7;
 
 const termineByDate = {};
 
@@ -106,7 +115,7 @@ for (let i = 0; i < firstDayIndex; i++) {
 }
 
 for (let day = 1; day <= daysInMonth; day++) {
-    calendarCells.push(new Date(calendarYear, calendarMonth, day));
+    calendarCells.push(new Date(selectedCalendarYear, selectedCalendarMonth, day));
 }
 
 <div class="page-header sheet-hero">
@@ -196,7 +205,19 @@ for (let day = 1; day <= daysInMonth; day++) {
             <p class="card-subtitle">Aktueller Monat mit allen Ausbildungseinträgen.</p>
         </div>
 
-        <span class="chip blue"><%= monthNames[calendarMonth] %> <%= calendarYear %></span>
+        <div class="calendar-nav">
+    <a href="/termine?month=<%= prevMonthDate.getMonth() %>&year=<%= prevMonthDate.getFullYear() %>">
+        ← Vorheriger Monat
+    </a>
+
+    <span class="chip blue">
+        <%= monthNames[selectedCalendarMonth] %> <%= selectedCalendarYear %>
+    </span>
+
+    <a href="/termine?month=<%= nextMonthDate.getMonth() %>&year=<%= nextMonthDate.getFullYear() %>">
+        Nächster Monat →
+    </a>
+</div>
     </div>
 
     <div class="pro-calendar-weekdays">

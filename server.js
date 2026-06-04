@@ -290,22 +290,22 @@ async function sendSpontanePruefungenPanel() {
     const channel = await botClient.channels.fetch(process.env.SPONTANE_PRUEFUNGEN_CHANNEL_ID);
 
     if (!channel) {
-        console.log("Spontane Prüfungen Channel nicht gefunden");
+        console.log("Spontane Pr fungen Channel nicht gefunden");
         return;
     }
 
     const embed = new EmbedBuilder()
         .setColor(0x2563eb)
-        .setTitle("?? Spontane Prüfung eintragen")
+        .setTitle("?? Spontane Pr fung eintragen")
         .setDescription(
-            "Wähle zuerst die Prüfungsart aus.\n\n" +
-            "Klicke danach auf **Antrag erstellen** und trage im Fenster die **DN** und den **Namen** des Prüflings ein.\n\n" +
-            "Anschließend wartet der Antrag auf die Entscheidung der Leitung."
+            "W hle zuerst die Pr fungsart aus.\n\n" +
+            "Klicke danach auf **Antrag erstellen** und trage im Fenster die **DN** und den **Namen** des Pr flings ein.\n\n" +
+            "Anschlie end wartet der Antrag auf die Entscheidung der Leitung."
         )
         .addFields(
             {
                 name: "Schritt 1",
-                value: "Prüfungsart auswählen.",
+                value: "Pr fungsart ausw hlen.",
                 inline: true
             },
             {
@@ -352,95 +352,66 @@ async function addLog(action, data = {}, actor = null) {
             data?.name ||
             "Unbekannt";
 
-        const cleanExamType = data.examType === "Sanitaeter-Pruefung"
-            ? "Sanitäter-Prüfung"
-            : (data.examType || null);
+        let title = "LSMD Dashboard";
+        let description = `${actorName} hat eine Aktion ausgefÃ¼hrt.`;
+        let color = 3447003;
+        let emoji = "??";
 
-        const logTypes = {
-            "Login": {
-                emoji: "🔐",
-                title: "Login",
-                description: `${actorName} hat sich im LSMD Dashboard eingeloggt.`,
-                color: 0x22c55e
-            },
+        if (action === "Login") {
+            title = "Login";
+            description = `${actorName} hat sich im LSMD Dashboard eingeloggt.`;
+            color = 5763719;
+            emoji = "??";
+        }
 
-            "Ausbildungstermin erstellt": {
-                emoji: "📅",
-                title: "Ausbildungstermin erstellt",
-                description: `${actorName} hat einen neuen Ausbildungstermin eingetragen.`,
-                color: 0x2563eb
-            },
+        if (action === "Ausbildungstermin erstellt") {
+            title = "Ausbildungstermin erstellt";
+            description = `${actorName} hat einen neuen Ausbildungstermin eingetragen.`;
+            color = 3447003;
+            emoji = "??";
+        }
 
-            "Ausbildungstermin bearbeitet": {
-                emoji: "✏️",
-                title: "Ausbildungstermin bearbeitet",
-                description: `${actorName} hat einen Ausbildungstermin bearbeitet.`,
-                color: 0xfacc15
-            },
+        if (action === "Ausbildungstermin bearbeitet") {
+            title = "Ausbildungstermin bearbeitet";
+            description = `${actorName} hat einen Ausbildungstermin bearbeitet.`;
+            color = 16705372;
+            emoji = "???";
+        }
 
-            "Termin geloescht": {
-                emoji: "🗑️",
-                title: "Ausbildungstermin gelöscht",
-                description: `${actorName} hat einen Ausbildungstermin gelöscht.`,
-                color: 0xef233c
-            },
+        if (action === "Termin gelÃ¶scht") {
+            title = "Ausbildungstermin gelÃ¶scht";
+            description = `${actorName} hat einen Ausbildungstermin gelÃ¶scht.`;
+            color = 15158332;
+            emoji = "???";
+        }
 
-            "Dokument hinzugefuegt": {
-                emoji: "📄",
-                title: "Dokument hinzugefügt",
-                description: `${actorName} hat ein neues Dokument hinzugefügt.`,
-                color: 0x22c55e
-            },
+        if (action === "Dokument hinzugefÃ¼gt") {
+            title = "Dokument hinzugefÃ¼gt";
+            description = `${actorName} hat ein neues Dokument hinzugefÃ¼gt.`;
+            color = 3066993;
+            emoji = "??";
+        }
 
-            "Dokument bearbeitet": {
-                emoji: "✏️",
-                title: "Dokument bearbeitet",
-                description: `${actorName} hat ein Dokument bearbeitet.`,
-                color: 0xfacc15
-            },
+        if (action === "Dokument bearbeitet") {
+            title = "Dokument bearbeitet";
+            description = `${actorName} hat ein Dokument bearbeitet.`;
+            color = 16705372;
+            emoji = "??";
+        }
 
-            "Dokument geloescht": {
-                emoji: "🗑️",
-                title: "Dokument gelöscht",
-                description: `${actorName} hat ein Dokument gelöscht.`,
-                color: 0xef233c
-            },
+        if (action === "Dokument geloescht") {
+            title = "Dokument gelÃ¶scht";
+            description = `${actorName} hat ein Dokument gelÃ¶scht.`;
+            color = 15158332;
+            emoji = "???";
+        }
 
-            "Punkte hinzugefuegt": {
-                emoji: "➕",
-                title: "Punkte hinzugefügt",
-                description: `${actorName} hat Punkte hinzugefügt.`,
-                color: 0x22c55e
-            },
-
-            "Punkte entfernt": {
-                emoji: "➖",
-                title: "Punkte entfernt",
-                description: `${actorName} hat Punkte entfernt.`,
-                color: 0xef233c
-            },
-
-            "Punkte gesetzt": {
-                emoji: "🎯",
-                title: "Punkte gesetzt",
-                description: `${actorName} hat Punkte neu gesetzt.`,
-                color: 0x2563eb
-            },
-
-            "Spontane Prüfungen Panel gesendet": {
-                emoji: "🚑",
-                title: "Spontane-Prüfungen Panel gesendet",
-                description: `${actorName} hat das Discord-Panel für spontane Prüfungen gesendet.`,
-                color: 0x2563eb
-            }
-        };
-
-        const config = logTypes[action] || {
-            emoji: "📌",
-            title: "LSMD Dashboard",
-            description: `${actorName} hat eine Aktion ausgeführt.`,
-            color: 0x2563eb
-        };
+        if (action === "Punkte hinzugefÃ¼gt" || action === "Punkte entfernt" || action === "Punkte gesetzt") {
+            title = "Punkteverwaltung";
+            description = `${actorName} hat Punkte im Dashboard geÃ¤ndert.`;
+            color = 10181046;
+            emoji = "??";
+        }
 
         const fields = [];
 
@@ -463,15 +434,15 @@ async function addLog(action, data = {}, actor = null) {
         if (data.type) {
             fields.push({
                 name: "Kategorie",
-                value: data.type === "Sanitaeter Theorie" ? "Sanitäter Theorie" : String(data.type),
+                value: String(data.type),
                 inline: true
             });
         }
 
-        if (cleanExamType) {
+        if (data.examType) {
             fields.push({
                 name: "Art",
-                value: String(cleanExamType),
+                value: String(data.examType),
                 inline: true
             });
         }
@@ -494,7 +465,7 @@ async function addLog(action, data = {}, actor = null) {
 
         if (data.examiner) {
             fields.push({
-                name: "Ausbilder / Prüfer",
+                name: "Ausbilder / PrÃ¼fer",
                 value: String(data.examiner),
                 inline: true
             });
@@ -517,7 +488,7 @@ async function addLog(action, data = {}, actor = null) {
         }
 
         fields.push({
-            name: "Ausgeführt von",
+            name: "AusgefÃ¼hrt von",
             value: actorId ? `<@${actorId}>` : actorName,
             inline: true
         });
@@ -536,21 +507,25 @@ async function addLog(action, data = {}, actor = null) {
             body: JSON.stringify({
                 username: "LSMD Dashboard Logs",
                 avatar_url: "https://cdn.discordapp.com/embed/avatars/0.png",
+
+                // EINMAL pingen, nicht doppelt
                 content: "",
+
                 allowed_mentions: {
                     parse: ["users"]
                 },
+
                 embeds: [
                     {
-                        color: config.color,
+                        color,
                         author: {
                             name: "LSMD Dashboard System"
                         },
-                        title: `${config.emoji} ${config.title}`,
-                        description: config.description,
+                        title: `${emoji} ${title}`,
+                        description,
                         fields,
                         footer: {
-                            text: "LSMD Dashboard • Automatischer System-Log"
+                            text: "LSMD Dashboard"
                         },
                         timestamp: createdAt.toISOString()
                     }
@@ -568,6 +543,7 @@ async function addLog(action, data = {}, actor = null) {
         console.error("Discord Log konnte nicht gesendet werden:", err);
     }
 }
+
 async function getAllPoints() {
     if (pointsListCache && Date.now() - pointsListCacheTime < POINTS_LIST_CACHE_TIME) {
         return pointsListCache;
@@ -629,7 +605,7 @@ botClient.on(Events.InteractionCreate, async (interaction) => {
 
         if (!isDiscordAdmin(interaction)) {
             return interaction.reply({
-                content: "Du hast keine Berechtigung für dieses Prüfungs-Panel.",
+                content: "Du hast keine Berechtigung f r dieses Pr fungs-Panel.",
                 flags: MessageFlags.Ephemeral
             });
         }
@@ -646,7 +622,7 @@ botClient.on(Events.InteractionCreate, async (interaction) => {
             });
 
             return interaction.reply({
-                content: `Prüfungsart ausgewählt: **${examType}**. Klicke jetzt auf **Antrag erstellen**.`,
+                content: `Pr fungsart ausgew hlt: **${examType}**. Klicke jetzt auf **Antrag erstellen**.`,
                 flags: MessageFlags.Ephemeral
             });
         }
@@ -656,7 +632,7 @@ botClient.on(Events.InteractionCreate, async (interaction) => {
 
             if (!state || !state.examType) {
                 return interaction.reply({
-                    content: "Bitte zuerst die Prüfungsart auswählen.",
+                    content: "Bitte zuerst die Pr fungsart ausw hlen.",
                     flags: MessageFlags.Ephemeral
                 });
             }
@@ -669,11 +645,11 @@ botClient.on(Events.InteractionCreate, async (interaction) => {
 
             const modal = new ModalBuilder()
                 .setCustomId("spontan_submit_modal")
-                .setTitle("Spontane Prüfung eintragen");
+                .setTitle("Spontane Pr fung eintragen");
 
             const dnInput = new TextInputBuilder()
                 .setCustomId("pruefling_dn")
-                .setLabel("DN des Prüflings")
+                .setLabel("DN des Pr flings")
                 .setStyle(TextInputStyle.Short)
                 .setRequired(true)
                 .setMaxLength(30)
@@ -681,7 +657,7 @@ botClient.on(Events.InteractionCreate, async (interaction) => {
 
             const nameInput = new TextInputBuilder()
                 .setCustomId("pruefling_name")
-                .setLabel("Name des Prüflings")
+                .setLabel("Name des Pr flings")
                 .setStyle(TextInputStyle.Short)
                 .setRequired(true)
                 .setMaxLength(80)
@@ -700,7 +676,7 @@ botClient.on(Events.InteractionCreate, async (interaction) => {
 
             if (!state || !state.examType) {
                 return interaction.reply({
-                    content: "Die Prüfungsart fehlt. Bitte Antrag nochmal neu erstellen.",
+                    content: "Die Pr fungsart fehlt. Bitte Antrag nochmal neu erstellen.",
                     flags: MessageFlags.Ephemeral
                 });
             }
@@ -712,14 +688,14 @@ botClient.on(Events.InteractionCreate, async (interaction) => {
 
             const embed = new EmbedBuilder()
                 .setColor(0xf59e0b)
-                .setTitle("?? Neuer Antrag: Spontane Prüfung")
+                .setTitle("?? Neuer Antrag: Spontane Pr fung")
                 .setDescription(
-                    "Ein Prüfling wurde für eine spontane Prüfung eingetragen.\n\n" +
+                    "Ein Pr fling wurde f r eine spontane Pr fung eingetragen.\n\n" +
                     "Die Leitung kann diesen Antrag jetzt genehmigen oder ablehnen."
                 )
                 .addFields(
                     {
-                        name: "Prüfling",
+                        name: "Pr fling",
                         value: `**${prueflingName}**`,
                         inline: true
                     },
@@ -729,7 +705,7 @@ botClient.on(Events.InteractionCreate, async (interaction) => {
                         inline: true
                     },
                     {
-                        name: "Prüfung",
+                        name: "Pr fung",
                         value: state.examType,
                         inline: true
                     },
@@ -744,7 +720,7 @@ botClient.on(Events.InteractionCreate, async (interaction) => {
                         inline: false
                     }
                 )
-                .setFooter({ text: `LSMD Ausbildungssystem • Antrag #${requestId}` })
+                .setFooter({ text: `LSMD Ausbildungssystem   Antrag #${requestId}` })
                 .setTimestamp();
 
             const decisionRow = new ActionRowBuilder().addComponents(
@@ -791,7 +767,7 @@ botClient.on(Events.InteractionCreate, async (interaction) => {
                     });
                 }
             } catch (err) {
-                console.error("Panel konnte nicht zurückgesetzt werden:", err);
+                console.error("Panel konnte nicht zur ckgesetzt werden:", err);
             }
 
             spontaneSelections.delete(adminId);
@@ -818,11 +794,11 @@ botClient.on(Events.InteractionCreate, async (interaction) => {
 
             const embed = new EmbedBuilder()
                 .setColor(0x22c55e)
-                .setTitle("? Spontane Prüfung genehmigt")
+                .setTitle("? Spontane Pr fung genehmigt")
                 .setDescription("Die Leitung hat den Antrag genehmigt.")
                 .addFields(
                     {
-                        name: "Prüfling",
+                        name: "Pr fling",
                         value: `**${request.targetName}**`,
                         inline: true
                     },
@@ -832,7 +808,7 @@ botClient.on(Events.InteractionCreate, async (interaction) => {
                         inline: true
                     },
                     {
-                        name: "Prüfung",
+                        name: "Pr fung",
                         value: request.examType,
                         inline: true
                     },
@@ -852,7 +828,7 @@ botClient.on(Events.InteractionCreate, async (interaction) => {
                         inline: false
                     }
                 )
-                .setFooter({ text: `LSMD Ausbildungssystem • Antrag #${requestId}` })
+                .setFooter({ text: `LSMD Ausbildungssystem   Antrag #${requestId}` })
                 .setTimestamp();
 
             await interaction.message.edit({
@@ -879,15 +855,15 @@ botClient.on(Events.InteractionCreate, async (interaction) => {
 
             const modal = new ModalBuilder()
                 .setCustomId(`spontan_reject_modal_${requestId}`)
-                .setTitle("Spontane Prüfung ablehnen");
+                .setTitle("Spontane Pr fung ablehnen");
 
             const reasonInput = new TextInputBuilder()
                 .setCustomId("reject_reason")
-                .setLabel("Grund für die Ablehnung")
+                .setLabel("Grund f r die Ablehnung")
                 .setStyle(TextInputStyle.Paragraph)
                 .setRequired(true)
                 .setMaxLength(500)
-                .setPlaceholder("z.B. Voraussetzungen fehlen, Rücksprache nötig, falscher Zeitpunkt...");
+                .setPlaceholder("z.B. Voraussetzungen fehlen, R cksprache n tig, falscher Zeitpunkt...");
 
             modal.addComponents(
                 new ActionRowBuilder().addComponents(reasonInput)
@@ -918,11 +894,11 @@ botClient.on(Events.InteractionCreate, async (interaction) => {
 
             const embed = new EmbedBuilder()
                 .setColor(0xef233c)
-                .setTitle("? Spontane Prüfung abgelehnt")
+                .setTitle("? Spontane Pr fung abgelehnt")
                 .setDescription("Die Leitung hat den Antrag abgelehnt.")
                 .addFields(
                     {
-                        name: "Prüfling",
+                        name: "Pr fling",
                         value: `**${request.targetName}**`,
                         inline: true
                     },
@@ -932,7 +908,7 @@ botClient.on(Events.InteractionCreate, async (interaction) => {
                         inline: true
                     },
                     {
-                        name: "Prüfung",
+                        name: "Pr fung",
                         value: request.examType,
                         inline: true
                     },
@@ -957,7 +933,7 @@ botClient.on(Events.InteractionCreate, async (interaction) => {
                         inline: false
                     }
                 )
-                .setFooter({ text: `LSMD Ausbildungssystem • Antrag #${requestId}` })
+                .setFooter({ text: `LSMD Ausbildungssystem   Antrag #${requestId}` })
                 .setTimestamp();
 
             await requestMessage.edit({
@@ -971,7 +947,7 @@ botClient.on(Events.InteractionCreate, async (interaction) => {
             });
         }
     } catch (err) {
-        console.error("Fehler bei Spontane-Prüfungen Interaction:", err);
+        console.error("Fehler bei Spontane-Pr fungen Interaction:", err);
 
         if (!interaction.replied && !interaction.deferred) {
             await interaction.reply({
@@ -1102,6 +1078,21 @@ app.get("/users", requireLogin, async (req, res) => {
 app.get("/termine", requireLogin, async (req, res) => {
     const termine = await termineCollection.find({}).sort({ date: 1, time: 1 }).toArray();
 
+const selectedMonth = Number(req.query.month);
+const selectedYear = Number(req.query.year);
+
+const today = new Date();
+
+const calendarMonth = !isNaN(selectedMonth) ? selectedMonth : today.getMonth();
+const calendarYear = !isNaN(selectedYear) ? selectedYear : today.getFullYear();
+
+res.render("termine", viewData(req, {
+    active: "termine",
+    termine,
+    calendarMonth,
+    calendarYear
+}));
+
     res.render("termine", viewData(req, {
         active: "termine",
         termine
@@ -1134,7 +1125,7 @@ app.get("/admin", requireLogin, requireAdmin, async (req, res) => {
 app.post("/admin/spontane-panel", requireLogin, requireAdmin, async (req, res) => {
     await sendSpontanePruefungenPanel();
 
-    await addLog("Spontane Prüfungen Panel gesendet", {
+    await addLog("Spontane Pr fungen Panel gesendet", {
         channelId: process.env.SPONTANE_PRUEFUNGEN_CHANNEL_ID
     }, req.session.user);
 
@@ -1147,11 +1138,11 @@ function buildSpontanePanelComponents() {
     const typeRow = new ActionRowBuilder().addComponents(
         new StringSelectMenuBuilder()
             .setCustomId(`spontan_type_${resetId}`)
-            .setPlaceholder("Prüfungsart auswählen")
+            .setPlaceholder("Pr fungsart ausw hlen")
             .addOptions(
                 {
-                    label: "Sanitäter Prüfung",
-                    value: "Sanitäter Prüfung",
+                    label: "Sanit ter Pr fung",
+                    value: "Sanit ter Pr fung",
                     emoji: "??"
                 }
             )
@@ -1244,41 +1235,47 @@ res.redirect("/admin");
 // =====================
 
 app.post("/termine/create", requireLogin, async (req, res) => {
-    const {
-        name,
-        examType,
-        date,
-        time,
-        examiner,
-        notes
-    } = req.body;
+    try {
+        const {
+            name,
+            examType,
+            date,
+            time,
+            examiner,
+            notes
+        } = req.body;
 
-    if (!name || !examType || !date || !examiner) {
-        return res.redirect("/termine");
+        if (!name || !examType || !date || !examiner) {
+            return res.redirect("/termine");
+        }
+
+        await termineCollection.insertOne({
+            name,
+            discordId: "",
+            examType,
+            date,
+            time,
+            examiner,
+            status: "Offen",
+            notes,
+            source: "termine",
+            createdAt: new Date()
+        });
+
+        await addLog("Ausbildungstermin erstellt", {
+            name,
+            examType,
+            date,
+            time,
+            examiner,
+            notes
+        }, req.session.user);
+
+        res.redirect("/termine");
+    } catch (err) {
+        console.error("Fehler beim Erstellen des Termins:", err);
+        res.status(500).send("Serverfehler");
     }
-
-    await termineCollection.insertOne({
-        name,
-        discordId: "",
-        examType,
-        date,
-        time,
-        examiner,
-        status: "Offen",
-        notes,
-        source: "termine",
-        createdAt: new Date()
-    });
-
-    await addLog("Ausbildungstermin erstellt", {
-    name,
-    examType,
-    date,
-    time,
-    examiner
-}, req.session.user);
-
-    res.redirect("/termine");
 });
 
 app.get("/termine/edit/:id", requireLogin, requireAdmin, async (req, res) => {
@@ -1321,57 +1318,75 @@ app.post("/termine/edit/:id", requireLogin, requireAdmin, async (req, res) => {
             {
                 $set: {
                     name,
-                    discordId: "",
                     examType,
                     date,
                     time,
                     examiner,
-                    status: "Offen",
                     notes
                 }
             }
         );
 
         await addLog("Ausbildungstermin bearbeitet", {
-    id: req.params.id,
-    name,
-    examType,
-    date,
-    time,
-    examiner
-}, req.session.user);
+            id: req.params.id,
+            name,
+            examType,
+            date,
+            time,
+            examiner,
+            notes
+        }, req.session.user);
 
         res.redirect("/termine");
     } catch (err) {
-        console.error("Fehler beim Speichern des Termins:", err);
+        console.error("Fehler beim Bearbeiten des Termins:", err);
         res.status(500).send("Serverfehler");
     }
 });
 
 app.post("/termine/status/:id", requireLogin, async (req, res) => {
-    const { status } = req.body;
+    try {
+        await termineCollection.updateOne(
+            { _id: new ObjectId(req.params.id) },
+            {
+                $set: {
+                    status: req.body.status || "Offen"
+                }
+            }
+        );
 
-    await termineCollection.updateOne(
-        { _id: new ObjectId(req.params.id) },
-        { $set: { status } }
-    );
-
-    await addLog("Termin Status geaendert", { id: req.params.id, status }, req.session.user);
-
-    res.redirect("/termine");
+        res.redirect("/termine");
+    } catch (err) {
+        console.error("Fehler beim Status-Update:", err);
+        res.status(500).send("Serverfehler");
+    }
 });
 
 app.post("/termine/delete/:id", requireLogin, requireAdmin, async (req, res) => {
-    await termineCollection.deleteOne({
-        _id: new ObjectId(req.params.id)
-    });
+    try {
+        const termin = await termineCollection.findOne({
+            _id: new ObjectId(req.params.id)
+        });
 
-    await addLog("Termin geloescht", { id: req.params.id }, req.session.user);
+        await termineCollection.deleteOne({
+            _id: new ObjectId(req.params.id)
+        });
 
-    res.redirect("/termine");
+        await addLog("Termin geloescht", {
+            id: req.params.id,
+            name: termin?.name,
+            examType: termin?.examType,
+            date: termin?.date,
+            time: termin?.time,
+            examiner: termin?.examiner
+        }, req.session.user);
+
+        res.redirect("/termine");
+    } catch (err) {
+        console.error("Fehler beim Loeschen des Termins:", err);
+        res.status(500).send("Serverfehler");
+    }
 });
-
-// =====================
 // DOKUMENTE
 // =====================
 

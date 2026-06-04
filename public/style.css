@@ -8244,3 +8244,38 @@ textarea:hover {
         min-height: auto;
     }
 }
+
+/* =====================
+   KALENDER NAVIGATION
+===================== */
+
+.calendar-nav {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+}
+
+.calendar-nav a {
+    text-decoration: none;
+    color: #dbeafe;
+    padding: 9px 12px;
+    border-radius: 999px;
+    background: rgba(37,99,235,0.13);
+    border: 1px solid rgba(37,99,235,0.30);
+    font-size: 13px;
+    font-weight: 900;
+    transition: 0.2s ease;
+}
+
+.calendar-nav a:hover {
+    transform: translateY(-2px);
+    background: rgba(37,99,235,0.20);
+}
+
+@media (max-width: 700px) {
+    .calendar-nav {
+        justify-content: flex-start;
+    }
+}
