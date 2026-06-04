@@ -4022,3 +4022,125 @@ a {
         justify-content: flex-start;
     }
 }
+
+/* =====================
+   PRO SYSTEM GLOBAL UPGRADE
+===================== */
+
+.card,
+.stat-card,
+.doc-card,
+.quick-card,
+.points-box,
+.clean-panel {
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+    border: 1px solid rgba(255, 255, 255, 0.09) !important;
+    box-shadow:
+        0 18px 50px rgba(0, 0, 0, 0.28),
+        inset 0 1px 0 rgba(255, 255, 255, 0.05) !important;
+}
+
+.card:hover,
+.stat-card:hover,
+.doc-card:hover,
+.quick-card:hover,
+.points-box:hover {
+    transform: translateY(-2px);
+    border-color: rgba(59, 130, 246, 0.35) !important;
+    box-shadow:
+        0 24px 70px rgba(0, 0, 0, 0.36),
+        0 0 28px rgba(37, 99, 235, 0.10) !important;
+}
+
+.card-header {
+    padding-bottom: 14px;
+    margin-bottom: 16px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+}
+
+.card-header h2 {
+    letter-spacing: -0.03em;
+}
+
+.card-subtitle,
+.page-header p,
+.card p,
+.quick-card p,
+.points-box p {
+    color: rgba(203, 213, 225, 0.78) !important;
+}
+
+button,
+.open-doc-btn,
+.danger-btn,
+.quick-card {
+    transition: 0.22s ease !important;
+}
+
+button:hover,
+.open-doc-btn:hover {
+    transform: translateY(-1px);
+    filter: brightness(1.08);
+}
+
+.danger-btn:hover {
+    transform: translateY(-1px);
+    filter: brightness(1.12);
+}
+
+input,
+select,
+textarea {
+    background: rgba(2, 6, 23, 0.72) !important;
+    border: 1px solid rgba(148, 163, 184, 0.18) !important;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+    border-color: rgba(59, 130, 246, 0.65) !important;
+    box-shadow:
+        0 0 0 3px rgba(37, 99, 235, 0.18),
+        inset 0 1px 0 rgba(255, 255, 255, 0.05) !important;
+}
+
+.chip,
+.badge {
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.12);
+    letter-spacing: 0.02em;
+}
+
+.page-header {
+    margin-bottom: 24px !important;
+}
+
+.page-header h1 {
+    letter-spacing: -0.05em;
+    text-shadow: 0 10px 35px rgba(37, 99, 235, 0.18);
+}
+
+.stats-grid {
+    gap: 18px !important;
+}
+
+.dashboard-grid {
+    gap: 18px !important;
+}
+
+.stat-card {
+    min-height: 128px;
+}
+
+.stat-icon {
+    box-shadow:
+        0 12px 28px rgba(0,0,0,0.25),
+        inset 0 1px 0 rgba(255,255,255,0.10);
+}
+
+.empty-state {
+    border-radius: 22px;
+    background: rgba(2, 6, 23, 0.42);
+    border: 1px dashed rgba(148, 163, 184, 0.18);
+}
