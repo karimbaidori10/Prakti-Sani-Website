@@ -1,51 +1,51 @@
 <div class="page-header">
     <h1>Mitglieder</h1>
-    <p>Alle Mitglieder mit Punkten, Wochenziel und Rang&uuml;bersicht.</p>
+    <p>Alle Mitglieder mit Punkten, Wochenziel, Rang und Discord-&Uuml;bersicht.</p>
 </div>
 
 <section class="stats-grid">
     <div class="stat-card stat-blue">
-        <div class="stat-icon">User</div>
+        <div class="stat-icon">👥</div>
         <div>
             <h2><%= users ? users.length : 0 %></h2>
             <strong>Mitglieder</strong>
-            <p>Aktive Community</p>
+            <p>Aktive Eintr&auml;ge</p>
         </div>
     </div>
 
     <div class="stat-card stat-green">
-        <div class="stat-icon">OK</div>
+        <div class="stat-icon">✅</div>
         <div>
             <h2><%= users ? users.filter(u => Number(u.points || 0) >= 5).length : 0 %></h2>
             <strong>Wochenziel</strong>
-            <p>Erreicht</p>
+            <p>5+ Punkte erreicht</p>
         </div>
     </div>
 
     <div class="stat-card stat-yellow">
-        <div class="stat-icon">Offen</div>
+        <div class="stat-icon">⏳</div>
         <div>
             <h2><%= users ? users.filter(u => Number(u.points || 0) < 5).length : 0 %></h2>
-            <strong>Offen</strong>
-            <p>Noch unter 5 Punkte</p>
+            <strong>Noch offen</strong>
+            <p>Unter 5 Punkte</p>
         </div>
     </div>
 
     <div class="stat-card stat-red">
-        <div class="stat-icon">Top</div>
+        <div class="stat-icon">🏆</div>
         <div>
             <h2><%= users && users.length > 0 ? users[0].points : 0 %></h2>
             <strong>Top Punkte</strong>
-            <p>Bester Eintrag</p>
+            <p>St&auml;rkster Eintrag</p>
         </div>
     </div>
 </section>
 
-<section class="card">
+<section class="card" style="margin-top: 18px;">
     <div class="card-header">
         <div>
             <h2>Mitglieder&uuml;bersicht</h2>
-            <p class="card-subtitle">Suche nach Name, Rang oder Discord ID.</p>
+            <p class="card-subtitle">Suche nach Name, Rang, Discord ID oder Punkten.</p>
         </div>
 
         <span class="chip blue">
@@ -55,7 +55,7 @@
 
     <% if (!users || users.length === 0) { %>
         <div class="empty-state">
-            <div>Keine Daten</div>
+            <div>👥</div>
             <h3>Keine Mitglieder vorhanden</h3>
             <p>Sobald Punkte vergeben werden, erscheinen Mitglieder hier automatisch.</p>
         </div>
@@ -86,18 +86,30 @@
             </div>
 
             <% users.forEach((member, index) => { %>
+                <%
+                    const points = Number(member.points || 0);
+                    const goalDone = points >= 5;
+                    const displayName = member.displayName || member.username || ("User " + (index + 1));
+                    const firstLetter = displayName.toString().charAt(0).toUpperCase();
+                %>
+
                 <div
                     class="member-table-row <%= index === 0 ? 'top-member-row' : '' %>"
                     data-search="<%= [
-                        member.displayName || '',
+                        displayName || '',
+                        member.username || '',
                         member.rank || '',
                         member.userId || '',
-                        member.points || 0
+                        points
                     ].join(' ').toLowerCase() %>"
-                    data-goal="<%= Number(member.points || 0) >= 5 ? 'done' : 'open' %>"
+                    data-goal="<%= goalDone ? 'done' : 'open' %>"
                 >
                     <div class="member-place">
-                        <%= index + 1 %>
+                        <% if (index === 0) { %>
+                            🏆
+                        <% } else { %>
+                            <%= index + 1 %>
+                        <% } %>
                     </div>
 
                     <div class="member-profile">
@@ -105,13 +117,13 @@
                             <% if (member.avatarUrl) { %>
                                 <img src="<%= member.avatarUrl %>" alt="Avatar">
                             <% } else { %>
-                                <span>MD</span>
+                                <span><%= firstLetter || "?" %></span>
                             <% } %>
                         </div>
 
                         <div>
-                            <h3><%= member.displayName || ("User " + (index + 1)) %></h3>
-                            <p>Discord ID: <%= member.userId %></p>
+                            <h3><%= displayName %></h3>
+                            <p>Discord ID: <%= member.userId || "Nicht vorhanden" %></p>
                         </div>
                     </div>
 
@@ -120,15 +132,15 @@
                     </div>
 
                     <div class="member-points-text">
-                        <strong><%= member.points || 0 %></strong>
+                        <strong><%= points %></strong>
                         <span>Punkte</span>
                     </div>
 
                     <div class="member-goal">
-                        <% if (Number(member.points || 0) >= 5) { %>
+                        <% if (goalDone) { %>
                             <span class="badge success">Erreicht</span>
                         <% } else { %>
-                            <span class="badge warning">Noch offen</span>
+                            <span class="badge warning">Noch <%= 5 - points %> offen</span>
                         <% } %>
                     </div>
                 </div>
@@ -136,7 +148,7 @@
         </div>
 
         <div id="memberEmptySearch" class="empty-state" style="display:none; margin-top: 16px;">
-            <div>Keine Treffer</div>
+            <div>🔍</div>
             <h3>Kein Mitglied gefunden</h3>
             <p>Versuche einen anderen Namen, Rang oder eine Discord ID.</p>
         </div>

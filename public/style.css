@@ -6237,3 +6237,63 @@ textarea:focus {
         justify-content: center;
     }
 }
+
+/* =====================
+   MITGLIEDER PHASE 3
+===================== */
+
+.pro-searchbar {
+    display: grid;
+    grid-template-columns: 1fr 240px;
+    gap: 12px;
+    margin-bottom: 18px;
+}
+
+.pro-searchbar input,
+.pro-searchbar select {
+    min-height: 46px;
+}
+
+.member-table-row {
+    position: relative;
+    overflow: hidden;
+}
+
+.member-table-row::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background:
+        radial-gradient(circle at top right, rgba(37,99,235,0.11), transparent 34%),
+        radial-gradient(circle at bottom left, rgba(239,35,60,0.08), transparent 34%);
+    opacity: 0;
+    pointer-events: none;
+    transition: 0.2s ease;
+}
+
+.member-table-row:hover::before {
+    opacity: 1;
+}
+
+.member-table-row > * {
+    position: relative;
+    z-index: 1;
+}
+
+.member-place {
+    text-align: center;
+}
+
+.member-goal {
+    text-align: right;
+}
+
+@media (max-width: 900px) {
+    .pro-searchbar {
+        grid-template-columns: 1fr;
+    }
+
+    .member-goal {
+        text-align: left;
+    }
+}
