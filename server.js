@@ -328,19 +328,10 @@ async function sendSpontanePruefungenPanel() {
             .setPlaceholder("Prüfungsart auswählen")
             .addOptions(
                 {
-                    label: "Sanitäter",
-                    value: "Sanitäter",
+                    label: "Sanitäter Prüfung",
+                    value: "Sanitäter Prüfung",
                     emoji: "🚑"
-                },
-                {
-                    label: "Darf alleine fahren",
-                    value: "Darf alleine fahren",
-                    emoji: "✅"
-                },
-                {
-                    label: "Theorieprüfung",
-                    value: "Theorieprüfung",
-                    emoji: "📘"
+
                 }
             )
     );
