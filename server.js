@@ -18,7 +18,10 @@ const {
     StringSelectMenuBuilder,
     ButtonBuilder,
     ButtonStyle,
-    Events
+    Events,
+    ModalBuilder,
+    TextInputBuilder,
+    TextInputStyle
 } = require("discord.js");
 
 const app = express();
@@ -55,6 +58,8 @@ const botClient = new Client({
 });
 
 const spontaneSelections = new Map();
+const spontaneRequests = new Map();
+let spontaneRequestCounter = 1;
 
 
 app.set("view engine", "ejs");
@@ -336,19 +341,13 @@ async function sendSpontanePruefungenPanel() {
             )
     );
 
-    const buttonRow = new ActionRowBuilder().addComponents(
-        new ButtonBuilder()
-            .setCustomId("spontan_approve")
-            .setLabel("Genehmigen")
-            .setEmoji("✅")
-            .setStyle(ButtonStyle.Success),
-
-        new ButtonBuilder()
-            .setCustomId("spontan_reject")
-            .setLabel("Ablehnen")
-            .setEmoji("❌")
-            .setStyle(ButtonStyle.Danger)
-    );
+const buttonRow = new ActionRowBuilder().addComponents(
+    new ButtonBuilder()
+        .setCustomId("spontan_submit")
+        .setLabel("Antrag erstellen")
+        .setEmoji("📨")
+        .setStyle(ButtonStyle.Primary)
+);
 
     await channel.send({
         embeds: [embed],
@@ -623,7 +622,8 @@ botClient.on(Events.InteractionCreate, async (interaction) => {
         if (
             !interaction.isUserSelectMenu() &&
             !interaction.isStringSelectMenu() &&
-            !interaction.isButton()
+            !interaction.isButton() &&
+            !interaction.isModalSubmit()
         ) {
             return;
         }
@@ -666,12 +666,12 @@ botClient.on(Events.InteractionCreate, async (interaction) => {
             });
 
             return interaction.reply({
-                content: `Prüfungsart ausgewählt: **${examType}**`,
+                content: `Prüfungsart ausgewählt: **${examType}**. Klicke jetzt auf **Antrag erstellen**.`,
                 ephemeral: true
             });
         }
 
-        if (interaction.customId === "spontan_approve" || interaction.customId === "spontan_reject") {
+        if (interaction.customId === "spontan_submit") {
             const state = spontaneSelections.get(adminId);
 
             if (!state || !state.targetId || !state.examType) {
@@ -681,15 +681,14 @@ botClient.on(Events.InteractionCreate, async (interaction) => {
                 });
             }
 
-            const approved = interaction.customId === "spontan_approve";
+            const requestId = spontaneRequestCounter++;
 
             const embed = new EmbedBuilder()
-                .setColor(approved ? 0x22c55e : 0xef233c)
-                .setTitle(approved ? "✅ Spontane Prüfung genehmigt" : "❌ Spontane Prüfung abgelehnt")
+                .setColor(0xf59e0b)
+                .setTitle("📋 Neuer Antrag: Spontane Prüfung")
                 .setDescription(
-                    approved
-                        ? "Eine spontane Prüfung wurde genehmigt."
-                        : "Eine spontane Prüfung wurde abgelehnt."
+                    "Ein Prüfling wurde für eine spontane Prüfung eingetragen.\n\n" +
+                    "Die Leitung kann diesen Antrag jetzt genehmigen oder ablehnen."
                 )
                 .addFields(
                     {
@@ -703,35 +702,223 @@ botClient.on(Events.InteractionCreate, async (interaction) => {
                         inline: true
                     },
                     {
-                        name: approved ? "Genehmigt von" : "Abgelehnt von",
+                        name: "Eingetragen von",
                         value: `<@${interaction.user.id}>`,
                         inline: true
+                    },
+                    {
+                        name: "Status",
+                        value: "⏳ Wartet auf Entscheidung",
+                        inline: false
                     }
                 )
-                .setFooter({ text: "LSMD Ausbildungssystem" })
+                .setFooter({ text: `LSMD Ausbildungssystem • Antrag #${requestId}` })
                 .setTimestamp();
 
-            await interaction.channel.send({
+            const decisionRow = new ActionRowBuilder().addComponents(
+                new ButtonBuilder()
+                    .setCustomId(`spontan_request_approve_${requestId}`)
+                    .setLabel("Genehmigen")
+                    .setEmoji("✅")
+                    .setStyle(ButtonStyle.Success),
+
+                new ButtonBuilder()
+                    .setCustomId(`spontan_request_reject_${requestId}`)
+                    .setLabel("Ablehnen")
+                    .setEmoji("❌")
+                    .setStyle(ButtonStyle.Danger)
+            );
+
+            const requestMessage = await interaction.channel.send({
                 content: `<@${state.targetId}>`,
                 allowedMentions: {
                     users: [state.targetId]
                 },
-                embeds: [embed]
+                embeds: [embed],
+                components: [decisionRow]
+            });
+
+            spontaneRequests.set(requestId, {
+                id: requestId,
+                targetId: state.targetId,
+                targetName: state.targetName,
+                examType: state.examType,
+                createdBy: interaction.user.id,
+                channelId: interaction.channel.id,
+                messageId: requestMessage.id,
+                status: "offen"
             });
 
             spontaneSelections.delete(adminId);
 
             return interaction.reply({
-                content: approved
-                    ? "Spontane Prüfung wurde genehmigt und gepostet."
-                    : "Spontane Prüfung wurde abgelehnt und gepostet.",
+                content: "Der Antrag wurde unten als neue Nachricht erstellt.",
+                ephemeral: true
+            });
+        }
+
+        if (interaction.customId.startsWith("spontan_request_approve_")) {
+            const requestId = Number(interaction.customId.replace("spontan_request_approve_", ""));
+            const request = spontaneRequests.get(requestId);
+
+            if (!request || request.status !== "offen") {
+                return interaction.reply({
+                    content: "Dieser Antrag wurde bereits bearbeitet oder nicht gefunden.",
+                    ephemeral: true
+                });
+            }
+
+            request.status = "genehmigt";
+            request.decidedBy = interaction.user.id;
+
+            const embed = new EmbedBuilder()
+                .setColor(0x22c55e)
+                .setTitle("✅ Spontane Prüfung genehmigt")
+                .setDescription("Die Leitung hat den Antrag genehmigt.")
+                .addFields(
+                    {
+                        name: "Prüfling",
+                        value: `<@${request.targetId}>`,
+                        inline: true
+                    },
+                    {
+                        name: "Prüfung",
+                        value: request.examType,
+                        inline: true
+                    },
+                    {
+                        name: "Eingetragen von",
+                        value: `<@${request.createdBy}>`,
+                        inline: true
+                    },
+                    {
+                        name: "Genehmigt von",
+                        value: `<@${interaction.user.id}>`,
+                        inline: true
+                    },
+                    {
+                        name: "Status",
+                        value: "✅ Genehmigt",
+                        inline: false
+                    }
+                )
+                .setFooter({ text: `LSMD Ausbildungssystem • Antrag #${requestId}` })
+                .setTimestamp();
+
+            await interaction.message.edit({
+                embeds: [embed],
+                components: []
+            });
+
+            return interaction.reply({
+                content: "Der Antrag wurde genehmigt.",
+                ephemeral: true
+            });
+        }
+
+        if (interaction.customId.startsWith("spontan_request_reject_")) {
+            const requestId = Number(interaction.customId.replace("spontan_request_reject_", ""));
+            const request = spontaneRequests.get(requestId);
+
+            if (!request || request.status !== "offen") {
+                return interaction.reply({
+                    content: "Dieser Antrag wurde bereits bearbeitet oder nicht gefunden.",
+                    ephemeral: true
+                });
+            }
+
+            const modal = new ModalBuilder()
+                .setCustomId(`spontan_reject_modal_${requestId}`)
+                .setTitle("Spontane Prüfung ablehnen");
+
+            const reasonInput = new TextInputBuilder()
+                .setCustomId("reject_reason")
+                .setLabel("Grund für die Ablehnung")
+                .setStyle(TextInputStyle.Paragraph)
+                .setRequired(true)
+                .setMaxLength(500)
+                .setPlaceholder("z.B. Voraussetzungen fehlen, Rücksprache nötig, falscher Zeitpunkt...");
+
+            modal.addComponents(
+                new ActionRowBuilder().addComponents(reasonInput)
+            );
+
+            return interaction.showModal(modal);
+        }
+
+        if (interaction.customId.startsWith("spontan_reject_modal_")) {
+            const requestId = Number(interaction.customId.replace("spontan_reject_modal_", ""));
+            const request = spontaneRequests.get(requestId);
+
+            if (!request || request.status !== "offen") {
+                return interaction.reply({
+                    content: "Dieser Antrag wurde bereits bearbeitet oder nicht gefunden.",
+                    ephemeral: true
+                });
+            }
+
+            const reason = interaction.fields.getTextInputValue("reject_reason");
+
+            request.status = "abgelehnt";
+            request.decidedBy = interaction.user.id;
+            request.reason = reason;
+
+            const channel = await botClient.channels.fetch(request.channelId);
+            const requestMessage = await channel.messages.fetch(request.messageId);
+
+            const embed = new EmbedBuilder()
+                .setColor(0xef233c)
+                .setTitle("❌ Spontane Prüfung abgelehnt")
+                .setDescription("Die Leitung hat den Antrag abgelehnt.")
+                .addFields(
+                    {
+                        name: "Prüfling",
+                        value: `<@${request.targetId}>`,
+                        inline: true
+                    },
+                    {
+                        name: "Prüfung",
+                        value: request.examType,
+                        inline: true
+                    },
+                    {
+                        name: "Eingetragen von",
+                        value: `<@${request.createdBy}>`,
+                        inline: true
+                    },
+                    {
+                        name: "Abgelehnt von",
+                        value: `<@${interaction.user.id}>`,
+                        inline: true
+                    },
+                    {
+                        name: "Grund",
+                        value: reason,
+                        inline: false
+                    },
+                    {
+                        name: "Status",
+                        value: "❌ Abgelehnt",
+                        inline: false
+                    }
+                )
+                .setFooter({ text: `LSMD Ausbildungssystem • Antrag #${requestId}` })
+                .setTimestamp();
+
+            await requestMessage.edit({
+                embeds: [embed],
+                components: []
+            });
+
+            return interaction.reply({
+                content: "Der Antrag wurde abgelehnt und der Grund wurde eingetragen.",
                 ephemeral: true
             });
         }
     } catch (err) {
         console.error("Fehler bei Spontane-Prüfungen Interaction:", err);
 
-        if (!interaction.replied) {
+        if (!interaction.replied && !interaction.deferred) {
             await interaction.reply({
                 content: "Es ist ein Fehler aufgetreten.",
                 ephemeral: true
