@@ -1008,7 +1008,7 @@ await addLog("Login", {
     name: req.user.username
 }, req.session.user);
 
-        res.redirect("/dashboard");
+        return res.redirect("/dashboard");
     }
 );
 
@@ -1025,7 +1025,7 @@ app.get("/logout", (req, res) => {
 // =====================
 
 app.get("/", requireLogin, (req, res) => {
-    res.redirect("/dashboard");
+    return res.redirect("/dashboard");
 });
 
 app.get("/dashboard", requireLogin, async (req, res) => {
@@ -1511,6 +1511,7 @@ if (process.env.DISCORD_BOT_TOKEN) {
 }
 
 start().catch(console.error);
+
 
 
 
