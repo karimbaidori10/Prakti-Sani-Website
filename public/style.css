@@ -5768,3 +5768,85 @@ button::after,
         transform: none !important;
     }
 }
+
+/* =====================
+   PERFORMANCE MODE 2 - SMOOTH APP
+===================== */
+
+/* Keine schweren Filter mehr */
+* {
+    filter: none;
+}
+
+/* Glow-Hintergründe komplett entschärfen */
+body {
+    background:
+        linear-gradient(135deg, #020617, #0f172a 55%, #020617) !important;
+}
+
+/* Karten behalten Premium Look, aber leichter */
+.card,
+.stat-card,
+.doc-card,
+.quick-card,
+.points-box,
+.clean-panel,
+.admin-member-row,
+.leaderboard-row,
+.sheet-table-row-clean {
+    background: rgba(15, 23, 42, 0.82) !important;
+    border: 1px solid rgba(255,255,255,0.08) !important;
+}
+
+/* Keine Dauer-Animationen */
+*,
+*::before,
+*::after {
+    animation-duration: 0s !important;
+    animation-delay: 0s !important;
+}
+
+/* Hover nur noch minimal */
+.card:hover,
+.stat-card:hover,
+.doc-card:hover,
+.quick-card:hover,
+.points-box:hover {
+    transform: none !important;
+    border-color: rgba(96,165,250,0.22) !important;
+}
+
+/* Sidebar flüssiger */
+.sidebar {
+    box-shadow: 8px 0 24px rgba(0,0,0,0.20) !important;
+}
+
+.sidebar nav a:hover {
+    transform: none !important;
+}
+
+/* Tabellen und Listen ruhiger */
+.admin-member-row:hover,
+.leaderboard-row:hover,
+.sheet-table-row-clean:hover {
+    transform: none !important;
+}
+
+/* Bilder/Avatare sauber rendern */
+img {
+    image-rendering: auto;
+}
+
+/* Buttons bleiben hochwertig, aber ohne schwere Effekte */
+button,
+.open-doc-btn,
+.danger-btn {
+    box-shadow: 0 8px 20px rgba(0,0,0,0.22) !important;
+}
+
+button:hover,
+.open-doc-btn:hover,
+.danger-btn:hover {
+    transform: none !important;
+    filter: brightness(1.06) !important;
+}
