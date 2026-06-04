@@ -222,6 +222,7 @@ async function addLog(action, data = {}, actor = null) {
     await logsCollection.insertOne(logEntry);
 
     if (!process.env.DISCORD_LOG_WEBHOOK) {
+        console.log("DISCORD_LOG_WEBHOOK fehlt in Railway Variables");
         return;
     }
 
@@ -231,7 +232,7 @@ async function addLog(action, data = {}, actor = null) {
         const pingText = actorId ? `<@${actorId}>` : actorName;
 
         let title = "LSMD Dashboard Log";
-        let description = `${pingText} hat eine Aktion ausgef&uuml;hrt.`;
+        let description = `${pingText} hat eine Aktion ausgeführt.`;
         let color = 3447003;
 
         if (action.includes("Login")) {
@@ -253,14 +254,14 @@ async function addLog(action, data = {}, actor = null) {
         }
 
         if (action.includes("Termin geloescht")) {
-            title = "Ausbildungstermin gel&ouml;scht";
-            description = `${pingText} hat einen Ausbildungstermin gel&ouml;scht.`;
+            title = "Ausbildungstermin gelöscht";
+            description = `${pingText} hat einen Ausbildungstermin gelöscht.`;
             color = 15548997;
         }
 
         if (action.includes("Dokument hinzugefuegt")) {
-            title = "Dokument hinzugef&uuml;gt";
-            description = `${pingText} hat ein neues Dokument hinzugef&uuml;gt.`;
+            title = "Dokument hinzugefügt";
+            description = `${pingText} hat ein neues Dokument hinzugefügt.`;
             color = 3447003;
         }
 
@@ -271,89 +272,61 @@ async function addLog(action, data = {}, actor = null) {
         }
 
         if (action.includes("Dokument geloescht")) {
-            title = "Dokument gel&ouml;scht";
-            description = `${pingText} hat ein Dokument gel&ouml;scht.`;
+            title = "Dokument gelöscht";
+            description = `${pingText} hat ein Dokument gelöscht.`;
             color = 15548997;
         }
 
         if (action.includes("Punkte")) {
             title = "Punkteverwaltung";
-            description = `${pingText} hat Punkte im Dashboard ge&auml;ndert.`;
+            description = `${pingText} hat Punkte im Dashboard geändert.`;
             color = 10181046;
         }
 
         const fields = [];
 
         if (data.name) {
-            fields.push({
-                name: "Teilnehmer",
-                value: String(data.name),
-                inline: true
-            });
+            fields.push({ name: "Teilnehmer", value: String(data.name), inline: true });
         }
 
         if (data.title) {
-            fields.push({
-                name: "Dokument",
-                value: String(data.title),
-                inline: true
-            });
+            fields.push({ name: "Dokument", value: String(data.title), inline: true });
         }
 
         if (data.examType) {
             fields.push({
                 name: "Art",
-                value: String(data.examType).replace("Sanitaeter", "Sanit&auml;ter"),
+                value: String(data.examType).replace("Sanitaeter", "Sanitäter"),
                 inline: true
             });
         }
 
         if (data.date) {
-            fields.push({
-                name: "Datum",
-                value: String(data.date),
-                inline: true
-            });
+            fields.push({ name: "Datum", value: String(data.date), inline: true });
         }
 
         if (data.time) {
-            fields.push({
-                name: "Uhrzeit",
-                value: String(data.time),
-                inline: true
-            });
+            fields.push({ name: "Uhrzeit", value: String(data.time), inline: true });
         }
 
         if (data.examiner) {
-            fields.push({
-                name: "Ausbilder",
-                value: String(data.examiner),
-                inline: true
-            });
+            fields.push({ name: "Ausbilder", value: String(data.examiner), inline: true });
         }
 
         if (data.type) {
             fields.push({
                 name: "Kategorie",
-                value: String(data.type).replace("Sanitaeter", "Sanit&auml;ter"),
+                value: String(data.type).replace("Sanitaeter", "Sanitäter"),
                 inline: true
             });
         }
 
         if (data.amount !== undefined) {
-            fields.push({
-                name: "Punkte",
-                value: String(data.amount),
-                inline: true
-            });
+            fields.push({ name: "Punkte", value: String(data.amount), inline: true });
         }
 
         if (data.userId) {
-            fields.push({
-                name: "Betroffener User",
-                value: `<@${data.userId}>`,
-                inline: true
-            });
+            fields.push({ name: "Betroffener User", value: `<@${data.userId}>`, inline: true });
         }
 
         fields.push({
@@ -362,14 +335,13 @@ async function addLog(action, data = {}, actor = null) {
             inline: false
         });
 
-        await fetch(process.env.DISCORD_LOG_WEBHOOK, {
+        const response = await fetch(process.env.DISCORD_LOG_WEBHOOK, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"
             },
             body: JSON.stringify({
                 username: "LSMD Dashboard Logs",
-                avatar_url: "https://cdn.discordapp.com/embed/avatars/0.png",
                 content: actorId ? `<@${actorId}>` : "",
                 allowed_mentions: {
                     parse: ["users"]
@@ -388,6 +360,13 @@ async function addLog(action, data = {}, actor = null) {
                 ]
             })
         });
+
+        if (!response.ok) {
+            const errorText = await response.text();
+            console.error("Discord Webhook Fehler:", response.status, errorText);
+        } else {
+            console.log("Discord Log gesendet:", action);
+        }
     } catch (err) {
         console.error("Discord Log konnte nicht gesendet werden:", err);
     }
