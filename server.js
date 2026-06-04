@@ -632,13 +632,36 @@ function buildRoleField(title, members) {
     };
 }
 
+function memberLine(member) {
+    return `<@${member.id}>`;
+}
+
+function buildRoleField(title, members) {
+    return {
+        name: title,
+        value: members && members.length > 0
+            ? members.map(memberLine).join("\n")
+            : "—",
+        inline: false
+    };
+}
+
 async function updateTeamListMessage() {
     if (!process.env.TEAM_LIST_CHANNEL_ID) {
         console.log("TEAM_LIST_CHANNEL_ID fehlt");
         return;
     }
 
+    const channel = await botClient.channels.fetch(process.env.TEAM_LIST_CHANNEL_ID);
+
+    if (!channel) {
+        console.log("Teamliste Channel nicht gefunden");
+        return;
+    }
+
     const guild = await botClient.guilds.fetch(process.env.DISCORD_GUILD_ID);
+
+    console.log("Lade alle Discord Mitglieder...");
     await guild.members.fetch();
 
     const allMembers = Array.from(guild.members.cache.values())
@@ -653,28 +676,29 @@ async function updateTeamListMessage() {
     const testphase = allMembers.filter(member => hasRole(member, process.env.ROLE_TESTPHASE));
     const aushilfen = allMembers.filter(member => hasRole(member, process.env.ROLE_AUSHILFE));
 
-    const total =
-        head.length +
-        leitung.length +
-        stvLeitung.length +
-        untereLeitung.length +
-        seniorAusbilder.length +
-        festeMitarbeiter.length +
-        testphase.length +
-        aushilfen.length;
+    const uniqueTeamMembers = new Set([
+        ...head.map(m => m.id),
+        ...leitung.map(m => m.id),
+        ...stvLeitung.map(m => m.id),
+        ...untereLeitung.map(m => m.id),
+        ...seniorAusbilder.map(m => m.id),
+        ...festeMitarbeiter.map(m => m.id),
+        ...testphase.map(m => m.id),
+        ...aushilfen.map(m => m.id)
+    ]);
 
     const embed = new EmbedBuilder()
-        .setColor(0x2563eb)
+        .setColor(0xef233c)
         .setTitle("🚑 LSMD Prakti-Sani Teamliste")
         .setDescription(
-            "**Aktuelle Mitgliederübersicht nach Rollen**\n\n" +
+            "**Aktuelle Mitgliederübersicht der Abteilung**\n\n" +
             "Diese Liste wird automatisch vom LSMD Bot aktualisiert."
         )
         .addFields(
             {
                 name: "📊 Übersicht",
                 value:
-                    `**Gesamt gelistete Rollen-Einträge:** ${total}\n` +
+                    `**Teammitglieder:** ${uniqueTeamMembers.size}\n` +
                     `**Letzte Aktualisierung:** <t:${Math.floor(Date.now() / 1000)}:R>`,
                 inline: false
             },
@@ -690,13 +714,6 @@ async function updateTeamListMessage() {
         .setFooter({ text: "LSMD Ausbildungssystem • Automatische Teamliste" })
         .setTimestamp();
 
-    const channel = await botClient.channels.fetch(process.env.TEAM_LIST_CHANNEL_ID);
-
-    if (!channel) {
-        console.log("Teamliste Channel nicht gefunden");
-        return;
-    }
-
     if (process.env.TEAM_LIST_MESSAGE_ID) {
         try {
             const message = await channel.messages.fetch(process.env.TEAM_LIST_MESSAGE_ID);
@@ -709,10 +726,10 @@ async function updateTeamListMessage() {
                 }
             });
 
-            console.log("Teamliste aktualisiert");
+            console.log("Teamliste als Embed aktualisiert");
             return;
         } catch (err) {
-            console.error("TEAM_LIST_MESSAGE_ID ist falsch oder Nachricht wurde gelöscht:", err);
+            console.error("TEAM_LIST_MESSAGE_ID falsch oder Nachricht gelöscht:", err);
         }
     }
 
