@@ -6032,3 +6032,208 @@ textarea:focus {
         grid-template-columns: 1fr;
     }
 }
+
+/* =====================
+   PHASE 4 FEINSCHLIFF
+   ADMIN + DOKUMENTE
+===================== */
+
+.card-header > div h2 {
+    margin-bottom: 4px;
+}
+
+.clean-status-list {
+    display: grid;
+    gap: 10px;
+}
+
+.clean-status-list div {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 14px;
+    padding: 13px 14px;
+    border-radius: 14px;
+    background: rgba(2, 6, 23, 0.36);
+    border: 1px solid rgba(148, 163, 184, 0.11);
+}
+
+.clean-status-list span {
+    color: var(--muted);
+    font-size: 13px;
+    font-weight: 800;
+}
+
+.clean-status-list strong {
+    color: #ffffff;
+    font-size: 13px;
+    text-align: right;
+}
+
+.points-actions {
+    display: flex;
+    gap: 8px;
+    justify-content: flex-end;
+}
+
+.points-actions form {
+    width: auto;
+}
+
+.points-actions button {
+    min-width: 58px;
+    padding: 9px 10px;
+    font-size: 13px;
+}
+
+.badge.blue {
+    background: rgba(37, 99, 235, 0.18);
+    color: #93c5fd;
+    border: 1px solid rgba(37, 99, 235, 0.32);
+}
+
+.badge.green {
+    background: rgba(34, 197, 94, 0.18);
+    color: #86efac;
+    border: 1px solid rgba(34, 197, 94, 0.32);
+}
+
+.badge.yellow {
+    background: rgba(234, 179, 8, 0.18);
+    color: #fde047;
+    border: 1px solid rgba(234, 179, 8, 0.32);
+}
+
+.badge.red {
+    background: rgba(239, 35, 60, 0.18);
+    color: #fca5a5;
+    border: 1px solid rgba(239, 35, 60, 0.32);
+}
+
+.doc-card {
+    position: relative;
+    overflow: hidden;
+}
+
+.doc-card::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background:
+        radial-gradient(circle at top right, rgba(37, 99, 235, 0.13), transparent 34%),
+        radial-gradient(circle at bottom left, rgba(239, 35, 60, 0.10), transparent 34%);
+    opacity: 0;
+    transition: 0.2s ease;
+    pointer-events: none;
+}
+
+.doc-card:hover::before {
+    opacity: 1;
+}
+
+.doc-card > * {
+    position: relative;
+    z-index: 1;
+}
+
+.doc-icon {
+    box-shadow: inset 0 0 22px rgba(255,255,255,0.03);
+}
+
+.doc-actions {
+    grid-template-columns: 1fr;
+}
+
+.doc-actions form {
+    width: 100%;
+}
+
+.open-doc-btn,
+.doc-actions button {
+    min-height: 44px;
+}
+
+.admin-member-row {
+    grid-template-columns: 55px 52px 1fr 100px 130px;
+}
+
+.admin-member-row .leader-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: inherit;
+}
+
+.admin-member-row .leader-points {
+    text-align: center;
+}
+
+.admin-member-row .leader-points strong {
+    font-size: 25px;
+}
+
+.admin-member-row .leader-points span {
+    font-size: 11px;
+    color: var(--muted);
+}
+
+.card.clean-panel {
+    border-color: rgba(37, 99, 235, 0.22);
+}
+
+.stat-card::after {
+    content: "";
+    position: absolute;
+    right: -40px;
+    top: -40px;
+    width: 110px;
+    height: 110px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.04);
+}
+
+.form textarea {
+    line-height: 1.5;
+}
+
+.form select option {
+    color: #111827;
+}
+
+@media (max-width: 900px) {
+    .admin-member-row {
+        grid-template-columns: 50px 50px 1fr;
+    }
+
+    .admin-member-row .leader-points,
+    .admin-member-row .points-actions {
+        grid-column: 1 / -1;
+        text-align: left;
+        justify-content: flex-start;
+    }
+
+    .clean-status-list div {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .clean-status-list strong {
+        text-align: left;
+    }
+}
+
+@media (max-width: 600px) {
+    .doc-top {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .doc-icon {
+        width: 100%;
+    }
+
+    .points-actions {
+        justify-content: center;
+    }
+}
