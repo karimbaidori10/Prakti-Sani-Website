@@ -302,33 +302,3 @@
         </div>
     </div>
 </section>
-
-<% if (logs && logs.length > 0) { %>
-    <section class="card clean-panel" style="margin-top: 18px;">
-        <div class="card-header">
-            <div>
-                <h2>Letzte System-Logs</h2>
-                <p class="card-subtitle">Die letzten Aktionen im Dashboard.</p>
-            </div>
-
-            <span class="chip blue"><%= logs.length %> Logs</span>
-        </div>
-
-        <div class="clean-status-list">
-            <% logs.slice(0, 12).forEach((log) => { %>
-                <div>
-                    <span>
-                        <%= log.action || "Aktion" %>
-                    </span>
-                    <strong>
-                        <% if (log.createdAt) { %>
-                            <%= new Date(log.createdAt).toLocaleString("de-DE") %>
-                        <% } else { %>
-                            Unbekannte Zeit
-                        <% } %>
-                    </strong>
-                </div>
-            <% }) %>
-        </div>
-    </section>
-<% } %>
