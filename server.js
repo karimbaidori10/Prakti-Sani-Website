@@ -287,6 +287,69 @@ function isDiscordAdmin(interaction) {
     return false;
 }
 
+async function sendAbmeldungPanel() {
+    if (!process.env.ABMELDUNG_CHANNEL_ID) {
+        console.log("ABMELDUNG_CHANNEL_ID fehlt");
+        return;
+    }
+
+    const channel = await botClient.channels.fetch(process.env.ABMELDUNG_CHANNEL_ID);
+
+    if (!channel) {
+        console.log("Abmeldung Channel nicht gefunden");
+        return;
+    }
+
+    const embed = new EmbedBuilder()
+        .setColor(0x2b2d31)
+        .setTitle("🚑 LSMD Abmeldungssystem")
+        .setDescription(
+            "**Willkommen im Abmeldungsbereich des LSMD.**\n\n" +
+            "Nutze den Button unten, um dich offiziell für einen Zeitraum abzumelden.\n\n" +
+            "Bitte beachte:\n" +
+            "• Abmeldungen bitte **erst ab 3 Tagen** eintragen\n" +
+            "• Für Prüfungen oder Besprechungen bitte den genauen Tag angeben\n" +
+            "• Falsche oder unvollständige Angaben können abgelehnt werden"
+        )
+        .addFields(
+            {
+                name: "📋 Benötigte Angaben",
+                value:
+                    "**Name**\n" +
+                    "**Dienstnummer**\n" +
+                    "**Zeitraum**\n" +
+                    "**Grund**",
+                inline: true
+            },
+            {
+                name: "✅ Nach dem Absenden",
+                value:
+                    "Deine Abmeldung wird automatisch als Embed im Channel veröffentlicht.",
+                inline: true
+            }
+        )
+        .setFooter({ text: "LSMD Abmeldungssystem • Automatische Vorlage" })
+        .setTimestamp();
+
+    const row = new ActionRowBuilder().addComponents(
+        new ButtonBuilder()
+            .setCustomId("abmeldung_open_modal")
+            .setLabel("Abmeldung einreichen")
+            .setEmoji("📨")
+            .setStyle(ButtonStyle.Primary)
+    );
+
+    await channel.send({
+        embeds: [embed],
+        components: [row],
+        allowedMentions: {
+            parse: []
+        }
+    });
+
+    console.log("Abmeldungs-Panel gesendet");
+}
+
 async function sendSpontanePruefungenPanel() {
     if (!process.env.SPONTANE_PRUEFUNGEN_CHANNEL_ID) {
         console.log("SPONTANE_PRUEFUNGEN_CHANNEL_ID fehlt");
@@ -794,8 +857,131 @@ botClient.on(Events.InteractionCreate, async (interaction) => {
             return;
         }
 
-        if (!interaction.customId.startsWith("spontan_")) {
+        if (
+    !interaction.customId.startsWith("spontan_") &&
+    !interaction.customId.startsWith("abmeldung_")
+) {
+    return;
+}
+
+        if (
+            !interaction.isStringSelectMenu() &&
+            !interaction.isButton() &&
+            !interaction.isModalSubmit()
+        ) {
             return;
+        }
+
+        if (
+            !interaction.customId.startsWith("spontan_") &&
+            !interaction.customId.startsWith("abmeldung_")
+        ) {
+            return;
+        }
+
+        if (interaction.isButton() && interaction.customId === "abmeldung_open_modal") {
+            const modal = new ModalBuilder()
+                .setCustomId("abmeldung_submit_modal")
+                .setTitle("LSMD Abmeldung");
+
+            const nameInput = new TextInputBuilder()
+                .setCustomId("abmeldung_name")
+                .setLabel("Name")
+                .setStyle(TextInputStyle.Short)
+                .setRequired(true)
+                .setMaxLength(80)
+                .setPlaceholder("z.B. Karim Tranquile");
+
+            const dnInput = new TextInputBuilder()
+                .setCustomId("abmeldung_dn")
+                .setLabel("Dienstnummer")
+                .setStyle(TextInputStyle.Short)
+                .setRequired(true)
+                .setMaxLength(30)
+                .setPlaceholder("z.B. MD-23");
+
+            const zeitraumInput = new TextInputBuilder()
+                .setCustomId("abmeldung_zeitraum")
+                .setLabel("Zeitraum")
+                .setStyle(TextInputStyle.Short)
+                .setRequired(true)
+                .setMaxLength(100)
+                .setPlaceholder("z.B. 10.06.2026 - 14.06.2026");
+
+            const grundInput = new TextInputBuilder()
+                .setCustomId("abmeldung_grund")
+                .setLabel("Grund")
+                .setStyle(TextInputStyle.Paragraph)
+                .setRequired(true)
+                .setMaxLength(500)
+                .setPlaceholder("z.B. Urlaub, Krankheit, private Gründe...");
+
+            modal.addComponents(
+                new ActionRowBuilder().addComponents(nameInput),
+                new ActionRowBuilder().addComponents(dnInput),
+                new ActionRowBuilder().addComponents(zeitraumInput),
+                new ActionRowBuilder().addComponents(grundInput)
+            );
+
+            return interaction.showModal(modal);
+        }
+
+        if (interaction.isModalSubmit() && interaction.customId === "abmeldung_submit_modal") {
+            const name = interaction.fields.getTextInputValue("abmeldung_name");
+            const dn = interaction.fields.getTextInputValue("abmeldung_dn");
+            const zeitraum = interaction.fields.getTextInputValue("abmeldung_zeitraum");
+            const grund = interaction.fields.getTextInputValue("abmeldung_grund");
+
+            const embed = new EmbedBuilder()
+                .setColor(0xef233c)
+                .setTitle("📌 Neue Abmeldung")
+                .setDescription("Eine neue Abmeldung wurde eingereicht.")
+                .addFields(
+                    {
+                        name: "👤 Name",
+                        value: `**${name}**`,
+                        inline: true
+                    },
+                    {
+                        name: "🆔 Dienstnummer",
+                        value: `**${dn}**`,
+                        inline: true
+                    },
+                    {
+                        name: "📅 Zeitraum",
+                        value: `**${zeitraum}**`,
+                        inline: false
+                    },
+                    {
+                        name: "📝 Grund",
+                        value: grund,
+                        inline: false
+                    },
+                    {
+                        name: "📨 Eingereicht von",
+                        value: `<@${interaction.user.id}>`,
+                        inline: true
+                    },
+                    {
+                        name: "⏰ Eingereicht am",
+                        value: `<t:${Math.floor(Date.now() / 1000)}:f>`,
+                        inline: true
+                    }
+                )
+                .setFooter({ text: "LSMD Abmeldungssystem" })
+                .setTimestamp();
+
+            await interaction.channel.send({
+                embeds: [embed],
+                allowedMentions: {
+                    parse: []
+                }
+            });
+
+            return interaction.reply({
+                content: "✅ Deine Abmeldung wurde erfolgreich eingereicht.",
+                flags: MessageFlags.Ephemeral
+            });
         }
 
         if (!isDiscordAdmin(interaction)) {
@@ -1677,7 +1863,6 @@ async function start() {
     await mongo.connect();
 
     const db = mongo.db("lsmd");
-
     pointsCollection = db.collection("points");
     termineCollection = db.collection("examAppointments");
     examsCollection = db.collection("exams");
