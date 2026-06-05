@@ -43,7 +43,7 @@
         <span class="clean-dashboard-label">LSMD Zentrale</span>
         <h1>Willkommen zur&uuml;ck,<br><%= displayName %></h1>
         <p>
-            Ausbildungstermine, Mitglieder, Dokumente und MD-Verwaltung auf einen Blick.
+            Ausbildungstermine, Mitglieder, Dokumente und Wochenziele zentral im Blick.
         </p>
 
         <div class="clean-dashboard-pills">
@@ -114,7 +114,11 @@
             <div class="empty-state">
                 <div>📅</div>
                 <h3>Keine Eintr&auml;ge vorhanden</h3>
-                <p>Erstelle den ersten Eintrag bei Ausbildungstermine.</p>
+                <% if (isAdmin) { %>
+    <p>Erstelle den ersten Eintrag bei Ausbildungstermine.</p>
+<% } else { %>
+    <p>Noch keine Ausbildungstermine vorhanden.</p>
+<% } %>
             </div>
         <% } else { %>
             <div class="clean-entry-list">
@@ -160,8 +164,11 @@
 
             <a href="/termine" class="clean-quick-card blue">
                 <div>
-                    <strong>Ausbildungstermine</strong>
-                    <span>MD-Eintr&auml;ge verwalten</span>
+                    <% if (isAdmin) { %>
+    <span>MD-Eintr&auml;ge verwalten</span>
+<% } else { %>
+    <span>MD-Eintr&auml;ge ansehen</span>
+<% } %>
                 </div>
                 <b>&rsaquo;</b>
             </a>
