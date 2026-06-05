@@ -858,21 +858,6 @@ botClient.on(Events.InteractionCreate, async (interaction) => {
         }
 
         if (
-    !interaction.customId.startsWith("spontan_") &&
-    !interaction.customId.startsWith("abmeldung_")
-) {
-    return;
-}
-
-        if (
-            !interaction.isStringSelectMenu() &&
-            !interaction.isButton() &&
-            !interaction.isModalSubmit()
-        ) {
-            return;
-        }
-
-        if (
             !interaction.customId.startsWith("spontan_") &&
             !interaction.customId.startsWith("abmeldung_")
         ) {
@@ -1514,6 +1499,26 @@ app.post("/admin/teamliste", requireLogin, requireAdmin, async (req, res) => {
     } catch (err) {
         console.error("Teamliste konnte nicht gesendet werden:", err);
         return res.status(500).send("Teamliste konnte nicht gesendet werden.");
+    }
+});
+
+app.post("/admin/abmeldung-panel", requireLogin, requireAdmin, async (req, res) => {
+    try {
+        await sendAbmeldungPanel();
+        return res.redirect("/admin");
+    } catch (err) {
+        console.error("Abmeldungs-Panel konnte nicht gesendet werden:", err);
+        return res.status(500).send("Abmeldungs-Panel konnte nicht gesendet werden.");
+    }
+});
+
+app.post("/admin/abmeldung-panel", requireLogin, requireAdmin, async (req, res) => {
+    try {
+        await sendAbmeldungPanel();
+        return res.redirect("/admin");
+    } catch (err) {
+        console.error("Abmeldungs-Panel konnte nicht gesendet werden:", err);
+        return res.status(500).send("Abmeldungs-Panel konnte nicht gesendet werden.");
     }
 });
 

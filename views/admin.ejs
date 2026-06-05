@@ -1,6 +1,6 @@
 <div class="page-header">
     <h1>Admin</h1>
-    <p>Leitungsbereich f&uuml;r Punkte, Mitglieder, Discord, Spontane Pr&uuml;fungen und Systemstatus.</p>
+    <p>Leitungsbereich f&uuml;r Punkte, Mitglieder, Discord, Spontane Pr&uuml;fungen, Abmeldungen und Systemstatus.</p>
 </div>
 
 <section class="stats-grid">
@@ -204,6 +204,18 @@
 
 <p class="card-subtitle" style="margin-top: 12px;">
     Aktualisiert die Discord-Teamliste im Mitglieder-Channel.
+</p>
+
+<div class="clean-divider"></div>
+
+<form action="/admin/abmeldung-panel" method="POST" style="margin-top: 16px;">
+    <button type="submit">
+        📨 Abmeldungs-Panel senden
+    </button>
+</form>
+
+<p class="card-subtitle" style="margin-top: 12px;">
+    Sendet das Abmeldungs-Panel in den Discord-Abmeldungs-Channel.
 </p>
 
     </div>
