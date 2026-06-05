@@ -720,8 +720,9 @@ const embed = new EmbedBuilder()
             console.log("Teamliste als Embed aktualisiert");
             return;
         } catch (err) {
-            console.error("TEAM_LIST_MESSAGE_ID falsch oder Nachricht gelöscht:", err);
-        }
+    console.error("TEAM_LIST_MESSAGE_ID falsch oder Nachricht gelöscht:", err);
+    return;
+}
     }
 
     const message = await channel.send({
@@ -1055,7 +1056,7 @@ try {
                 .setStyle(TextInputStyle.Paragraph)
                 .setRequired(true)
                 .setMaxLength(500)
-                .setPlaceholder("z.B. Voraussetzungen fehlen, R cksprache n tig, falscher Zeitpunkt...");
+                .setPlaceholder("z.B. Voraussetzungen fehlen, Rücksprache nötig, falscher Zeitpunkt...");
 
             modal.addComponents(
                 new ActionRowBuilder().addComponents(reasonInput)
