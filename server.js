@@ -273,7 +273,32 @@ function isDiscordAdmin(interaction) {
 
     const allowedRoles = [
         ADMIN_ROLE_ID,
-        PRAKTI_SANI_ROLE_ID
+    ].filter(Boolean);
+
+    if (roles.cache) {
+        return allowedRoles.some(roleId => roles.cache.has(roleId));
+    }
+
+    if (Array.isArray(roles)) {
+        return allowedRoles.some(roleId => roles.includes(roleId));
+    }
+
+    return false;
+}
+
+function isDiscordLeadership(interaction) {
+    const roles = interaction.member?.roles;
+
+    if (!roles) {
+        return false;
+    }
+
+    const allowedRoles = [
+        ADMIN_ROLE_ID,
+        process.env.ROLE_HEAD_PRAKTI_SANI,
+        process.env.ROLE_LEITUNG,
+        process.env.ROLE_STV_LEITUNG,
+        process.env.ROLE_UNTERE_LEITUNG
     ].filter(Boolean);
 
     if (roles.cache) {
@@ -979,7 +1004,7 @@ await interaction.channel.send({
 
 
 if (interaction.isButton() && interaction.customId === "abmeldung_approve") {
-    if (!isDiscordAdmin(interaction)) {
+    if (!isDiscordLeadership(interaction)) {
         return interaction.reply({
             content: "Du hast keine Berechtigung, Abmeldungen zu bearbeiten.",
             flags: MessageFlags.Ephemeral
@@ -1013,7 +1038,7 @@ if (interaction.isButton() && interaction.customId === "abmeldung_approve") {
 }
 
 if (interaction.isButton() && interaction.customId === "abmeldung_reject") {
-    if (!isDiscordAdmin(interaction)) {
+    if (!isDiscordLeadership(interaction)) {
         return interaction.reply({
             content: "Du hast keine Berechtigung, Abmeldungen zu bearbeiten.",
             flags: MessageFlags.Ephemeral
@@ -1040,7 +1065,7 @@ if (interaction.isButton() && interaction.customId === "abmeldung_reject") {
 }
 
 if (interaction.isModalSubmit() && interaction.customId.startsWith("abmeldung_reject_modal_")) {
-    if (!isDiscordAdmin(interaction)) {
+    if (!isDiscordLeadership(interaction)) {
         return interaction.reply({
             content: "Du hast keine Berechtigung, Abmeldungen zu bearbeiten.",
             flags: MessageFlags.Ephemeral
