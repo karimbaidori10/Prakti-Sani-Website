@@ -204,10 +204,12 @@
 </script>
 
 <script>
+document.addEventListener("DOMContentLoaded", function () {
     const memberSearch = document.getElementById("memberSearch");
     const memberFilter = document.getElementById("memberFilter");
-    const memberRows = document.querySelectorAll(".member-table-row");
+    const memberRows = Array.from(document.querySelectorAll(".member-table-row"));
     const memberCount = document.getElementById("memberCount");
+    const emptySearch = document.getElementById("memberEmptySearch");
 
     function filterMembers() {
         const searchValue = memberSearch ? memberSearch.value.toLowerCase().trim() : "";
@@ -216,32 +218,42 @@
         let visibleCount = 0;
 
         memberRows.forEach((row) => {
-            const searchText = row.dataset.search || "";
-            const goalStatus = row.dataset.goal || "open";
+            const searchText = (row.getAttribute("data-search") || "").toLowerCase();
+            const goalStatus = row.getAttribute("data-goal") || "open";
 
             const matchesSearch = searchText.includes(searchValue);
-            const matchesFilter = filterValue === "all" || goalStatus === filterValue;
+            const matchesFilter =
+                filterValue === "all" ||
+                filterValue === goalStatus;
 
-            if (matchesSearch && matchesFilter) {
-                row.style.display = "";
+            const shouldShow = matchesSearch && matchesFilter;
+
+            row.style.display = shouldShow ? "grid" : "none";
+
+            if (shouldShow) {
                 visibleCount++;
-            } else {
-                row.style.display = "none";
             }
         });
 
         if (memberCount) {
             memberCount.textContent = visibleCount;
         }
+
+        if (emptySearch) {
+            emptySearch.style.display = visibleCount === 0 ? "block" : "none";
+        }
     }
 
     if (memberSearch) {
         memberSearch.addEventListener("input", filterMembers);
+        memberSearch.addEventListener("keyup", filterMembers);
     }
 
     if (memberFilter) {
         memberFilter.addEventListener("change", filterMembers);
+        memberFilter.addEventListener("input", filterMembers);
     }
 
     filterMembers();
+});
 </script>
