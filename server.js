@@ -271,8 +271,41 @@ function isDiscordAdmin(interaction) {
         return false;
     }
 
+
+
     const allowedRoles = [
         ADMIN_ROLE_ID,
+    ].filter(Boolean);
+
+    if (roles.cache) {
+        return allowedRoles.some(roleId => roles.cache.has(roleId));
+    }
+
+    if (Array.isArray(roles)) {
+        return allowedRoles.some(roleId => roles.includes(roleId));
+    }
+
+    return false;
+}
+
+function canUseSpontanePanel(interaction) {
+    const roles = interaction.member?.roles;
+
+    if (!roles) {
+        return false;
+    }
+
+    const allowedRoles = [
+        ADMIN_ROLE_ID,
+        PRAKTI_SANI_ROLE_ID,
+        process.env.ROLE_HEAD_PRAKTI_SANI,
+        process.env.ROLE_LEITUNG,
+        process.env.ROLE_STV_LEITUNG,
+        process.env.ROLE_UNTERE_LEITUNG,
+        process.env.ROLE_SENIOR,
+        process.env.ROLE_FESTES_MITGLIED,
+        process.env.ROLE_TESTPHASE,
+        process.env.ROLE_AUSHILFE
     ].filter(Boolean);
 
     if (roles.cache) {
@@ -1107,7 +1140,7 @@ if (interaction.isModalSubmit() && interaction.customId.startsWith("abmeldung_re
     });
 }
 
-        if (!isDiscordAdmin(interaction)) {
+        if (!canUseSpontanePanel(interaction)) {
             return interaction.reply({
                 content: "Du hast keine Berechtigung für dieses Prüfungs-Panel.",
                 flags: MessageFlags.Ephemeral
