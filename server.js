@@ -1429,7 +1429,7 @@ res.redirect("/admin");
 // TERMINE
 // =====================
 
-app.post("/termine/create", requireLogin, async (req, res) => {
+app.post("/termine/create", requireLogin, requireAdmin, async (req, res) => {
     try {
         const {
             name,

@@ -202,3 +202,46 @@
         memberFilter.addEventListener("change", filterMembers);
     }
 </script>
+
+<script>
+    const memberSearch = document.getElementById("memberSearch");
+    const memberFilter = document.getElementById("memberFilter");
+    const memberRows = document.querySelectorAll(".member-table-row");
+    const memberCount = document.getElementById("memberCount");
+
+    function filterMembers() {
+        const searchValue = memberSearch ? memberSearch.value.toLowerCase().trim() : "";
+        const filterValue = memberFilter ? memberFilter.value : "all";
+
+        let visibleCount = 0;
+
+        memberRows.forEach((row) => {
+            const searchText = row.dataset.search || "";
+            const goalStatus = row.dataset.goal || "open";
+
+            const matchesSearch = searchText.includes(searchValue);
+            const matchesFilter = filterValue === "all" || goalStatus === filterValue;
+
+            if (matchesSearch && matchesFilter) {
+                row.style.display = "";
+                visibleCount++;
+            } else {
+                row.style.display = "none";
+            }
+        });
+
+        if (memberCount) {
+            memberCount.textContent = visibleCount;
+        }
+    }
+
+    if (memberSearch) {
+        memberSearch.addEventListener("input", filterMembers);
+    }
+
+    if (memberFilter) {
+        memberFilter.addEventListener("change", filterMembers);
+    }
+
+    filterMembers();
+</script>
