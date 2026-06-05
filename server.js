@@ -306,9 +306,8 @@ async function sendAbmeldungPanel() {
         .setDescription(
             "**Willkommen im Abmeldungsbereich des LSMD.**\n\n" +
             "Nutze den Button unten, um dich offiziell für einen Zeitraum abzumelden.\n\n" +
-            "Bitte beachte:\n" +
+            "**Bitte beachte:**\n" +
             "• Abmeldungen bitte **erst ab 3 Tagen** eintragen\n" +
-            "• Für Prüfungen oder Besprechungen bitte den genauen Tag angeben\n" +
             "• Falsche oder unvollständige Angaben können abgelehnt werden"
         )
         .addFields(
@@ -319,13 +318,7 @@ async function sendAbmeldungPanel() {
                     "**Dienstnummer**\n" +
                     "**Zeitraum**\n" +
                     "**Grund**",
-                inline: true
-            },
-            {
-                name: "✅ Nach dem Absenden",
-                value:
-                    "Deine Abmeldung wird automatisch als Embed im Channel veröffentlicht.",
-                inline: true
+                inline: false
             }
         )
         .setFooter({ text: "LSMD Abmeldungssystem • Automatische Vorlage" })
@@ -383,10 +376,10 @@ async function sendSpontanePruefungenPanel() {
                 inline: true
             },
             {
-                name: "Schritt 3",
-                value: "Warten auf Entscheidung der Leitung.",
-                inline: true
-            }
+    name: "📌 Status",
+    value: "⏳ Wartet auf Entscheidung der Leitung",
+    inline: false
+}
         )
         .setFooter({ text: "LSMD Ausbildungssystem" })
         .setTimestamp();
@@ -956,18 +949,138 @@ botClient.on(Events.InteractionCreate, async (interaction) => {
                 .setFooter({ text: "LSMD Abmeldungssystem" })
                 .setTimestamp();
 
-            await interaction.channel.send({
-                embeds: [embed],
-                allowedMentions: {
-                    parse: []
-                }
-            });
+            const decisionRow = new ActionRowBuilder().addComponents(
+    new ButtonBuilder()
+        .setCustomId("abmeldung_approve")
+        .setLabel("Genehmigen")
+        .setEmoji("✅")
+        .setStyle(ButtonStyle.Success),
+
+    new ButtonBuilder()
+        .setCustomId("abmeldung_reject")
+        .setLabel("Ablehnen")
+        .setEmoji("❌")
+        .setStyle(ButtonStyle.Danger)
+);
+
+await interaction.channel.send({
+    embeds: [embed],
+    components: [decisionRow],
+    allowedMentions: {
+        parse: []
+    }
+});
 
             return interaction.reply({
                 content: "✅ Deine Abmeldung wurde erfolgreich eingereicht.",
                 flags: MessageFlags.Ephemeral
             });
         }
+
+
+if (interaction.isButton() && interaction.customId === "abmeldung_approve") {
+    if (!isDiscordAdmin(interaction)) {
+        return interaction.reply({
+            content: "Du hast keine Berechtigung, Abmeldungen zu bearbeiten.",
+            flags: MessageFlags.Ephemeral
+        });
+    }
+
+    const oldEmbed = interaction.message.embeds[0];
+
+    const embed = EmbedBuilder.from(oldEmbed)
+        .setColor(0x22c55e)
+        .setTitle("✅ Abmeldung genehmigt")
+        .addFields(
+            {
+                name: "✅ Genehmigt von",
+                value: `<@${interaction.user.id}>`,
+                inline: true
+            }
+        )
+        .setFooter({ text: "LSMD Abmeldungssystem • Genehmigt" })
+        .setTimestamp();
+
+    await interaction.message.edit({
+        embeds: [embed],
+        components: []
+    });
+
+    return interaction.reply({
+        content: "✅ Abmeldung wurde genehmigt.",
+        flags: MessageFlags.Ephemeral
+    });
+}
+
+if (interaction.isButton() && interaction.customId === "abmeldung_reject") {
+    if (!isDiscordAdmin(interaction)) {
+        return interaction.reply({
+            content: "Du hast keine Berechtigung, Abmeldungen zu bearbeiten.",
+            flags: MessageFlags.Ephemeral
+        });
+    }
+
+    const modal = new ModalBuilder()
+        .setCustomId(`abmeldung_reject_modal_${interaction.message.id}`)
+        .setTitle("Abmeldung ablehnen");
+
+    const reasonInput = new TextInputBuilder()
+        .setCustomId("abmeldung_reject_reason")
+        .setLabel("Grund der Ablehnung")
+        .setStyle(TextInputStyle.Paragraph)
+        .setRequired(true)
+        .setMaxLength(500)
+        .setPlaceholder("z.B. Zeitraum zu kurz, Angaben fehlen, Rücksprache nötig...");
+
+    modal.addComponents(
+        new ActionRowBuilder().addComponents(reasonInput)
+    );
+
+    return interaction.showModal(modal);
+}
+
+if (interaction.isModalSubmit() && interaction.customId.startsWith("abmeldung_reject_modal_")) {
+    if (!isDiscordAdmin(interaction)) {
+        return interaction.reply({
+            content: "Du hast keine Berechtigung, Abmeldungen zu bearbeiten.",
+            flags: MessageFlags.Ephemeral
+        });
+    }
+
+    const messageId = interaction.customId.replace("abmeldung_reject_modal_", "");
+    const reason = interaction.fields.getTextInputValue("abmeldung_reject_reason");
+
+    const message = await interaction.channel.messages.fetch(messageId);
+    const oldEmbed = message.embeds[0];
+
+    const embed = EmbedBuilder.from(oldEmbed)
+        .setColor(0xef233c)
+        .setTitle("❌ Abmeldung abgelehnt")
+        .addFields(
+            {
+                name: "❌ Abgelehnt von",
+                value: `<@${interaction.user.id}>`,
+                inline: true
+            },
+            {
+                name: "📝 Ablehnungsgrund",
+                value: reason,
+                inline: false
+            }
+        )
+        .setFooter({ text: "LSMD Abmeldungssystem • Abgelehnt" })
+        .setTimestamp();
+
+    await message.edit({
+        embeds: [embed],
+        components: []
+    });
+
+    return interaction.reply({
+        content: "❌ Abmeldung wurde abgelehnt.",
+        flags: MessageFlags.Ephemeral
+    });
+}
 
         if (!isDiscordAdmin(interaction)) {
             return interaction.reply({
@@ -1512,15 +1625,6 @@ app.post("/admin/abmeldung-panel", requireLogin, requireAdmin, async (req, res) 
     }
 });
 
-app.post("/admin/abmeldung-panel", requireLogin, requireAdmin, async (req, res) => {
-    try {
-        await sendAbmeldungPanel();
-        return res.redirect("/admin");
-    } catch (err) {
-        console.error("Abmeldungs-Panel konnte nicht gesendet werden:", err);
-        return res.status(500).send("Abmeldungs-Panel konnte nicht gesendet werden.");
-    }
-});
 
 function buildSpontanePanelComponents() {
     const resetId = Date.now();
