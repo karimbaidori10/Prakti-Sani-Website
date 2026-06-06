@@ -54,6 +54,10 @@ const ROLE_STV_LEITUNG = process.env.ROLE_STV_LEITUNG;
 const ROLE_LEITUNG = process.env.ROLE_LEITUNG;
 const BONUS_HQ_CHANNEL_ID = process.env.BONUS_HQ_CHANNEL_ID;
 const BONUS_WEEKLY_PING_ROLE_ID = process.env.BONUS_WEEKLY_PING_ROLE_ID || PRAKTI_SANI_ROLE_ID;
+const JOB_ANNOUNCE_CHANNEL_ID = process.env.JOB_ANNOUNCE_CHANNEL_ID;
+const JOB_ANNOUNCE_PING_ROLE_ID = process.env.JOB_ANNOUNCE_PING_ROLE_ID || PRAKTI_SANI_ROLE_ID;
+
+let lastJobAnnounceReminderHour = null;
 
 const EINSTELLUNGS_BONUS = 250000;
 const EINSTELLUNGS_BONUS_LIMIT = 3000000;
@@ -695,6 +699,116 @@ function startWeeklyBonusAnnouncementWatcher() {
     }, 60 * 1000);
 }
 
+function getJobAnnounceText() {
+    const berlin = getBerlinParts(new Date());
+    const hour = berlin.hour;
+
+    if (hour < 17) {
+        return `📢 LSMD BEWERBUNGSPHASE 📢
+
+Das LSMD öffnet die mündliche Bewerbungsphase.
+
+Du hast Lust auf medizinisches RP, spannende Einsätze und Teamarbeit?
+Dann bewirb dich noch heute beim Los Santos Medical Department.
+
+Voraussetzung:
+PKW- & LKW-Führerschein`;
+    }
+
+    if (hour >= 17 && hour < 22) {
+        return `📢 LSMD BEWERBUNGSPHASE 📢
+
+Die Bewerbungsphase des LSMD ist jetzt geöffnet!
+
+Du möchtest Leben retten und Teil eines starken Teams werden?
+Dann bewirb dich jetzt beim Los Santos Medical Department.
+
+Voraussetzung:
+PKW- & LKW-Führerschein`;
+    }
+
+    return `📢 LSMD BEWERBUNG 📢
+
+Das LSMD öffnet die spontane mündliche Bewerbungsphase.
+
+Du hast Lust auf medizinisches RP und spannende Einsätze?
+Dann komm morgen gerne vorbei und bewirb dich beim Medical Department.
+
+Voraussetzung:
+PKW- & LKW-Führerschein`;
+}
+
+async function sendJobAnnounceReminder() {
+    if (!JOB_ANNOUNCE_CHANNEL_ID) {
+        console.log("JOB_ANNOUNCE_CHANNEL_ID fehlt");
+        return;
+    }
+
+    const channel = await botClient.channels.fetch(JOB_ANNOUNCE_CHANNEL_ID).catch(() => null);
+
+    if (!channel) {
+        console.log("Jobannounce Reminder Channel nicht gefunden");
+        return;
+    }
+
+    const announceText = getJobAnnounceText();
+
+    await channel.send({
+        content: JOB_ANNOUNCE_PING_ROLE_ID ? `<@&${JOB_ANNOUNCE_PING_ROLE_ID}>` : "",
+        embeds: [
+            new EmbedBuilder()
+                .setColor(0xef233c)
+                .setTitle("📢 ANNOUNCE ERINNERUNG")
+                .setDescription(
+                    "Bitte vergesst nicht eure Werbung auf **LateNightV** zu schalten.\n\n" +
+                    "```text\nF8 → /jobannounce → Text einfügen\n```\n" +
+                    "Werbung ist alle **30 Minuten** erlaubt.\n\n" +
+                    "**Text zum Kopieren:**\n" +
+                    "```text\n" + announceText + "\n```"
+                )
+                .setFooter({ text: "LSMD Announce Reminder" })
+                .setTimestamp()
+        ],
+        allowedMentions: {
+            roles: JOB_ANNOUNCE_PING_ROLE_ID ? [JOB_ANNOUNCE_PING_ROLE_ID] : []
+        }
+    });
+
+    console.log("Jobannounce Reminder gesendet");
+}
+
+function startJobAnnounceReminderWatcher() {
+    setInterval(async () => {
+        try {
+            const berlin = getBerlinParts(new Date());
+            const hour = berlin.hour;
+
+            // Nur 14:00 bis 23:59
+            if (hour < 14 || hour > 23) {
+                return;
+            }
+
+            // Nur einmal pro Stunde senden
+            const hourKey = `${berlin.year}-${berlin.month}-${berlin.day}-${hour}`;
+
+            if (lastJobAnnounceReminderHour === hourKey) {
+                return;
+            }
+
+            // Erst ab Minute 0 senden
+            if (berlin.minute !== 0) {
+                return;
+            }
+
+            lastJobAnnounceReminderHour = hourKey;
+
+            await sendJobAnnounceReminder();
+        } catch (err) {
+            console.error("Jobannounce Reminder Fehler:", err);
+        }
+    }, 60 * 1000);
+}
+
 async function sendAbmeldungPanel() {
     if (!process.env.ABMELDUNG_CHANNEL_ID) {
         console.log("ABMELDUNG_CHANNEL_ID fehlt");
@@ -1205,6 +1319,8 @@ const embed = new EmbedBuilder()
 
 botClient.once(Events.ClientReady, async () => {
     console.log("Discord Bot ist bereit");
+
+    startJobAnnounceReminderWatcher();
 
     try {
         await updateTeamListMessage();
