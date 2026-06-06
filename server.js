@@ -35,6 +35,7 @@ let termineCollection;
 let examsCollection;
 let docsCollection;
 let logsCollection;
+let einstellungsBonusCollection;
 
 const discordMemberCache = new Map();
 const DISCORD_CACHE_TIME = 1000 * 60 * 10;
@@ -51,6 +52,10 @@ const ROLE_SENIOR = process.env.ROLE_SENIOR;
 const ROLE_UNTERE_LEITUNG = process.env.ROLE_UNTERE_LEITUNG;
 const ROLE_STV_LEITUNG = process.env.ROLE_STV_LEITUNG;
 const ROLE_LEITUNG = process.env.ROLE_LEITUNG;
+const BONUS_HQ_CHANNEL_ID = process.env.BONUS_HQ_CHANNEL_ID;
+
+const EINSTELLUNGS_BONUS = 250000;
+const EINSTELLUNGS_BONUS_LIMIT = 3000000;
 
 const botClient = new Client({
     intents: [
@@ -343,6 +348,137 @@ function isDiscordLeadership(interaction) {
     }
 
     return false;
+}
+
+async function getAusbilderBonusStand(ausbilderDiscordId) {
+    const result = await einstellungsBonusCollection.aggregate([
+        {
+            $match: {
+                ausbilderDiscordId,
+                status: "ausgezahlt"
+            }
+        },
+        {
+            $group: {
+                _id: "$ausbilderDiscordId",
+                total: {
+                    $sum: "$bonus"
+                }
+            }
+        }
+    ]).toArray();
+
+    return result[0]?.total || 0;
+}
+
+async function sendEinstellungsBonusRequest(interaction, data) {
+    if (!BONUS_HQ_CHANNEL_ID) {
+        console.log("BONUS_HQ_CHANNEL_ID fehlt");
+        return null;
+    }
+
+    const aktuellerStand = await getAusbilderBonusStand(interaction.user.id);
+
+    if (aktuellerStand >= EINSTELLUNGS_BONUS_LIMIT) {
+        return null;
+    }
+
+    const neuerStand = aktuellerStand + EINSTELLUNGS_BONUS;
+
+    if (neuerStand > EINSTELLUNGS_BONUS_LIMIT) {
+        return null;
+    }
+
+    const bonusChannel = await botClient.channels.fetch(BONUS_HQ_CHANNEL_ID);
+
+    if (!bonusChannel) {
+        console.log("Bonus-HQ Channel nicht gefunden");
+        return null;
+    }
+
+    const bonusDoc = {
+        ausbilderDiscordId: interaction.user.id,
+        ausbilderName: interaction.user.tag,
+        eingestellterName: data.name,
+        eingestellterDN: data.dn,
+        bonus: EINSTELLUNGS_BONUS,
+        status: "offen",
+        messageId: null,
+        paidBy: null,
+        paidAt: null,
+        createdAt: new Date(),
+        updatedAt: new Date()
+    };
+
+    const insertResult = await einstellungsBonusCollection.insertOne(bonusDoc);
+    const bonusId = insertResult.insertedId.toString();
+
+    const embed = new EmbedBuilder()
+        .setColor(0xfacc15)
+        .setTitle("💸 Einstellungsbonus beantragt")
+        .addFields(
+            {
+                name: "👨‍🏫 Ausbilder",
+                value: `<@${interaction.user.id}>`,
+                inline: true
+            },
+            {
+                name: "👤 Eingestellter",
+                value: `DN ${data.dn} | ${data.name}`,
+                inline: true
+            },
+            {
+                name: "💰 Bonus",
+                value: `${EINSTELLUNGS_BONUS.toLocaleString("de-DE")} $`,
+                inline: true
+            },
+            {
+                name: "📊 Aktueller Stand",
+                value: `${aktuellerStand.toLocaleString("de-DE")} $ / ${EINSTELLUNGS_BONUS_LIMIT.toLocaleString("de-DE")} $`,
+                inline: false
+            },
+            {
+                name: "📌 Status",
+                value: "⏳ Wartet auf Auszahlung durch die Leitung",
+                inline: false
+            }
+        )
+        .setFooter({ text: "LSMD Einstellungsbonus" })
+        .setTimestamp();
+
+    const row = new ActionRowBuilder().addComponents(
+        new ButtonBuilder()
+            .setCustomId(`einstellung_bonus_paid_${bonusId}`)
+            .setLabel("Ausgezahlt")
+            .setEmoji("✅")
+            .setStyle(ButtonStyle.Success),
+
+        new ButtonBuilder()
+            .setCustomId(`einstellung_bonus_reject_${bonusId}`)
+            .setLabel("Ablehnen")
+            .setEmoji("❌")
+            .setStyle(ButtonStyle.Danger)
+    );
+
+    const message = await bonusChannel.send({
+        embeds: [embed],
+        components: [row],
+        allowedMentions: {
+            parse: []
+        }
+    });
+
+    await einstellungsBonusCollection.updateOne(
+        { _id: insertResult.insertedId },
+        {
+            $set: {
+                messageId: message.id,
+                updatedAt: new Date()
+            }
+        }
+    );
+
+    return insertResult.insertedId;
 }
 
 async function sendAbmeldungPanel() {
@@ -2035,6 +2171,7 @@ async function start() {
     examsCollection = db.collection("exams");
     docsCollection = db.collection("documents");
     logsCollection = db.collection("dashboardLogs");
+    einstellungsBonusCollection = db.collection("einstellungsBonus");
 
     await pointsCollection.createIndex({ points: -1 });
     await pointsCollection.createIndex({ userId: 1 });
@@ -2045,6 +2182,8 @@ async function start() {
     await docsCollection.createIndex({ createdAt: -1 });
 
     await logsCollection.createIndex({ createdAt: -1 });
+    await einstellungsBonusCollection.createIndex({ ausbilderDiscordId: 1, status: 1 });
+    await einstellungsBonusCollection.createIndex({ createdAt: -1 });
 
     if (process.env.DISCORD_BOT_TOKEN) {
         botClient.login(process.env.DISCORD_BOT_TOKEN)
