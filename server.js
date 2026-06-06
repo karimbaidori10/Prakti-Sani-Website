@@ -67,6 +67,7 @@ const botClient = new Client({
 const spontaneSelections = new Map();
 const spontaneRequests = new Map();
 let spontaneRequestCounter = 1;
+const bonusHelperSelections = new Map();
 
 
 app.set("view engine", "ejs");
@@ -377,16 +378,42 @@ async function sendEinstellungsBonusRequest(interaction, data) {
         return null;
     }
 
-    const aktuellerStand = await getAusbilderBonusStand(interaction.user.id);
+    const helperId = data.helperId || null;
+    const hasHelper = helperId && helperId !== interaction.user.id;
 
-    if (aktuellerStand >= EINSTELLUNGS_BONUS_LIMIT) {
-        return null;
-    }
+    const participants = hasHelper
+        ? [
+            {
+                discordId: interaction.user.id,
+                name: interaction.user.tag,
+                label: "Hauptausbilder"
+            },
+            {
+                discordId: helperId,
+                name: `Helper ${helperId}`,
+                label: "Helfer"
+            }
+        ]
+        : [
+            {
+                discordId: interaction.user.id,
+                name: interaction.user.tag,
+                label: "Ausbilder"
+            }
+        ];
 
-    const neuerStand = aktuellerStand + EINSTELLUNGS_BONUS;
+    const bonusProPerson = hasHelper ? 125000 : EINSTELLUNGS_BONUS;
 
-    if (neuerStand > EINSTELLUNGS_BONUS_LIMIT) {
-        return null;
+    for (const participant of participants) {
+        const stand = await getAusbilderBonusStand(participant.discordId);
+
+        if (stand >= EINSTELLUNGS_BONUS_LIMIT) {
+            return null;
+        }
+
+        if (stand + bonusProPerson > EINSTELLUNGS_BONUS_LIMIT) {
+            return null;
+        }
     }
 
     const bonusChannel = await botClient.channels.fetch(BONUS_HQ_CHANNEL_ID);
@@ -396,81 +423,110 @@ async function sendEinstellungsBonusRequest(interaction, data) {
         return null;
     }
 
-    const bonusDoc = {
-        ausbilderDiscordId: interaction.user.id,
-        ausbilderName: interaction.user.tag,
+    const requestGroupId = new ObjectId().toString();
+    const createdAt = new Date();
+
+    const docs = participants.map(participant => ({
+        requestGroupId,
+        ausbilderDiscordId: participant.discordId,
+        ausbilderName: participant.name,
         eingestellterName: data.name,
         eingestellterDN: data.dn,
-        bonus: EINSTELLUNGS_BONUS,
+        bonus: bonusProPerson,
         status: "offen",
         messageId: null,
         paidBy: null,
         paidAt: null,
-        createdAt: new Date(),
-        updatedAt: new Date()
-    };
+        createdAt,
+        updatedAt: createdAt
+    }));
 
-    const insertResult = await einstellungsBonusCollection.insertOne(bonusDoc);
-    const bonusId = insertResult.insertedId.toString();
+    const insertResult = await einstellungsBonusCollection.insertMany(docs);
+    const mainBonusId = Object.values(insertResult.insertedIds)[0].toString();
+
+    const mainStand = await getAusbilderBonusStand(interaction.user.id);
+    const helperStand = hasHelper ? await getAusbilderBonusStand(helperId) : null;
+
+    const fields = [
+        {
+            name: "👤 Eingestellter",
+            value: `DN ${data.dn} | ${data.name}`,
+            inline: false
+        },
+        {
+            name: hasHelper ? "👨‍🏫 Hauptausbilder" : "👨‍🏫 Ausbilder",
+            value: `<@${interaction.user.id}>`,
+            inline: true
+        },
+        {
+            name: "💰 Bonus",
+            value: hasHelper
+                ? "125.000 $ pro Person"
+                : `${EINSTELLUNGS_BONUS.toLocaleString("de-DE")} $`,
+            inline: true
+        }
+    ];
+
+    if (hasHelper) {
+        fields.push({
+            name: "🤝 Helfer",
+            value: `<@${helperId}>`,
+            inline: true
+        });
+    }
+
+    fields.push({
+        name: "📊 Stand Hauptausbilder",
+        value: `${mainStand.toLocaleString("de-DE")} $ / ${EINSTELLUNGS_BONUS_LIMIT.toLocaleString("de-DE")} $`,
+        inline: false
+    });
+
+    if (hasHelper) {
+        fields.push({
+            name: "📊 Stand Helfer",
+            value: `${helperStand.toLocaleString("de-DE")} $ / ${EINSTELLUNGS_BONUS_LIMIT.toLocaleString("de-DE")} $`,
+            inline: false
+        });
+    }
+
+    fields.push({
+        name: "📌 Status",
+        value: "⏳ Wartet auf Auszahlung durch die Leitung",
+        inline: false
+    });
 
     const embed = new EmbedBuilder()
         .setColor(0xfacc15)
         .setTitle("💸 Einstellungsbonus beantragt")
-        .addFields(
-            {
-                name: "👨‍🏫 Ausbilder",
-                value: `<@${interaction.user.id}>`,
-                inline: true
-            },
-            {
-                name: "👤 Eingestellter",
-                value: `DN ${data.dn} | ${data.name}`,
-                inline: true
-            },
-            {
-                name: "💰 Bonus",
-                value: `${EINSTELLUNGS_BONUS.toLocaleString("de-DE")} $`,
-                inline: true
-            },
-            {
-                name: "📊 Aktueller Stand",
-                value: `${aktuellerStand.toLocaleString("de-DE")} $ / ${EINSTELLUNGS_BONUS_LIMIT.toLocaleString("de-DE")} $`,
-                inline: false
-            },
-            {
-                name: "📌 Status",
-                value: "⏳ Wartet auf Auszahlung durch die Leitung",
-                inline: false
-            }
-        )
+        .addFields(fields)
         .setFooter({ text: "LSMD Einstellungsbonus" })
         .setTimestamp();
 
     const row = new ActionRowBuilder().addComponents(
         new ButtonBuilder()
-            .setCustomId(`einstellung_bonus_paid_${bonusId}`)
+            .setCustomId(`einstellung_bonus_paid_${mainBonusId}`)
             .setLabel("Ausgezahlt")
             .setEmoji("✅")
             .setStyle(ButtonStyle.Success),
 
         new ButtonBuilder()
-            .setCustomId(`einstellung_bonus_reject_${bonusId}`)
+            .setCustomId(`einstellung_bonus_reject_${mainBonusId}`)
             .setLabel("Ablehnen")
             .setEmoji("❌")
             .setStyle(ButtonStyle.Danger)
     );
 
     const message = await bonusChannel.send({
-    content: ADMIN_ROLE_ID ? `<@&${ADMIN_ROLE_ID}>` : "",
-    embeds: [embed],
-    components: [row],
-    allowedMentions: {
-        roles: ADMIN_ROLE_ID ? [ADMIN_ROLE_ID] : []
-    }
-});
+        content: ADMIN_ROLE_ID ? `<@&${ADMIN_ROLE_ID}>` : "",
+        embeds: [embed],
+        components: [row],
+        allowedMentions: {
+            roles: ADMIN_ROLE_ID ? [ADMIN_ROLE_ID] : []
+        }
+    });
 
-    await einstellungsBonusCollection.updateOne(
-        { _id: insertResult.insertedId },
+    await einstellungsBonusCollection.updateMany(
+        { requestGroupId },
         {
             $set: {
                 messageId: message.id,
@@ -479,7 +535,7 @@ async function sendEinstellungsBonusRequest(interaction, data) {
         }
     );
 
-    return insertResult.insertedId;
+    return requestGroupId;
 }
 
 async function sendEinstellungsBonusPanel() {
@@ -526,6 +582,14 @@ async function sendEinstellungsBonusPanel() {
         .setFooter({ text: "LSMD Einstellungsbonus • Automatische Vorlage" })
         .setTimestamp();
 
+const helperRow = new ActionRowBuilder().addComponents(
+    new UserSelectMenuBuilder()
+        .setCustomId("einstellung_bonus_helper_select")
+        .setPlaceholder("Optional: Helfer auswählen")
+        .setMinValues(0)
+        .setMaxValues(1)
+);
+
     const row = new ActionRowBuilder().addComponents(
         new ButtonBuilder()
             .setCustomId("einstellung_bonus_open_modal")
@@ -536,7 +600,7 @@ async function sendEinstellungsBonusPanel() {
 
     await channel.send({
         embeds: [embed],
-        components: [row],
+        components: [helperRow, row],
         allowedMentions: {
             parse: []
         }
@@ -1101,12 +1165,13 @@ botClient.on(Events.GuildMemberRemove, async () => {
 botClient.on(Events.InteractionCreate, async (interaction) => {
     try {
         if (
-            !interaction.isStringSelectMenu() &&
-            !interaction.isButton() &&
-            !interaction.isModalSubmit()
-        ) {
-            return;
-        }
+    !interaction.isStringSelectMenu() &&
+    !interaction.isUserSelectMenu() &&
+    !interaction.isButton() &&
+    !interaction.isModalSubmit()
+) {
+    return;
+}
 
         if (
     !interaction.customId.startsWith("spontan_") &&
@@ -1362,62 +1427,64 @@ if (interaction.isButton() && interaction.customId.startsWith("einstellung_bonus
         });
     }
 
-    if (bonusDoc.status !== "offen") {
+    const requestGroupId = bonusDoc.requestGroupId || null;
+
+    const bonusDocs = requestGroupId
+        ? await einstellungsBonusCollection.find({ requestGroupId }).toArray()
+        : [bonusDoc];
+
+    if (bonusDocs.some(doc => doc.status !== "offen")) {
         return interaction.reply({
             content: "Dieser Bonus-Antrag wurde bereits bearbeitet.",
             flags: MessageFlags.Ephemeral
         });
     }
 
-    const aktuellerStand = await getAusbilderBonusStand(bonusDoc.ausbilderDiscordId);
-    const neuerStand = aktuellerStand + bonusDoc.bonus;
+    const newStandFields = [];
 
-    if (neuerStand > EINSTELLUNGS_BONUS_LIMIT) {
-        await einstellungsBonusCollection.updateOne(
-            { _id: new ObjectId(bonusId) },
+    for (const doc of bonusDocs) {
+        const aktuellerStand = await getAusbilderBonusStand(doc.ausbilderDiscordId);
+        const neuerStand = aktuellerStand + doc.bonus;
+
+        if (neuerStand > EINSTELLUNGS_BONUS_LIMIT) {
+            return interaction.reply({
+                content: "❌ Bonuslimit wurde bei mindestens einem Ausbilder erreicht.",
+                flags: MessageFlags.Ephemeral
+            });
+        }
+
+        newStandFields.push({
+            name: `📊 Neuer Stand <@${doc.ausbilderDiscordId}>`,
+            value: `${neuerStand.toLocaleString("de-DE")} $ / ${EINSTELLUNGS_BONUS_LIMIT.toLocaleString("de-DE")} $`,
+            inline: false
+        });
+    }
+
+    if (requestGroupId) {
+        await einstellungsBonusCollection.updateMany(
+            { requestGroupId },
             {
                 $set: {
-                    status: "abgelehnt",
+                    status: "ausgezahlt",
+                    paidBy: interaction.user.id,
+                    paidAt: new Date(),
                     updatedAt: new Date()
                 }
             }
         );
-
-        const embed = EmbedBuilder.from(interaction.message.embeds[0])
-            .setColor(0xef233c)
-            .setTitle("❌ Einstellungsbonus abgelehnt")
-            .addFields(
-                {
-                    name: "📝 Grund",
-                    value: "Bonuslimit von 3.000.000 $ wurde erreicht.",
-                    inline: false
+    } else {
+        await einstellungsBonusCollection.updateOne(
+            { _id: new ObjectId(bonusId) },
+            {
+                $set: {
+                    status: "ausgezahlt",
+                    paidBy: interaction.user.id,
+                    paidAt: new Date(),
+                    updatedAt: new Date()
                 }
-            )
-            .setFooter({ text: "LSMD Einstellungsbonus • Limit erreicht" })
-            .setTimestamp();
-
-        await interaction.message.edit({
-            embeds: [embed],
-            components: []
-        });
-
-        return interaction.reply({
-            content: "❌ Bonuslimit wurde erreicht. Der Antrag wurde abgelehnt.",
-            flags: MessageFlags.Ephemeral
-        });
-    }
-
-    await einstellungsBonusCollection.updateOne(
-        { _id: new ObjectId(bonusId) },
-        {
-            $set: {
-                status: "ausgezahlt",
-                paidBy: interaction.user.id,
-                paidAt: new Date(),
-                updatedAt: new Date()
             }
-        }
-    );
+        );
+    }
 
     const embed = EmbedBuilder.from(interaction.message.embeds[0])
         .setColor(0x22c55e)
@@ -1428,11 +1495,7 @@ if (interaction.isButton() && interaction.customId.startsWith("einstellung_bonus
                 value: `<@${interaction.user.id}>`,
                 inline: true
             },
-            {
-                name: "📊 Neuer Stand",
-                value: `${neuerStand.toLocaleString("de-DE")} $ / ${EINSTELLUNGS_BONUS_LIMIT.toLocaleString("de-DE")} $`,
-                inline: false
-            }
+            ...newStandFields
         )
         .setFooter({ text: "LSMD Einstellungsbonus • Ausgezahlt" })
         .setTimestamp();
@@ -1506,6 +1569,19 @@ if (interaction.isModalSubmit() && interaction.customId.startsWith("einstellung_
         });
     }
 
+    const requestGroupId = bonusDoc.requestGroupId || null;
+
+if (requestGroupId) {
+    await einstellungsBonusCollection.updateMany(
+        { requestGroupId },
+        {
+            $set: {
+                status: "abgelehnt",
+                updatedAt: new Date()
+            }
+        }
+    );
+} else {
     await einstellungsBonusCollection.updateOne(
         { _id: new ObjectId(bonusId) },
         {
@@ -1515,6 +1591,7 @@ if (interaction.isModalSubmit() && interaction.customId.startsWith("einstellung_
             }
         }
     );
+}
 
     const bonusChannel = await botClient.channels.fetch(BONUS_HQ_CHANNEL_ID);
     const bonusMessage = await bonusChannel.messages.fetch(bonusDoc.messageId);
@@ -1544,6 +1621,35 @@ if (interaction.isModalSubmit() && interaction.customId.startsWith("einstellung_
 
     return interaction.reply({
         content: "❌ Einstellungsbonus wurde abgelehnt.",
+        flags: MessageFlags.Ephemeral
+    });
+}
+
+if (interaction.isUserSelectMenu() && interaction.customId === "einstellung_bonus_helper_select") {
+    const helperId = interaction.values[0];
+
+    if (!helperId) {
+        bonusHelperSelections.delete(interaction.user.id);
+
+        return interaction.reply({
+            content: "Helfer-Auswahl wurde entfernt.",
+            flags: MessageFlags.Ephemeral
+        });
+    }
+
+    if (helperId === interaction.user.id) {
+        bonusHelperSelections.delete(interaction.user.id);
+
+        return interaction.reply({
+            content: "Du kannst dich nicht selbst als Helfer auswählen.",
+            flags: MessageFlags.Ephemeral
+        });
+    }
+
+    bonusHelperSelections.set(interaction.user.id, helperId);
+
+    return interaction.reply({
+        content: `Helfer ausgewählt: <@${helperId}>. Der Bonus wird auf **125.000 $ pro Person** geteilt.`,
         flags: MessageFlags.Ephemeral
     });
 }
@@ -1581,10 +1687,14 @@ if (interaction.isModalSubmit() && interaction.customId === "einstellung_bonus_s
     const dn = interaction.fields.getTextInputValue("einstellung_bonus_dn");
     const name = interaction.fields.getTextInputValue("einstellung_bonus_name");
 
-    const result = await sendEinstellungsBonusRequest(interaction, {
-        dn,
-        name
-    });
+    const helperId = bonusHelperSelections.get(interaction.user.id) || null;
+bonusHelperSelections.delete(interaction.user.id);
+
+const result = await sendEinstellungsBonusRequest(interaction, {
+    dn,
+    name,
+    helperId
+});
 
     if (!result) {
         return interaction.reply({
