@@ -53,6 +53,7 @@ const ROLE_UNTERE_LEITUNG = process.env.ROLE_UNTERE_LEITUNG;
 const ROLE_STV_LEITUNG = process.env.ROLE_STV_LEITUNG;
 const ROLE_LEITUNG = process.env.ROLE_LEITUNG;
 const BONUS_HQ_CHANNEL_ID = process.env.BONUS_HQ_CHANNEL_ID;
+const BONUS_WEEKLY_PING_ROLE_ID = process.env.BONUS_WEEKLY_PING_ROLE_ID || PRAKTI_SANI_ROLE_ID;
 
 const EINSTELLUNGS_BONUS = 250000;
 const EINSTELLUNGS_BONUS_LIMIT = 3000000;
@@ -607,6 +608,91 @@ const helperRow = new ActionRowBuilder().addComponents(
     });
 
     console.log("Einstellungsbonus-Panel gesendet");
+}
+
+async function sendWeeklyBonusAnnouncement() {
+    if (!BONUS_HQ_CHANNEL_ID) {
+        console.log("BONUS_HQ_CHANNEL_ID fehlt");
+        return;
+    }
+
+    const cycleStart = getBonusCycleStart();
+    const cycleKey = cycleStart.toISOString();
+
+    const alreadySent = await einstellungsBonusCollection.findOne({
+        type: "weekly_bonus_announcement",
+        cycleKey
+    });
+
+    if (alreadySent) {
+        return;
+    }
+
+    const channel = await botClient.channels.fetch(BONUS_HQ_CHANNEL_ID);
+
+    if (!channel) {
+        console.log("Bonus-HQ Channel nicht gefunden");
+        return;
+    }
+
+    const embed = new EmbedBuilder()
+        .setColor(0x22c55e)
+        .setTitle("💸 Neue Bonuswoche gestartet")
+        .setDescription(
+            "**Ab jetzt beginnt eine neue Einstellungsbonus-Woche.**\n\n" +
+            "Alle Ausbilder können wieder Einstellungsboni sammeln.\n\n" +
+            "**Limit:** 3.000.000 $ pro Ausbilder\n" +
+            "**Bonus:** 250.000 $ pro Einstellung\n" +
+            "**Mit Helfer:** 125.000 $ pro Person"
+        )
+        .addFields(
+            {
+                name: "📅 Reset-Zeitpunkt",
+                value: "Jeden Sonntag um **20:00 Uhr**",
+                inline: false
+            },
+            {
+                name: "📌 Hinweis",
+                value: "Alte Auszahlungen bleiben gespeichert, zählen aber nicht mehr für die neue Woche.",
+                inline: false
+            }
+        )
+        .setFooter({ text: "LSMD Einstellungsbonus • Neue Woche" })
+        .setTimestamp();
+
+    await channel.send({
+        content: BONUS_WEEKLY_PING_ROLE_ID ? `<@&${BONUS_WEEKLY_PING_ROLE_ID}>` : "",
+        embeds: [embed],
+        allowedMentions: {
+            roles: BONUS_WEEKLY_PING_ROLE_ID ? [BONUS_WEEKLY_PING_ROLE_ID] : []
+        }
+    });
+
+    await einstellungsBonusCollection.insertOne({
+        type: "weekly_bonus_announcement",
+        cycleKey,
+        createdAt: new Date()
+    });
+
+    console.log("Neue Bonuswoche Nachricht gesendet");
+}
+
+function startWeeklyBonusAnnouncementWatcher() {
+    setInterval(async () => {
+        try {
+            const berlin = getBerlinParts(new Date());
+
+            if (
+                berlin.weekday === "Sun" &&
+                berlin.hour === 20 &&
+                berlin.minute < 10
+            ) {
+                await sendWeeklyBonusAnnouncement();
+            }
+        } catch (err) {
+            console.error("Bonuswochen-Ankündigung Fehler:", err);
+        }
+    }, 60 * 1000);
 }
 
 async function sendAbmeldungPanel() {
@@ -2630,9 +2716,10 @@ async function start() {
 
     if (process.env.DISCORD_BOT_TOKEN) {
         botClient.login(process.env.DISCORD_BOT_TOKEN)
-            .then(() => {
-                console.log("Discord Bot ist online");
-            })
+    .then(() => {
+        console.log("Discord Bot ist online");
+        startWeeklyBonusAnnouncementWatcher();
+    })
             .catch((err) => {
                 console.error("Discord Bot Login Fehler:", err);
             });
