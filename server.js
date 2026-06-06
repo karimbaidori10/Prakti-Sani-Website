@@ -461,12 +461,13 @@ async function sendEinstellungsBonusRequest(interaction, data) {
     );
 
     const message = await bonusChannel.send({
-        embeds: [embed],
-        components: [row],
-        allowedMentions: {
-            parse: []
-        }
-    });
+    content: ADMIN_ROLE_ID ? `<@&${ADMIN_ROLE_ID}>` : "",
+    embeds: [embed],
+    components: [row],
+    allowedMentions: {
+        roles: ADMIN_ROLE_ID ? [ADMIN_ROLE_ID] : []
+    }
+});
 
     await einstellungsBonusCollection.updateOne(
         { _id: insertResult.insertedId },
