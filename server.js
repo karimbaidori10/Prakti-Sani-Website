@@ -481,6 +481,69 @@ async function sendEinstellungsBonusRequest(interaction, data) {
     return insertResult.insertedId;
 }
 
+async function sendEinstellungsBonusPanel() {
+    if (!BONUS_HQ_CHANNEL_ID) {
+        console.log("BONUS_HQ_CHANNEL_ID fehlt");
+        return;
+    }
+
+    const channel = await botClient.channels.fetch(BONUS_HQ_CHANNEL_ID);
+
+    if (!channel) {
+        console.log("Bonus-HQ Channel nicht gefunden");
+        return;
+    }
+
+    const embed = new EmbedBuilder()
+        .setColor(0xfacc15)
+        .setTitle("💸 LSMD Einstellungsbonus")
+        .setDescription(
+            "**Hier können Ausbilder ihren Einstellungsbonus beantragen.**\n\n" +
+            "Pro erfolgreicher Einstellung erhält der Ausbilder einen Bonus von **250.000 $**.\n\n" +
+            "**Limit:** Jeder Ausbilder kann maximal **3.000.000 $** Einstellungsbonus erhalten.\n\n" +
+            "Wenn das Limit erreicht ist, wird kein weiterer Bonus-Antrag mehr erstellt."
+        )
+        .addFields(
+            {
+                name: "📋 Benötigte Angaben",
+                value:
+                    "**Dienstnummer des Eingestellten**\n" +
+                    "**Name des Eingestellten**",
+                inline: false
+            },
+            {
+                name: "💰 Bonus",
+                value: "250.000 $ pro Einstellung",
+                inline: true
+            },
+            {
+                name: "📊 Maximalbetrag",
+                value: "3.000.000 $ pro Ausbilder",
+                inline: true
+            }
+        )
+        .setFooter({ text: "LSMD Einstellungsbonus • Automatische Vorlage" })
+        .setTimestamp();
+
+    const row = new ActionRowBuilder().addComponents(
+        new ButtonBuilder()
+            .setCustomId("einstellung_bonus_open_modal")
+            .setLabel("Bonus beantragen")
+            .setEmoji("💸")
+            .setStyle(ButtonStyle.Primary)
+    );
+
+    await channel.send({
+        embeds: [embed],
+        components: [row],
+        allowedMentions: {
+            parse: []
+        }
+    });
+
+    console.log("Einstellungsbonus-Panel gesendet");
+}
+
 async function sendAbmeldungPanel() {
     if (!process.env.ABMELDUNG_CHANNEL_ID) {
         console.log("ABMELDUNG_CHANNEL_ID fehlt");
@@ -1045,11 +1108,12 @@ botClient.on(Events.InteractionCreate, async (interaction) => {
         }
 
         if (
-            !interaction.customId.startsWith("spontan_") &&
-            !interaction.customId.startsWith("abmeldung_")
-        ) {
-            return;
-        }
+    !interaction.customId.startsWith("spontan_") &&
+    !interaction.customId.startsWith("abmeldung_") &&
+    !interaction.customId.startsWith("einstellung_bonus_")
+) {
+    return;
+}
 
         if (interaction.isButton() && interaction.customId === "abmeldung_open_modal") {
             const modal = new ModalBuilder()
@@ -1272,6 +1336,264 @@ if (interaction.isModalSubmit() && interaction.customId.startsWith("abmeldung_re
 
     return interaction.reply({
         content: "❌ Abmeldung wurde abgelehnt.",
+        flags: MessageFlags.Ephemeral
+    });
+}
+
+if (interaction.isButton() && interaction.customId.startsWith("einstellung_bonus_paid_")) {
+    if (!isDiscordLeadership(interaction)) {
+        return interaction.reply({
+            content: "Du hast keine Berechtigung, Einstellungsboni zu bearbeiten.",
+            flags: MessageFlags.Ephemeral
+        });
+    }
+
+    const bonusId = interaction.customId.replace("einstellung_bonus_paid_", "");
+
+    const bonusDoc = await einstellungsBonusCollection.findOne({
+        _id: new ObjectId(bonusId)
+    });
+
+    if (!bonusDoc) {
+        return interaction.reply({
+            content: "Dieser Bonus-Antrag wurde nicht gefunden.",
+            flags: MessageFlags.Ephemeral
+        });
+    }
+
+    if (bonusDoc.status !== "offen") {
+        return interaction.reply({
+            content: "Dieser Bonus-Antrag wurde bereits bearbeitet.",
+            flags: MessageFlags.Ephemeral
+        });
+    }
+
+    const aktuellerStand = await getAusbilderBonusStand(bonusDoc.ausbilderDiscordId);
+    const neuerStand = aktuellerStand + bonusDoc.bonus;
+
+    if (neuerStand > EINSTELLUNGS_BONUS_LIMIT) {
+        await einstellungsBonusCollection.updateOne(
+            { _id: new ObjectId(bonusId) },
+            {
+                $set: {
+                    status: "abgelehnt",
+                    updatedAt: new Date()
+                }
+            }
+        );
+
+        const embed = EmbedBuilder.from(interaction.message.embeds[0])
+            .setColor(0xef233c)
+            .setTitle("❌ Einstellungsbonus abgelehnt")
+            .addFields(
+                {
+                    name: "📝 Grund",
+                    value: "Bonuslimit von 3.000.000 $ wurde erreicht.",
+                    inline: false
+                }
+            )
+            .setFooter({ text: "LSMD Einstellungsbonus • Limit erreicht" })
+            .setTimestamp();
+
+        await interaction.message.edit({
+            embeds: [embed],
+            components: []
+        });
+
+        return interaction.reply({
+            content: "❌ Bonuslimit wurde erreicht. Der Antrag wurde abgelehnt.",
+            flags: MessageFlags.Ephemeral
+        });
+    }
+
+    await einstellungsBonusCollection.updateOne(
+        { _id: new ObjectId(bonusId) },
+        {
+            $set: {
+                status: "ausgezahlt",
+                paidBy: interaction.user.id,
+                paidAt: new Date(),
+                updatedAt: new Date()
+            }
+        }
+    );
+
+    const embed = EmbedBuilder.from(interaction.message.embeds[0])
+        .setColor(0x22c55e)
+        .setTitle("✅ Einstellungsbonus ausgezahlt")
+        .addFields(
+            {
+                name: "✅ Ausgezahlt von",
+                value: `<@${interaction.user.id}>`,
+                inline: true
+            },
+            {
+                name: "📊 Neuer Stand",
+                value: `${neuerStand.toLocaleString("de-DE")} $ / ${EINSTELLUNGS_BONUS_LIMIT.toLocaleString("de-DE")} $`,
+                inline: false
+            }
+        )
+        .setFooter({ text: "LSMD Einstellungsbonus • Ausgezahlt" })
+        .setTimestamp();
+
+    await interaction.message.edit({
+        embeds: [embed],
+        components: []
+    });
+
+    return interaction.reply({
+        content: "✅ Einstellungsbonus wurde als ausgezahlt markiert.",
+        flags: MessageFlags.Ephemeral
+    });
+}
+
+if (interaction.isButton() && interaction.customId.startsWith("einstellung_bonus_reject_")) {
+    if (!isDiscordLeadership(interaction)) {
+        return interaction.reply({
+            content: "Du hast keine Berechtigung, Einstellungsboni zu bearbeiten.",
+            flags: MessageFlags.Ephemeral
+        });
+    }
+
+    const bonusId = interaction.customId.replace("einstellung_bonus_reject_", "");
+
+    const modal = new ModalBuilder()
+        .setCustomId(`einstellung_bonus_reject_modal_${bonusId}`)
+        .setTitle("Einstellungsbonus ablehnen");
+
+    const reasonInput = new TextInputBuilder()
+        .setCustomId("einstellung_bonus_reject_reason")
+        .setLabel("Grund der Ablehnung")
+        .setStyle(TextInputStyle.Paragraph)
+        .setRequired(true)
+        .setMaxLength(500)
+        .setPlaceholder("z.B. falsche Angaben, doppelt eingetragen, nicht berechtigt...");
+
+    modal.addComponents(
+        new ActionRowBuilder().addComponents(reasonInput)
+    );
+
+    return interaction.showModal(modal);
+}
+
+if (interaction.isModalSubmit() && interaction.customId.startsWith("einstellung_bonus_reject_modal_")) {
+    if (!isDiscordLeadership(interaction)) {
+        return interaction.reply({
+            content: "Du hast keine Berechtigung, Einstellungsboni zu bearbeiten.",
+            flags: MessageFlags.Ephemeral
+        });
+    }
+
+    const bonusId = interaction.customId.replace("einstellung_bonus_reject_modal_", "");
+    const reason = interaction.fields.getTextInputValue("einstellung_bonus_reject_reason");
+
+    const bonusDoc = await einstellungsBonusCollection.findOne({
+        _id: new ObjectId(bonusId)
+    });
+
+    if (!bonusDoc) {
+        return interaction.reply({
+            content: "Dieser Bonus-Antrag wurde nicht gefunden.",
+            flags: MessageFlags.Ephemeral
+        });
+    }
+
+    if (bonusDoc.status !== "offen") {
+        return interaction.reply({
+            content: "Dieser Bonus-Antrag wurde bereits bearbeitet.",
+            flags: MessageFlags.Ephemeral
+        });
+    }
+
+    await einstellungsBonusCollection.updateOne(
+        { _id: new ObjectId(bonusId) },
+        {
+            $set: {
+                status: "abgelehnt",
+                updatedAt: new Date()
+            }
+        }
+    );
+
+    const bonusChannel = await botClient.channels.fetch(BONUS_HQ_CHANNEL_ID);
+    const bonusMessage = await bonusChannel.messages.fetch(bonusDoc.messageId);
+
+    const embed = EmbedBuilder.from(bonusMessage.embeds[0])
+        .setColor(0xef233c)
+        .setTitle("❌ Einstellungsbonus abgelehnt")
+        .addFields(
+            {
+                name: "❌ Abgelehnt von",
+                value: `<@${interaction.user.id}>`,
+                inline: true
+            },
+            {
+                name: "📝 Ablehnungsgrund",
+                value: reason,
+                inline: false
+            }
+        )
+        .setFooter({ text: "LSMD Einstellungsbonus • Abgelehnt" })
+        .setTimestamp();
+
+    await bonusMessage.edit({
+        embeds: [embed],
+        components: []
+    });
+
+    return interaction.reply({
+        content: "❌ Einstellungsbonus wurde abgelehnt.",
+        flags: MessageFlags.Ephemeral
+    });
+}
+
+if (interaction.isButton() && interaction.customId === "einstellung_bonus_open_modal") {
+    const modal = new ModalBuilder()
+        .setCustomId("einstellung_bonus_submit_modal")
+        .setTitle("Einstellungsbonus beantragen");
+
+    const dnInput = new TextInputBuilder()
+        .setCustomId("einstellung_bonus_dn")
+        .setLabel("Dienstnummer des Eingestellten")
+        .setStyle(TextInputStyle.Short)
+        .setRequired(true)
+        .setMaxLength(30)
+        .setPlaceholder("z.B. 1234");
+
+    const nameInput = new TextInputBuilder()
+        .setCustomId("einstellung_bonus_name")
+        .setLabel("Name des Eingestellten")
+        .setStyle(TextInputStyle.Short)
+        .setRequired(true)
+        .setMaxLength(80)
+        .setPlaceholder("z.B. Max Mustermann");
+
+    modal.addComponents(
+        new ActionRowBuilder().addComponents(dnInput),
+        new ActionRowBuilder().addComponents(nameInput)
+    );
+
+    return interaction.showModal(modal);
+}
+
+if (interaction.isModalSubmit() && interaction.customId === "einstellung_bonus_submit_modal") {
+    const dn = interaction.fields.getTextInputValue("einstellung_bonus_dn");
+    const name = interaction.fields.getTextInputValue("einstellung_bonus_name");
+
+    const result = await sendEinstellungsBonusRequest(interaction, {
+        dn,
+        name
+    });
+
+    if (!result) {
+        return interaction.reply({
+            content: "Du hast dein Bonuslimit von 3.000.000 $ bereits erreicht oder der Bonus-HQ Channel ist nicht eingerichtet.",
+            flags: MessageFlags.Ephemeral
+        });
+    }
+
+    return interaction.reply({
+        content: "✅ Dein Einstellungsbonus wurde beantragt und wartet auf Auszahlung durch die Leitung.",
         flags: MessageFlags.Ephemeral
     });
 }
@@ -1806,6 +2128,16 @@ app.post("/admin/teamliste", requireLogin, requireAdmin, async (req, res) => {
     } catch (err) {
         console.error("Teamliste konnte nicht gesendet werden:", err);
         return res.status(500).send("Teamliste konnte nicht gesendet werden.");
+    }
+});
+
+app.post("/admin/einstellungsbonus-panel", requireLogin, requireAdmin, async (req, res) => {
+    try {
+        await sendEinstellungsBonusPanel();
+        return res.redirect("/admin");
+    } catch (err) {
+        console.error("Einstellungsbonus-Panel konnte nicht gesendet werden:", err);
+        return res.status(500).send("Einstellungsbonus-Panel konnte nicht gesendet werden.");
     }
 });
 
