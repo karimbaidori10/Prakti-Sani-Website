@@ -56,6 +56,15 @@ const BONUS_HQ_CHANNEL_ID = process.env.BONUS_HQ_CHANNEL_ID;
 const BONUS_WEEKLY_PING_ROLE_ID = process.env.BONUS_WEEKLY_PING_ROLE_ID || PRAKTI_SANI_ROLE_ID;
 const JOB_ANNOUNCE_CHANNEL_ID = process.env.JOB_ANNOUNCE_CHANNEL_ID;
 const JOB_ANNOUNCE_PING_ROLE_ID = process.env.JOB_ANNOUNCE_PING_ROLE_ID || PRAKTI_SANI_ROLE_ID;
+const BEWERBUNG_CHANNEL_ID = process.env.BEWERBUNG_CHANNEL_ID;
+
+const BEWERBUNG_PING_ROLE_IDS = [
+    ROLE_UNTERE_LEITUNG,
+    ROLE_STV_LEITUNG,
+    ROLE_LEITUNG
+].filter(Boolean);
+
+const BEWERBUNG_REQUIRED_VOTES = Number(process.env.BEWERBUNG_REQUIRED_VOTES || 3);
 
 let lastJobAnnounceReminderHour = null;
 
@@ -73,6 +82,8 @@ const spontaneSelections = new Map();
 const spontaneRequests = new Map();
 let spontaneRequestCounter = 1;
 const bonusHelperSelections = new Map();
+const bewerbungRequests = new Map();
+let bewerbungRequestCounter = 1;
 
 
 app.set("view engine", "ejs");
@@ -868,6 +879,207 @@ async function sendAbmeldungPanel() {
     console.log("Abmeldungs-Panel gesendet");
 }
 
+function getBewerbungVoteStats(request) {
+    const votes = Object.values(request.votes || {});
+
+    const accept = votes.filter(vote => vote === "accept").length;
+    const deny = votes.filter(vote => vote === "deny").length;
+
+    return { accept, deny };
+}
+
+function buildBewerbungEmbed(request) {
+    const stats = getBewerbungVoteStats(request);
+
+    let statusText = "🟡 **Abstimmung läuft**";
+    let color = 0x00b7ff;
+
+    if (request.status === "angenommen") {
+        statusText = "🟢 **Angenommen**";
+        color = 0x22c55e;
+    }
+
+    if (request.status === "abgelehnt") {
+        statusText = "🔴 **Abgelehnt**";
+        color = 0xef233c;
+    }
+
+    const voteLines = Object.entries(request.votes || {}).length
+        ? Object.entries(request.votes)
+            .map(([userId, vote]) => {
+                const emoji = vote === "accept" ? "✅" : "❌";
+                const text = vote === "accept" ? "Dafür" : "Dagegen";
+                return `${emoji} <@${userId}> — **${text}**`;
+            })
+            .join("\n")
+        : "Noch keine Stimmen abgegeben.";
+
+    const fields = [
+        {
+            name: "👤 Bewerber",
+            value:
+                `**Name / DN:** ${request.nameDn}\n` +
+                `**Discord / Steam:** ${request.discordSteam}`,
+            inline: false
+        },
+        {
+            name: "🎓 Position",
+            value: `**${request.position}**`,
+            inline: true
+        },
+        {
+            name: "📌 Status",
+            value: statusText,
+            inline: true
+        },
+        {
+            name: "🗳️ Abstimmung",
+            value:
+                `✅ **Dafür:** ${stats.accept}\n` +
+                `❌ **Dagegen:** ${stats.deny}\n` +
+                `🎯 **Benötigt:** ${BEWERBUNG_REQUIRED_VOTES} gleiche Stimmen`,
+            inline: false
+        },
+        {
+            name: "📄 Bewerbungsdokument",
+            value: request.documentUrl
+                ? `[Dokument öffnen](${request.documentUrl})`
+                : "Kein Dokument angegeben.",
+            inline: false
+        },
+        {
+            name: "📝 Zusammenfassung",
+            value: request.summary || "Keine Zusammenfassung angegeben.",
+            inline: false
+        },
+        {
+            name: "👥 Abgestimmt",
+            value: voteLines,
+            inline: false
+        }
+    ];
+
+    if (request.decidedBy) {
+        fields.push({
+            name: "🔒 Entscheidung",
+            value: `Entschieden durch <@${request.decidedBy}>`,
+            inline: false
+        });
+    }
+
+    return new EmbedBuilder()
+        .setColor(color)
+        .setAuthor({
+            name: "LSMD Bewerbungs-System",
+            iconURL: "https://cdn.discordapp.com/embed/avatars/0.png"
+        })
+        .setTitle("🚑 Neue Bewerbung eingereicht")
+        .setDescription(
+            "**Eine neue Bewerbung wartet auf die Abstimmung der Leitung.**\n\n" +
+            "Jede berechtigte Leitungsperson kann eine Stimme abgeben oder ändern."
+        )
+        .addFields(fields)
+        .setFooter({ text: `LSMD Bewerbungs-System • Bewerbung #${request.id}` })
+        .setTimestamp();
+}
+
+function buildBewerbungComponents(request) {
+    const isClosed = request.status !== "offen";
+
+    const buttons = [
+        new ButtonBuilder()
+            .setCustomId(`bewerbung_vote_accept_${request.id}`)
+            .setLabel("Dafür stimmen")
+            .setEmoji("✅")
+            .setStyle(ButtonStyle.Success)
+            .setDisabled(isClosed),
+
+        new ButtonBuilder()
+            .setCustomId(`bewerbung_vote_deny_${request.id}`)
+            .setLabel("Dagegen stimmen")
+            .setEmoji("❌")
+            .setStyle(ButtonStyle.Danger)
+            .setDisabled(isClosed)
+    ];
+
+    if (request.documentUrl) {
+        buttons.push(
+            new ButtonBuilder()
+                .setLabel("Dokument öffnen")
+                .setEmoji("📄")
+                .setStyle(ButtonStyle.Link)
+                .setURL(request.documentUrl)
+        );
+    }
+
+    return [
+        new ActionRowBuilder().addComponents(buttons)
+    ];
+}
+
+function buildBewerbungPanelComponents() {
+    return [
+        new ActionRowBuilder().addComponents(
+            new ButtonBuilder()
+                .setCustomId("bewerbung_open_modal")
+                .setLabel("Bewerbung eintragen")
+                .setEmoji("🚑")
+                .setStyle(ButtonStyle.Primary)
+        )
+    ];
+}
+
+async function sendBewerbungsPanel() {
+    if (!BEWERBUNG_CHANNEL_ID) {
+        console.log("BEWERBUNG_CHANNEL_ID fehlt");
+        return;
+    }
+
+    const channel = await botClient.channels.fetch(BEWERBUNG_CHANNEL_ID).catch(() => null);
+
+    if (!channel) {
+        console.log("Bewerbungs-Channel nicht gefunden");
+        return;
+    }
+
+    const embed = new EmbedBuilder()
+        .setColor(0x00b7ff)
+        .setTitle("🚑 LSMD Bewerbungs-System")
+        .setDescription(
+            "**Privates Bewerbungs-System für die Leitung.**\n\n" +
+            "Hier können Bewerbungen eingetragen und anschließend von der Leitung abgestimmt werden.\n\n" +
+            "**Ablauf:**\n" +
+            "1. Bewerbung eintragen\n" +
+            "2. Dokument prüfen\n" +
+            "3. Leitung stimmt ab\n" +
+            "4. Ab genug Stimmen entscheidet das System automatisch"
+        )
+        .addFields(
+            {
+                name: "👥 Sichtbarkeit",
+                value: "Nur Leitung sollte diesen Channel sehen.",
+                inline: false
+            },
+            {
+                name: "🗳️ Abstimmung",
+                value: `Benötigt werden **${BEWERBUNG_REQUIRED_VOTES} gleiche Stimmen**.`,
+                inline: false
+            }
+        )
+        .setFooter({ text: "LSMD Bewerbungs-System • Leitung" })
+        .setTimestamp();
+
+    await channel.send({
+        embeds: [embed],
+        components: buildBewerbungPanelComponents(),
+        allowedMentions: {
+            parse: []
+        }
+    });
+
+    console.log("Bewerbungs-Panel gesendet");
+}
+
 async function sendSpontanePruefungenPanel() {
     if (!process.env.SPONTANE_PRUEFUNGEN_CHANNEL_ID) {
         console.log("SPONTANE_PRUEFUNGEN_CHANNEL_ID fehlt");
@@ -1381,9 +1593,191 @@ botClient.on(Events.InteractionCreate, async (interaction) => {
         if (
     !interaction.customId.startsWith("spontan_") &&
     !interaction.customId.startsWith("abmeldung_") &&
-    !interaction.customId.startsWith("einstellung_bonus_")
+    !interaction.customId.startsWith("einstellung_bonus_") &&
+    !interaction.customId.startsWith("bewerbung_")
 ) {
     return;
+}
+
+if (interaction.isButton() && interaction.customId === "bewerbung_open_modal") {
+    if (!isDiscordLeadership(interaction)) {
+        return interaction.reply({
+            content: "❌ Nur die Leitung darf Bewerbungen eintragen.",
+            flags: MessageFlags.Ephemeral
+        });
+    }
+
+    const modal = new ModalBuilder()
+        .setCustomId("bewerbung_submit_modal")
+        .setTitle("LSMD Bewerbung eintragen");
+
+    const nameDnInput = new TextInputBuilder()
+        .setCustomId("bewerbung_name_dn")
+        .setLabel("Name und DN")
+        .setStyle(TextInputStyle.Short)
+        .setRequired(true)
+        .setMaxLength(100)
+        .setPlaceholder("z.B. DN 1234 | Max Mustermann");
+
+    const discordSteamInput = new TextInputBuilder()
+        .setCustomId("bewerbung_discord_steam")
+        .setLabel("Discord / Steam")
+        .setStyle(TextInputStyle.Short)
+        .setRequired(true)
+        .setMaxLength(120)
+        .setPlaceholder("z.B. @Name oder Steam-ID");
+
+    const positionInput = new TextInputBuilder()
+        .setCustomId("bewerbung_position")
+        .setLabel("Bewerbung für")
+        .setStyle(TextInputStyle.Short)
+        .setRequired(true)
+        .setMaxLength(80)
+        .setPlaceholder("z.B. Ausbilder");
+
+    const documentInput = new TextInputBuilder()
+        .setCustomId("bewerbung_document")
+        .setLabel("Google Docs Link")
+        .setStyle(TextInputStyle.Short)
+        .setRequired(true)
+        .setMaxLength(300)
+        .setPlaceholder("https://docs.google.com/...");
+
+    const summaryInput = new TextInputBuilder()
+        .setCustomId("bewerbung_summary")
+        .setLabel("Kurze Zusammenfassung")
+        .setStyle(TextInputStyle.Paragraph)
+        .setRequired(true)
+        .setMaxLength(900)
+        .setPlaceholder("Kurze Info zur Bewerbung...");
+
+    modal.addComponents(
+        new ActionRowBuilder().addComponents(nameDnInput),
+        new ActionRowBuilder().addComponents(discordSteamInput),
+        new ActionRowBuilder().addComponents(positionInput),
+        new ActionRowBuilder().addComponents(documentInput),
+        new ActionRowBuilder().addComponents(summaryInput)
+    );
+
+    return interaction.showModal(modal);
+}
+
+if (interaction.isModalSubmit() && interaction.customId === "bewerbung_submit_modal") {
+    if (!isDiscordLeadership(interaction)) {
+        return interaction.reply({
+            content: "❌ Nur die Leitung darf Bewerbungen eintragen.",
+            flags: MessageFlags.Ephemeral
+        });
+    }
+
+    const requestId = String(bewerbungRequestCounter++);
+
+    const request = {
+        id: requestId,
+        nameDn: interaction.fields.getTextInputValue("bewerbung_name_dn"),
+        discordSteam: interaction.fields.getTextInputValue("bewerbung_discord_steam"),
+        position: interaction.fields.getTextInputValue("bewerbung_position"),
+        documentUrl: interaction.fields.getTextInputValue("bewerbung_document"),
+        summary: interaction.fields.getTextInputValue("bewerbung_summary"),
+        createdBy: interaction.user.id,
+        status: "offen",
+        votes: {},
+        messageId: null,
+        channelId: interaction.channel.id,
+        decidedBy: null
+    };
+
+    const content = BEWERBUNG_PING_ROLE_IDS.length
+        ? BEWERBUNG_PING_ROLE_IDS.map(roleId => `<@&${roleId}>`).join(" ")
+        : "";
+
+    const message = await interaction.channel.send({
+        content,
+        embeds: [buildBewerbungEmbed(request)],
+        components: buildBewerbungComponents(request),
+        allowedMentions: {
+            roles: BEWERBUNG_PING_ROLE_IDS
+        }
+    });
+
+    request.messageId = message.id;
+    bewerbungRequests.set(requestId, request);
+
+    return interaction.reply({
+        content: "✅ Bewerbung wurde eingetragen und wartet jetzt auf Abstimmung der Leitung.",
+        flags: MessageFlags.Ephemeral
+    });
+}
+
+if (
+    interaction.isButton() &&
+    (
+        interaction.customId.startsWith("bewerbung_vote_accept_") ||
+        interaction.customId.startsWith("bewerbung_vote_deny_")
+    )
+) {
+    if (!isDiscordLeadership(interaction)) {
+        return interaction.reply({
+            content: "❌ Nur die Leitung darf abstimmen.",
+            flags: MessageFlags.Ephemeral
+        });
+    }
+
+    const voteType = interaction.customId.startsWith("bewerbung_vote_accept_")
+        ? "accept"
+        : "deny";
+
+    const requestId = interaction.customId
+        .replace("bewerbung_vote_accept_", "")
+        .replace("bewerbung_vote_deny_", "");
+
+    const request = bewerbungRequests.get(requestId);
+
+    if (!request) {
+        return interaction.reply({
+            content: "❌ Diese Bewerbung wurde nicht gefunden oder der Bot wurde neu gestartet.",
+            flags: MessageFlags.Ephemeral
+        });
+    }
+
+    if (request.status !== "offen") {
+        return interaction.reply({
+            content: "Diese Bewerbung wurde bereits entschieden.",
+            flags: MessageFlags.Ephemeral
+        });
+    }
+
+    request.votes[interaction.user.id] = voteType;
+
+    const stats = getBewerbungVoteStats(request);
+
+    if (stats.accept >= BEWERBUNG_REQUIRED_VOTES) {
+        request.status = "angenommen";
+        request.decidedBy = interaction.user.id;
+    }
+
+    if (stats.deny >= BEWERBUNG_REQUIRED_VOTES) {
+        request.status = "abgelehnt";
+        request.decidedBy = interaction.user.id;
+    }
+
+    bewerbungRequests.set(requestId, request);
+
+    await interaction.message.edit({
+        content: request.status === "offen" ? interaction.message.content : "",
+        embeds: [buildBewerbungEmbed(request)],
+        components: buildBewerbungComponents(request),
+        allowedMentions: {
+            parse: []
+        }
+    });
+
+    const voteText = voteType === "accept" ? "✅ Dafür" : "❌ Dagegen";
+
+    return interaction.reply({
+        content: `Deine Stimme wurde gespeichert: **${voteText}**`,
+        flags: MessageFlags.Ephemeral
+    });
 }
 
         if (interaction.isButton() && interaction.customId === "abmeldung_open_modal") {
@@ -2432,6 +2826,16 @@ app.post("/admin/spontane-panel", requireLogin, requireAdmin, async (req, res) =
 
     await addLog("Spontane Prüfungen Panel gesendet", {
         channelId: process.env.SPONTANE_PRUEFUNGEN_CHANNEL_ID
+    }, req.session.user);
+
+    res.redirect("/admin");
+});
+
+app.post("/admin/bewerbungs-panel", requireLogin, requireAdmin, async (req, res) => {
+    await sendBewerbungsPanel();
+
+    await addLog("Bewerbungs-Panel gesendet", {
+        channelId: BEWERBUNG_CHANNEL_ID
     }, req.session.user);
 
     res.redirect("/admin");
