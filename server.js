@@ -2868,6 +2868,48 @@ app.post("/admin/einstellungsbonus-panel", requireLogin, requireAdmin, async (re
     }
 });
 
+app.post("/admin/wochen-reset", requireLogin, requireAdmin, async (req, res) => {
+    try {
+        const pointsResult = await pointsCollection.updateMany(
+            {},
+            {
+                $set: {
+                    points: 0,
+                    updatedAt: new Date()
+                }
+            }
+        );
+
+        const bonusResult = await einstellungsBonusCollection.updateMany(
+            {
+                status: "ausgezahlt"
+            },
+            {
+                $set: {
+                    status: "reset",
+                    resetAt: new Date(),
+                    resetBy: req.session.user?.discordId || null,
+                    updatedAt: new Date()
+                }
+            }
+        );
+
+        pointsListCache = null;
+        pointsListCacheTime = 0;
+
+        await addLog("Wochenreset durchgeführt", {
+            title: "Punkte und Einstellungsbonus wurden zurückgesetzt",
+            affectedUsers: pointsResult.modifiedCount,
+            affectedBonusEntries: bonusResult.modifiedCount
+        }, req.session.user);
+
+        return res.redirect("/admin");
+    } catch (err) {
+        console.error("Wochenreset Fehler:", err);
+        return res.status(500).send("Wochenreset konnte nicht durchgeführt werden.");
+    }
+});
+
 app.post("/admin/abmeldung-panel", requireLogin, requireAdmin, async (req, res) => {
     try {
         await sendAbmeldungPanel();

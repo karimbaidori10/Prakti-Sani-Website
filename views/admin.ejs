@@ -233,6 +233,19 @@
     </button>
 </form>
 
+<div class="clean-divider"></div>
+
+<form action="/admin/wochen-reset" method="POST" style="margin-top: 16px;"
+      onsubmit="return confirm('Wirklich Wochenreset durchführen? Alle Punkte werden auf 0 gesetzt und der Einstellungsbonus-Stand wird zurückgesetzt.');">
+    <button type="submit" class="danger-btn">
+        🔄 Wochenreset: Punkte & Bonus zurücksetzen
+    </button>
+</form>
+
+<p class="card-subtitle" style="margin-top: 12px;">
+    Setzt alle Mitgliederpunkte auf <strong>0</strong> und startet den Einstellungsbonus neu.
+</p>
+
 <form action="/admin/bewerbungs-panel" method="POST" style="margin-top: 16px;">
     <button type="submit">
         🚑 Bewerbungs-Panel senden
