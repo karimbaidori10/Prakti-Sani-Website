@@ -792,35 +792,42 @@ async function sendJobAnnounceReminder() {
 }
 
 function startJobAnnounceReminderWatcher() {
+    console.log("Jobannounce Reminder Watcher gestartet");
+
+    // Sofort nach Bot-Start einmal senden
+    setTimeout(async () => {
+        try {
+            const berlin = getBerlinParts(new Date());
+
+            console.log("Jobannounce Sofort-Check:", `${berlin.hour}:${berlin.minute}`);
+
+            if (berlin.hour >= 14 && berlin.hour <= 23) {
+                await sendJobAnnounceReminder();
+            } else {
+                console.log("Jobannounce Sofort übersprungen: außerhalb der Zeit");
+            }
+        } catch (err) {
+            console.error("Jobannounce Sofort-Reminder Fehler:", err);
+        }
+    }, 10 * 1000);
+
+    // Danach alle 60 Minuten senden
     setInterval(async () => {
         try {
             const berlin = getBerlinParts(new Date());
-            const hour = berlin.hour;
 
-            // Nur 14:00 bis 23:59
-            if (hour < 14 || hour > 23) {
+            console.log("Jobannounce 60-Minuten-Check:", `${berlin.hour}:${berlin.minute}`);
+
+            if (berlin.hour < 14 || berlin.hour > 23) {
+                console.log("Jobannounce übersprungen: außerhalb der Zeit");
                 return;
             }
-
-            // Nur einmal pro Stunde senden
-            const hourKey = `${berlin.year}-${berlin.month}-${berlin.day}-${hour}`;
-
-            if (lastJobAnnounceReminderHour === hourKey) {
-                return;
-            }
-
-            // Erst ab Minute 0 senden
-            if (berlin.minute !== 0) {
-                return;
-            }
-
-            lastJobAnnounceReminderHour = hourKey;
 
             await sendJobAnnounceReminder();
         } catch (err) {
             console.error("Jobannounce Reminder Fehler:", err);
         }
-    }, 60 * 1000);
+    }, 60 * 60 * 1000);
 }
 
 async function sendAbmeldungPanel() {
