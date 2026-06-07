@@ -2878,6 +2878,33 @@ app.post("/admin/abmeldung-panel", requireLogin, requireAdmin, async (req, res) 
     }
 });
 
+app.post("/admin/wochen-reset", requireLogin, requireAdmin, async (req, res) => {
+    try {
+        const result = await pointsCollection.updateMany(
+            {},
+            {
+                $set: {
+                    points: 0,
+                    updatedAt: new Date()
+                }
+            }
+        );
+
+        pointsListCache = null;
+        pointsListCacheTime = 0;
+
+        await addLog("Wochenreset durchgeführt", {
+            amount: 0,
+            affectedUsers: result.modifiedCount,
+            title: "Alle Punkte wurden auf 0 gesetzt"
+        }, req.session.user);
+
+        return res.redirect("/admin");
+    } catch (err) {
+        console.error("Wochenreset Fehler:", err);
+        return res.status(500).send("Wochenreset konnte nicht durchgeführt werden.");
+    }
+});
 
 function buildSpontanePanelComponents() {
     const resetId = Date.now();
