@@ -770,8 +770,11 @@ async function sendJobAnnounceReminder() {
                 .setTimestamp()
         ],
         allowedMentions: {
-            roles: JOB_ANNOUNCE_PING_ROLE_ID ? [JOB_ANNOUNCE_PING_ROLE_ID] : []
-        }
+    parse: [],
+    roles: JOB_ANNOUNCE_PING_ROLE_ID
+        ? [JOB_ANNOUNCE_PING_ROLE_ID]
+        : []
+}
     });
 
     console.log("Jobannounce Reminder gesendet");
