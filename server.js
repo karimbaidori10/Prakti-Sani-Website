@@ -92,6 +92,20 @@ async function updateProfessorPointsInSheet(professorDn, points) {
   }
 }
 
+function extractDnFromName(name) {
+    if (!name) {
+        return null;
+    }
+
+    const match = String(name).match(/MD[\s-]*(\d+)/i);
+
+    if (!match) {
+        return null;
+    }
+
+    return match[1];
+}
+
 const BEWERBUNG_PING_ROLE_IDS = [
     ROLE_UNTERE_LEITUNG,
     ROLE_STV_LEITUNG,
@@ -115,9 +129,13 @@ const botClient = new Client({
 const spontaneSelections = new Map();
 const spontaneRequests = new Map();
 let spontaneRequestCounter = 1;
+
 const bonusHelperSelections = new Map();
+
 const bewerbungRequests = new Map();
 let bewerbungRequestCounter = 1;
+
+const profLogSelections = new Map();
 
 
 app.set("view engine", "ejs");
@@ -1159,17 +1177,107 @@ async function sendProfessorenSchuelerSystemPanel() {
         .setFooter({ text: "LSMD Professoren-Abteilung | Schüler-System" })
         .setTimestamp();
 
-    const row = new ActionRowBuilder().addComponents(
-        new ButtonBuilder()
-            .setCustomId("prof_log_create")
-            .setLabel("Schüler-Log eintragen")
-            .setEmoji("📝")
-            .setStyle(ButtonStyle.Primary)
-    );
+    const professorRow = new ActionRowBuilder().addComponents(
+    new UserSelectMenuBuilder()
+        .setCustomId("prof_professor_select")
+        .setPlaceholder("Professor auswählen")
+        .setMinValues(1)
+        .setMaxValues(1)
+);
+
+
+
+const rankRow = new ActionRowBuilder().addComponents(
+    new StringSelectMenuBuilder()
+        .setCustomId("prof_rank_select")
+        .setPlaceholder("Weiterbildung / Rang auswählen")
+        .setMinValues(1)
+        .setMaxValues(1)
+        .addOptions(
+    {
+        label: "Sanitäter → Allgemeinmediziner",
+        value: "Sanitäter → Allgemeinmediziner",
+        emoji: "🚑"
+    },
+    {
+        label: "Allgemeinmediziner → Facharzt",
+        value: "Allgemeinmediziner → Facharzt",
+        emoji: "🩺"
+    },
+    {
+        label: "Facharzt → Notarzt",
+        value: "Facharzt → Notarzt",
+        emoji: "🚨"
+    },
+    {
+        label: "Notarzt → Arzt",
+        value: "Notarzt → Arzt",
+        emoji: "🏥"
+    },
+    {
+        label: "Prakti-Sani Testphase bestanden",
+        value: "Prakti-Sani Testphase bestanden",
+        emoji: "📘"
+    },
+    {
+        label: "Overwatch Testphase bestanden",
+        value: "Overwatch Testphase bestanden",
+        emoji: "👁️"
+    },
+    {
+        label: "Therapeut Weiterbildung bestanden",
+        value: "Therapeut Weiterbildung bestanden",
+        emoji: "🧠"
+    },
+    {
+        label: "Professor",
+        value: "Professor",
+        emoji: "🎓"
+    },
+    {
+        label: "Assistenzarzt Testphase bestanden",
+        value: "Assistenzarzt Testphase bestanden",
+        emoji: "⚕️"
+    },
+    {
+        label: "Personalabteilung Testphase bestanden",
+        value: "Personalabteilung Testphase bestanden",
+        emoji: "📋"
+    },
+    {
+        label: "Oberarzt Testphase bestanden",
+        value: "Oberarzt Testphase bestanden",
+        emoji: "🏥"
+    },
+    {
+        label: "Untere Leitung",
+        value: "Untere Leitung",
+        emoji: "🔰"
+    },
+    {
+        label: "Stv. Leitung",
+        value: "Stv. Leitung",
+        emoji: "⚜️"
+    },
+    {
+        label: "Leitung",
+        value: "Leitung",
+        emoji: "👑"
+    }
+)
+);
+
+const buttonRow = new ActionRowBuilder().addComponents(
+    new ButtonBuilder()
+        .setCustomId("prof_log_create")
+        .setLabel("Schüler-Log eintragen")
+        .setEmoji("📝")
+        .setStyle(ButtonStyle.Primary)
+);
 
     const payload = {
         embeds: [embed],
-        components: [row],
+        components: [professorRow, rankRow, buttonRow],
         allowedMentions: {
             parse: []
         }
@@ -2118,51 +2226,89 @@ botClient.on(Events.InteractionCreate, async (interaction) => {
     return;
 }
 
+if (interaction.isUserSelectMenu() && interaction.customId === "prof_professor_select") {
+    const selectedProfessorId = interaction.values[0];
+
+    const member = await interaction.guild.members.fetch(selectedProfessorId).catch(() => null);
+
+    if (!member) {
+        return interaction.reply({
+            content: "❌ Professor konnte nicht geladen werden.",
+            flags: MessageFlags.Ephemeral
+        });
+    }
+
+    const professorName = member.displayName || member.user.username;
+    const professorDn = extractDnFromName(professorName);
+
+    if (!professorDn) {
+        return interaction.reply({
+            content:
+                "❌ Ich konnte keine DN aus dem Namen erkennen.\n\n" +
+                "Der Professor muss z.B. so heißen:\n" +
+                "`[MD-17] Prof Dr. Karim`",
+            flags: MessageFlags.Ephemeral
+        });
+    }
+
+    const current = profLogSelections.get(interaction.user.id) || {};
+
+    current.professorId = selectedProfessorId;
+    current.professorName = professorName;
+    current.professorDn = professorDn;
+
+    profLogSelections.set(interaction.user.id, current);
+
+    return interaction.reply({
+        content: `✅ Professor ausgewählt: **${professorName}** | DN **${professorDn}**`,
+        flags: MessageFlags.Ephemeral
+    });
+}
+
+if (interaction.isStringSelectMenu() && interaction.customId === "prof_rank_select") {
+    const selectedRank = interaction.values[0];
+
+    const current = profLogSelections.get(interaction.user.id) || {};
+    current.rank = selectedRank;
+
+    profLogSelections.set(interaction.user.id, current);
+
+    return interaction.reply({
+        content: `✅ Weiterbildung/Rang ausgewählt: **${selectedRank}**`,
+        flags: MessageFlags.Ephemeral
+    });
+}
+
 if (interaction.isButton() && interaction.customId === "prof_log_create") {
+    const selection = profLogSelections.get(interaction.user.id);
+
+    if (!selection || !selection.professorId || !selection.professorDn || !selection.rank) {
+        return interaction.reply({
+            content: "❌ Bitte zuerst **Professor** und **Weiterbildung/Rang** auswählen.",
+            flags: MessageFlags.Ephemeral
+        });
+    }
+
     const modal = new ModalBuilder()
         .setCustomId("prof_log_modal")
         .setTitle("Professoren Schüler-Log");
 
-    const professorDnInput = new TextInputBuilder()
-        .setCustomId("professor_dn")
-        .setLabel("Deine Professor-DN")
-        .setPlaceholder("z.B. 17")
-        .setStyle(TextInputStyle.Short)
-        .setRequired(true);
-
     const studentInput = new TextInputBuilder()
         .setCustomId("student")
-        .setLabel("Schüler Name / Discord-ID")
-        .setPlaceholder("z.B. Max Mustermann / 123456789")
-        .setStyle(TextInputStyle.Short)
-        .setRequired(true);
-
-    const actionInput = new TextInputBuilder()
-        .setCustomId("action")
-        .setLabel("Was wurde gemacht?")
-        .setPlaceholder("Prüfung bestanden / Weiterbildung / Testphase")
-        .setStyle(TextInputStyle.Short)
-        .setRequired(true);
-
-    const pointsInput = new TextInputBuilder()
-        .setCustomId("points")
-        .setLabel("Punkte")
-        .setPlaceholder("z.B. 10")
+        .setLabel("Schüler Name / DN")
+        .setPlaceholder("z.B. [MD-41] Max Mustermann")
         .setStyle(TextInputStyle.Short)
         .setRequired(true);
 
     const noteInput = new TextInputBuilder()
         .setCustomId("note")
-        .setLabel("Kurze Bemerkung")
-        .setPlaceholder("Kurz und sachlich dokumentieren")
+        .setLabel("Bemerkung / Nachweis")
+        .setPlaceholder("z.B. bestanden, sauber durchgeführt, Nachweis vorhanden")
         .setStyle(TextInputStyle.Paragraph)
         .setRequired(false);
 
     modal.addComponents(
-        new ActionRowBuilder().addComponents(professorDnInput),
         new ActionRowBuilder().addComponents(studentInput),
-        new ActionRowBuilder().addComponents(actionInput),
-        new ActionRowBuilder().addComponents(pointsInput),
         new ActionRowBuilder().addComponents(noteInput)
     );
 
@@ -2170,35 +2316,34 @@ if (interaction.isButton() && interaction.customId === "prof_log_create") {
 }
 
 if (interaction.isModalSubmit() && interaction.customId === "prof_log_modal") {
-    const professorDn = interaction.fields.getTextInputValue("professor_dn");
-    const student = interaction.fields.getTextInputValue("student");
-    const action = interaction.fields.getTextInputValue("action");
-    const pointsRaw = interaction.fields.getTextInputValue("points");
-    const note = interaction.fields.getTextInputValue("note") || "Keine Bemerkung";
+    const selection = profLogSelections.get(interaction.user.id);
 
-    const points = parseInt(pointsRaw.replace(/\D/g, ""), 10);
-
-    if (isNaN(points) || points < 0 || points > 100) {
+    if (!selection || !selection.professorId || !selection.professorDn || !selection.rank) {
         return interaction.reply({
-            content: "Bitte gib eine gültige Punktezahl zwischen 0 und 100 ein.",
+            content: "❌ Auswahl wurde nicht gefunden. Bitte Professor und Weiterbildung erneut auswählen.",
             flags: MessageFlags.Ephemeral
         });
     }
+
+    const professorId = selection.professorId;
+    const professorName = selection.professorName;
+    const professorDn = selection.professorDn;
+    const rank = selection.rank;
+
+    const student = interaction.fields.getTextInputValue("student");
+    const note = interaction.fields.getTextInputValue("note") || "Keine Bemerkung";
+    const points = 1;
 
     const sheetUpdate = await updateProfessorPointsInSheet(professorDn, points);
 
     const embed = new EmbedBuilder()
         .setColor(0x8b5cf6)
         .setTitle("📘 Neuer Professoren Schüler-Log")
+        .setDescription("Ein Schüler-Log wurde eingetragen und automatisch mit **+1 Punkt** bewertet.")
         .addFields(
             {
                 name: "👨‍🏫 Professor",
-                value: `${interaction.user}`,
-                inline: true
-            },
-            {
-                name: "🆔 Professor-DN",
-                value: professorDn,
+                value: `<@${professorId}>\n${professorName}\nDN ${professorDn}`,
                 inline: true
             },
             {
@@ -2207,33 +2352,48 @@ if (interaction.isModalSubmit() && interaction.customId === "prof_log_modal") {
                 inline: true
             },
             {
-                name: "📌 Aktion",
-                value: action,
-                inline: true
+                name: "📚 Weiterbildung / Rang",
+                value: rank,
+                inline: false
+            },
+            {
+                name: "📌 Log",
+                value: `Schüler-Weiterbildung zu **${rank}** wurde eingetragen.`,
+                inline: false
             },
             {
                 name: "🏆 Punkte",
-                value: `${points} Punkte`,
+                value: "+1 Punkt",
                 inline: true
             },
             {
-                name: "📊 Sheet-Punkte",
+                name: "📊 Mastersheet",
                 value: sheetUpdate
-                    ? `${sheetUpdate.oldPoints} → ${sheetUpdate.newPoints} Punkte`
-                    : "Konnte nicht im Sheet aktualisiert werden.",
+                    ? `${sheetUpdate.oldPoints} → ${sheetUpdate.newPoints} Prof-Punkte`
+                    : "Konnte nicht im Mastersheet aktualisiert werden.",
                 inline: true
             },
             {
                 name: "📝 Bemerkung",
                 value: note,
                 inline: false
+            },
+            {
+                name: "📅 Datum",
+                value: `<t:${Math.floor(Date.now() / 1000)}:f>`,
+                inline: true
+            },
+            {
+                name: "📨 Eingetragen von",
+                value: `<@${interaction.user.id}>`,
+                inline: true
             }
         )
         .setFooter({ text: "LSMD Professoren-Abteilung | Schüler-System" })
         .setTimestamp();
 
     await interaction.reply({
-        content: "✅ Der Schüler-Log wurde eingetragen.",
+        content: "✅ Schüler-Log wurde eingetragen. Der Professor hat **+1 Prof-Punkt** erhalten.",
         flags: MessageFlags.Ephemeral
     });
 
@@ -2243,6 +2403,8 @@ if (interaction.isModalSubmit() && interaction.customId === "prof_log_modal") {
             parse: []
         }
     });
+
+    profLogSelections.delete(interaction.user.id);
 
     return;
 }
