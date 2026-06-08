@@ -2317,6 +2317,10 @@ if (interaction.isButton() && interaction.customId === "prof_log_create") {
 }
 
 if (interaction.isModalSubmit() && interaction.customId === "prof_log_modal") {
+await interaction.deferReply({
+    flags: MessageFlags.Ephemeral
+});
+
     const selection = profLogSelections.get(interaction.user.id);
 
     if (!selection || !selection.professorId || !selection.professorDn || !selection.rank) {
@@ -2402,9 +2406,8 @@ if (interaction.isModalSubmit() && interaction.customId === "prof_log_modal") {
         : null;
 
     if (!logChannel) {
-        return interaction.reply({
+        return interaction.editReply({
             content: "❌ Logs-Channel wurde nicht gefunden. Bitte `PROFESSOREN_SCHUELER_LOG_CHANNEL_ID` in Railway setzen.",
-            flags: MessageFlags.Ephemeral
         });
     }
 
