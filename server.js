@@ -55,6 +55,7 @@ const ROLE_LEITUNG = process.env.ROLE_LEITUNG;
 const BONUS_HQ_CHANNEL_ID = process.env.BONUS_HQ_CHANNEL_ID;
 const BONUS_WEEKLY_PING_ROLE_ID = process.env.BONUS_WEEKLY_PING_ROLE_ID || PRAKTI_SANI_ROLE_ID;
 const JOB_ANNOUNCE_CHANNEL_ID = process.env.JOB_ANNOUNCE_CHANNEL_ID;
+const DOKUMENTE_WEBHOOK_URL = process.env.DOKUMENTE_WEBHOOK_URL;
 const JOB_ANNOUNCE_PING_ROLE_ID = process.env.JOB_ANNOUNCE_PING_ROLE_ID || PRAKTI_SANI_ROLE_ID;
 const BEWERBUNG_CHANNEL_ID = process.env.BEWERBUNG_CHANNEL_ID;
 
@@ -710,6 +711,32 @@ function startWeeklyBonusAnnouncementWatcher() {
     }, 60 * 1000);
 }
 
+function getBerlinParts(date = new Date()) {
+    const parts = new Intl.DateTimeFormat("en-US", {
+        timeZone: "Europe/Berlin",
+        weekday: "short",
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit",
+        hour12: false
+    }).formatToParts(date);
+
+    const get = (type) => parts.find(part => part.type === type)?.value;
+
+    return {
+        weekday: get("weekday"),
+        year: Number(get("year")),
+        month: Number(get("month")),
+        day: Number(get("day")),
+        hour: Number(get("hour")),
+        minute: Number(get("minute")),
+        second: Number(get("second"))
+    };
+}
+
 function getJobAnnounceText() {
     const berlin = getBerlinParts(new Date());
     const hour = berlin.hour;
@@ -828,6 +855,119 @@ function startJobAnnounceReminderWatcher() {
             console.error("Jobannounce Reminder Fehler:", err);
         }
     }, 60 * 60 * 1000);
+}
+
+async function sendDokumenteWebhook() {
+    if (!DOKUMENTE_WEBHOOK_URL) {
+        console.log("DOKUMENTE_WEBHOOK_URL fehlt");
+        return false;
+    }
+
+    const dokumente = [
+        {
+            title: "📊 LSMD Therapeuten Mastersheet",
+            description: "Zentrale Übersicht für Mitglieder, Fälle, Status und interne Organisation der Therapeuten-Abteilung.",
+            url: "https://docs.google.com/spreadsheets/d/1DDszXZ2Xk5rrFsmBPXsABKPipMX7CXNxY48MyP4B6lU/edit?usp=sharing",
+            color: 0x06b6d4
+        },
+        {
+            title: "📝 LSMD Therapeutische Sprechstunde | Formular",
+            description: "Formular für interne therapeutische Sprechstunden und Dokumentationen.",
+            url: "https://docs.google.com/forms/d/e/1FAIpQLScB9T50A2LZkOtOhykfemftksW45lliWjakoGiyLQzOQSUvZg/viewform?usp=sharing&ouid=101346137102031307272",
+            color: 0x22c55e
+        },
+        {
+            title: "📋 Leitung Mastersheet Therapeuten",
+            description: "Interne Leitungsübersicht für Kontrolle, Verwaltung und Prüfung der Therapeuten-Abteilung.",
+            url: "https://docs.google.com/spreadsheets/d/122mGv9zHHAmNCmR24-moQ_lGa5d3XW3n291pLAb8FLw/edit?usp=sharing",
+            color: 0x3b82f6
+        },
+        {
+            title: "📘 Therapeuten Leitfaden",
+            description: "Offizieller Leitfaden für Abläufe, Verhalten, Struktur und Durchführung therapeutischer Gespräche.",
+            url: "https://docs.google.com/document/d/1srYmLkZfw4ADLdVyM0E9r9cSHa4u8whlfhU3zc4T-5A/edit?tab=t.0",
+            color: 0x8b5cf6
+        },
+        {
+            title: "🚑 Leitung Therapeuten Einweisung",
+            description: "Einweisungsdokument für Leitung, neue Therapeuten und strukturierte Freigaben.",
+            url: "https://docs.google.com/document/d/1tlvdjuPJVBRG_StopSjuNNLPAKm4RxSvawrzdeajMHY/edit?tab=t.0",
+            color: 0xf59e0b
+        }
+    ];
+
+    const introEmbed = {
+        color: 0xef233c,
+        author: {
+            name: "LSMD Dokumenten-System"
+        },
+        title: "📚 LSMD Dokumentenübersicht",
+        description:
+            "**Hier findest du alle wichtigen Dokumente der Abteilung.**\n\n" +
+            "Bitte nutzt immer die aktuell verlinkten Dokumente und achtet darauf, keine veralteten Versionen zu verwenden.",
+        fields: [
+            {
+                name: "📌 Hinweis",
+                value: "Alle Dokumente sind intern und nur für berechtigte Personen bestimmt.",
+                inline: false
+            },
+            {
+                name: "🔄 Aktualisierung",
+                value: `<t:${Math.floor(Date.now() / 1000)}:f>`,
+                inline: true
+            }
+        ],
+        footer: {
+            text: "LSMD Abteilungen • Dokumentenverwaltung"
+        },
+        timestamp: new Date().toISOString()
+    };
+
+    const embeds = [
+        introEmbed,
+        ...dokumente.map(doc => ({
+            color: doc.color,
+            title: doc.title,
+            url: doc.url,
+            description: doc.description,
+            fields: [
+                {
+                    name: "🔗 Zugriff",
+                    value: `[Dokument öffnen](${doc.url})`,
+                    inline: false
+                }
+            ],
+            footer: {
+                text: "LSMD Dokumenten-System"
+            },
+            timestamp: new Date().toISOString()
+        }))
+    ];
+
+    const response = await fetch(DOKUMENTE_WEBHOOK_URL, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            username: "LSMD Dokumenten-System",
+            avatar_url: "https://cdn.discordapp.com/embed/avatars/0.png",
+            content: "",
+            embeds,
+            allowed_mentions: {
+                parse: []
+            }
+        })
+    });
+
+    if (!response.ok) {
+        const errorText = await response.text();
+        console.error("Dokumente Webhook Fehler:", response.status, errorText);
+        return false;
+    }
+
+    console.log("Dokumente Webhook gesendet");
+    return true;
 }
 
 async function sendAbmeldungPanel() {
@@ -1400,6 +1540,20 @@ async function getAllPoints() {
 
 let teamListUpdateTimer = null;
 
+let guildMembersFetchCacheTime = 0;
+const GUILD_MEMBERS_FETCH_CACHE_TIME = 1000 * 60 * 5;
+
+async function fetchGuildMembersSafe(guild) {
+    if (Date.now() - guildMembersFetchCacheTime < GUILD_MEMBERS_FETCH_CACHE_TIME) {
+        return;
+    }
+
+    console.log("Lade alle Discord Mitglieder sicher...");
+    await guild.members.fetch();
+
+    guildMembersFetchCacheTime = Date.now();
+}
+
 function scheduleTeamListUpdate() {
     clearTimeout(teamListUpdateTimer);
 
@@ -1453,8 +1607,7 @@ async function updateTeamListMessage() {
 
     const guild = await botClient.guilds.fetch(process.env.DISCORD_GUILD_ID);
 
-    console.log("Lade alle Discord Mitglieder...");
-    await guild.members.fetch();
+    await fetchGuildMembersSafe(guild);
 
     const allMembers = Array.from(guild.members.cache.values())
         .filter(member => !member.user.bot);
@@ -1555,7 +1708,7 @@ async function updateCustomTeamListMessage(config) {
     const guild = await botClient.guilds.fetch(process.env.DISCORD_GUILD_ID);
 
     console.log(`Lade Mitglieder für ${config.logName}...`);
-    await guild.members.fetch();
+await fetchGuildMembersSafe(guild);
 
     const allMembers = Array.from(guild.members.cache.values())
         .filter(member => !member.user.bot);
@@ -3070,6 +3223,25 @@ app.post("/admin/abmeldung-panel", requireLogin, requireAdmin, async (req, res) 
     } catch (err) {
         console.error("Abmeldungs-Panel konnte nicht gesendet werden:", err);
         return res.status(500).send("Abmeldungs-Panel konnte nicht gesendet werden.");
+    }
+});
+
+app.post("/admin/dokumente-webhook", requireLogin, requireAdmin, async (req, res) => {
+    try {
+        const ok = await sendDokumenteWebhook();
+
+        if (!ok) {
+            return res.status(500).send("Dokumente Webhook konnte nicht gesendet werden.");
+        }
+
+        await addLog("Dokumente Webhook gesendet", {
+            channel: "dokumente"
+        }, req.session.user);
+
+        return res.redirect("/admin");
+    } catch (err) {
+        console.error("Dokumente Webhook Fehler:", err);
+        return res.status(500).send("Dokumente Webhook konnte nicht gesendet werden.");
     }
 });
 
