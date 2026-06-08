@@ -1539,6 +1539,137 @@ const embed = new EmbedBuilder()
     console.log("TEAM_LIST_MESSAGE_ID bitte in Railway eintragen:", message.id);
 }
 
+async function updateCustomTeamListMessage(config) {
+    if (!config.channelId) {
+        console.log(`${config.logName} Channel-ID fehlt`);
+        return;
+    }
+
+    const channel = await botClient.channels.fetch(config.channelId).catch(() => null);
+
+    if (!channel) {
+        console.log(`${config.logName} Channel nicht gefunden`);
+        return;
+    }
+
+    const guild = await botClient.guilds.fetch(process.env.DISCORD_GUILD_ID);
+
+    console.log(`Lade Mitglieder für ${config.logName}...`);
+    await guild.members.fetch();
+
+    const allMembers = Array.from(guild.members.cache.values())
+        .filter(member => !member.user.bot);
+
+    const groups = config.groups.map(group => ({
+        title: group.title,
+        members: allMembers.filter(member => hasRole(member, group.roleId))
+    }));
+
+    const groupedIds = new Set(
+        groups.flatMap(group => group.members.map(member => member.id))
+    );
+
+    const embed = new EmbedBuilder()
+        .setColor(config.color)
+        .setTitle(config.title)
+        .setDescription(
+            "**Aktuelle Mitgliederübersicht der Abteilung**\n\n" +
+            "Diese Liste wird automatisch aktualisiert und zeigt alle eingetragenen Teamrollen."
+        )
+        .addFields(
+            {
+                name: "📊 Übersicht",
+                value:
+                    `**Teammitglieder gesamt:** ${groupedIds.size}\n` +
+                    `**Letzte Aktualisierung:** <t:${Math.floor(Date.now() / 1000)}:R>`,
+                inline: false
+            },
+            ...groups.map(group => buildRoleField(group.title, group.members))
+        )
+        .setFooter({ text: `${config.footer} • Automatische Teamliste` })
+        .setTimestamp();
+
+    if (config.messageId) {
+        try {
+            const message = await channel.messages.fetch(config.messageId);
+
+            await message.edit({
+                content: "",
+                embeds: [embed],
+                allowedMentions: {
+                    parse: []
+                }
+            });
+
+            console.log(`${config.logName} Teamliste aktualisiert`);
+            return;
+        } catch (err) {
+            console.error(`${config.logName} MESSAGE_ID falsch oder Nachricht gelöscht:`, err);
+            return;
+        }
+    }
+
+    const message = await channel.send({
+        content: "",
+        embeds: [embed],
+        allowedMentions: {
+            parse: []
+        }
+    });
+
+    console.log(`${config.logName}_MESSAGE_ID bitte in Railway eintragen:`, message.id);
+}
+
+async function updateTherapeutenTeamListMessage() {
+    await updateCustomTeamListMessage({
+        logName: "THERAPEUTEN_TEAM_LIST",
+        channelId: process.env.THERAPEUTEN_TEAM_LIST_CHANNEL_ID,
+        messageId: process.env.THERAPEUTEN_TEAM_LIST_MESSAGE_ID,
+        color: 0x06b6d4,
+        title: "🧠 LSMD Therapeuten-Abteilung Teamliste",
+        footer: "LSMD Therapeuten-System",
+        groups: [
+            {
+                title: "👑 Leitung Therapeuten",
+                roleId: process.env.ROLE_THERAPEUTEN_LEITUNG
+            },
+            {
+                title: "⚜️ Stv. Leitung Therapeuten",
+                roleId: process.env.ROLE_THERAPEUTEN_STV_LEITUNG
+            },
+            {
+                title: "🧠 Therapeuten",
+                roleId: process.env.ROLE_THERAPEUTEN
+            }
+        ]
+    });
+}
+
+async function updateProfessorenTeamListMessage() {
+    await updateCustomTeamListMessage({
+        logName: "PROFESSOREN_TEAM_LIST",
+        channelId: process.env.PROFESSOREN_TEAM_LIST_CHANNEL_ID,
+        messageId: process.env.PROFESSOREN_TEAM_LIST_MESSAGE_ID,
+        color: 0x8b5cf6,
+        title: "🎓 LSMD Professoren-Abteilung Teamliste",
+        footer: "LSMD Professoren-System",
+        groups: [
+            {
+                title: "👑 Leitung Professoren",
+                roleId: process.env.ROLE_PROFESSOREN_LEITUNG
+            },
+            {
+                title: "⚜️ Stv. Leitung Professoren",
+                roleId: process.env.ROLE_PROFESSOREN_STV_LEITUNG
+            },
+            {
+                title: "🎓 Professoren",
+                roleId: process.env.ROLE_PROFESSOR
+            }
+        ]
+    });
+}
+
 botClient.once(Events.ClientReady, async () => {
     console.log("Discord Bot ist bereit");
 
@@ -1546,6 +1677,8 @@ botClient.once(Events.ClientReady, async () => {
 
     try {
         await updateTeamListMessage();
+        await updateTherapeutenTeamListMessage();
+        await updateProfessorenTeamListMessage();
     } catch (err) {
         console.error("Teamliste konnte beim Start nicht aktualisiert werden:", err);
     }
@@ -2855,6 +2988,26 @@ app.post("/admin/teamliste", requireLogin, requireAdmin, async (req, res) => {
     } catch (err) {
         console.error("Teamliste konnte nicht gesendet werden:", err);
         return res.status(500).send("Teamliste konnte nicht gesendet werden.");
+    }
+});
+
+app.post("/admin/therapeuten-teamliste", requireLogin, requireAdmin, async (req, res) => {
+    try {
+        await updateTherapeutenTeamListMessage();
+        return res.redirect("/admin");
+    } catch (err) {
+        console.error("Therapeuten-Teamliste konnte nicht gesendet werden:", err);
+        return res.status(500).send("Therapeuten-Teamliste konnte nicht gesendet werden.");
+    }
+});
+
+app.post("/admin/professoren-teamliste", requireLogin, requireAdmin, async (req, res) => {
+    try {
+        await updateProfessorenTeamListMessage();
+        return res.redirect("/admin");
+    } catch (err) {
+        console.error("Professoren-Teamliste konnte nicht gesendet werden:", err);
+        return res.status(500).send("Professoren-Teamliste konnte nicht gesendet werden.");
     }
 });
 
