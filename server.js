@@ -63,6 +63,7 @@ const PROFESSOREN_SCHUELER_SYSTEM_CHANNEL_ID = process.env.PROFESSOREN_SCHUELER_
 const PROFESSOREN_SCHUELER_SYSTEM_MESSAGE_ID = process.env.PROFESSOREN_SCHUELER_SYSTEM_MESSAGE_ID;
 const PROFESSOREN_SHEET_WEBHOOK_URL = "https://script.google.com/macros/s/AKfycbwMDV8XdSdzKrt4JlF-Z9MKWoApCYs9uUga5RYO-9SgZirVH8vtKuzNmiu__8wVSl4QJg/exec";
 const PROFESSOREN_SHEET_SECRET = "LSMD_PROFESSOREN_SECRET_123";
+const PROFESSOREN_SCHUELER_LOG_CHANNEL_ID = process.env.PROFESSOREN_SCHUELER_LOG_CHANNEL_ID;
 
 async function updateProfessorPointsInSheet(professorDn, points) {
   try {
@@ -2337,9 +2338,13 @@ if (interaction.isModalSubmit() && interaction.customId === "prof_log_modal") {
     const sheetUpdate = await updateProfessorPointsInSheet(professorDn, points);
 
     const embed = new EmbedBuilder()
-        .setColor(0x8b5cf6)
+        .setColor(sheetUpdate ? 0x22c55e : 0xef4444)
         .setTitle("📘 Neuer Professoren Schüler-Log")
-        .setDescription("Ein Schüler-Log wurde eingetragen und automatisch mit **+1 Punkt** bewertet.")
+        .setDescription(
+            sheetUpdate
+                ? "Ein Schüler-Log wurde eingetragen und automatisch mit **+1 Punkt** bewertet."
+                : "Ein Schüler-Log wurde eingetragen, aber das **Mastersheet konnte nicht aktualisiert werden**."
+        )
         .addFields(
             {
                 name: "👨‍🏫 Professor",
@@ -2370,7 +2375,7 @@ if (interaction.isModalSubmit() && interaction.customId === "prof_log_modal") {
                 name: "📊 Mastersheet",
                 value: sheetUpdate
                     ? `${sheetUpdate.oldPoints} → ${sheetUpdate.newPoints} Prof-Punkte`
-                    : "Konnte nicht im Mastersheet aktualisiert werden.",
+                    : "❌ Konnte nicht im Mastersheet aktualisiert werden.",
                 inline: true
             },
             {
@@ -2392,19 +2397,36 @@ if (interaction.isModalSubmit() && interaction.customId === "prof_log_modal") {
         .setFooter({ text: "LSMD Professoren-Abteilung | Schüler-System" })
         .setTimestamp();
 
-    await interaction.reply({
-        content: "✅ Schüler-Log wurde eingetragen. Der Professor hat **+1 Prof-Punkt** erhalten.",
-        flags: MessageFlags.Ephemeral
-    });
+    const logChannel = PROFESSOREN_SCHUELER_LOG_CHANNEL_ID
+        ? await botClient.channels.fetch(PROFESSOREN_SCHUELER_LOG_CHANNEL_ID).catch(() => null)
+        : null;
 
-    await interaction.channel.send({
+    if (!logChannel) {
+        return interaction.reply({
+            content: "❌ Logs-Channel wurde nicht gefunden. Bitte `PROFESSOREN_SCHUELER_LOG_CHANNEL_ID` in Railway setzen.",
+            flags: MessageFlags.Ephemeral
+        });
+    }
+
+    await logChannel.send({
         embeds: [embed],
         allowedMentions: {
             parse: []
         }
     });
 
+    await interaction.reply({
+        content: sheetUpdate
+            ? "✅ Schüler-Log wurde eingetragen. Der Professor hat **+1 Prof-Punkt** erhalten."
+            : "⚠️ Schüler-Log wurde gesendet, aber das Mastersheet wurde **nicht** aktualisiert.",
+        flags: MessageFlags.Ephemeral
+    });
+
     profLogSelections.delete(interaction.user.id);
+
+    await sendProfessorenSchuelerSystemPanel().catch(err => {
+        console.error("Professoren Panel konnte nicht zurückgesetzt werden:", err);
+    });
 
     return;
 }
