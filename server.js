@@ -56,8 +56,41 @@ const BONUS_HQ_CHANNEL_ID = process.env.BONUS_HQ_CHANNEL_ID;
 const BONUS_WEEKLY_PING_ROLE_ID = process.env.BONUS_WEEKLY_PING_ROLE_ID || PRAKTI_SANI_ROLE_ID;
 const JOB_ANNOUNCE_CHANNEL_ID = process.env.JOB_ANNOUNCE_CHANNEL_ID;
 const DOKUMENTE_WEBHOOK_URL = process.env.DOKUMENTE_WEBHOOK_URL;
+const PROFESSOREN_DOKUMENTE_WEBHOOK_URL = process.env.PROFESSOREN_DOKUMENTE_WEBHOOK_URL;
 const JOB_ANNOUNCE_PING_ROLE_ID = process.env.JOB_ANNOUNCE_PING_ROLE_ID || PRAKTI_SANI_ROLE_ID;
 const BEWERBUNG_CHANNEL_ID = process.env.BEWERBUNG_CHANNEL_ID;
+const PROFESSOREN_SCHUELER_SYSTEM_CHANNEL_ID = process.env.PROFESSOREN_SCHUELER_SYSTEM_CHANNEL_ID;
+const PROFESSOREN_SCHUELER_SYSTEM_MESSAGE_ID = process.env.PROFESSOREN_SCHUELER_SYSTEM_MESSAGE_ID;
+const PROFESSOREN_SHEET_WEBHOOK_URL = "https://script.google.com/macros/s/AKfycbwMDV8XdSdzKrt4JlF-Z9MKWoApCYs9uUga5RYO-9SgZirVH8vtKuzNmiu__8wVSl4QJg/exec";
+const PROFESSOREN_SHEET_SECRET = "LSMD_PROFESSOREN_SECRET_123";
+
+async function updateProfessorPointsInSheet(professorDn, points) {
+  try {
+    const res = await fetch(PROFESSOREN_SHEET_WEBHOOK_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        secret: PROFESSOREN_SHEET_SECRET,
+        professorDn,
+        points
+      })
+    });
+
+    const data = await res.json();
+
+    if (!data.success) {
+      console.log("Google Sheet Punkte Fehler:", data.message);
+      return null;
+    }
+
+    return data;
+  } catch (err) {
+    console.error("Fehler beim Aktualisieren der Professoren-Punkte im Sheet:", err);
+    return null;
+  }
+}
 
 const BEWERBUNG_PING_ROLE_IDS = [
     ROLE_UNTERE_LEITUNG,
@@ -970,6 +1003,197 @@ async function sendDokumenteWebhook() {
     return true;
 }
 
+async function sendProfessorenDokumenteWebhook() {
+    if (!PROFESSOREN_DOKUMENTE_WEBHOOK_URL) {
+        console.log("PROFESSOREN_DOKUMENTE_WEBHOOK_URL fehlt");
+        return false;
+    }
+
+    const dokumente = [
+        {
+            title: "🎓 LSMD Professoren Mastersheet",
+            description: "Zentrale Übersicht für Professoren, Schüler, freie Plätze, Punkte und Professoren-Titel.",
+            url: "https://docs.google.com/spreadsheets/d/1n9qplQUnJ1CkfoweVi7HJcwm1AiXmAl1r8p-mkB_7OI/edit?usp=sharing",
+            color: 0x8b5cf6
+        },
+        {
+            title: "📘 Leitfaden der Professoren-Abteilung",
+            description: "Offizieller interner Leitfaden für Professoren, Mentoren, Schülerbetreuung, Logs und Punktevergabe.",
+            url: "HIER_PROFESSOREN_LEITFADEN_LINK",
+            color: 0x3b82f6
+        },
+        {
+            title: "📝 Schüler-Anmeldung / Übersicht",
+            description: "Dokument oder Formular für Schüler-Anmeldungen, Professoren-Plätze und Zuweisungen.",
+            url: "HIER_SCHUELER_ANMELDUNG_LINK",
+            color: 0x22c55e
+        },
+        {
+            title: "📋 Professoren Logs",
+            description: "Vorlage und Übersicht für Schüler hinzufügen/entfernen, bestandene Prüfungen, Upranks und Punkte.",
+            url: "HIER_PROFESSOREN_LOGS_LINK",
+            color: 0xf59e0b
+        },
+        {
+            title: "🏅 Punkteübersicht Professoren",
+            description: "Übersicht für Professoren-Punkte bis zum anerkannten Professoren-Titel.",
+            url: "HIER_PUNKTEUEBERSICHT_LINK",
+            color: 0xef233c
+        }
+    ];
+
+    const introEmbed = {
+        color: 0x8b5cf6,
+        author: {
+            name: "LSMD Professoren-System"
+        },
+        title: "🎓 Professoren-Abteilung | Dokumentenübersicht",
+        description:
+            "**Hier findest du alle wichtigen Dokumente der Professoren-Abteilung.**\n\n" +
+            "Bitte nutzt nur diese offiziellen Dokumente, damit Schüler, Logs und Punkte sauber verwaltet werden.",
+        fields: [
+            {
+                name: "📌 Hinweis",
+                value: "Diese Dokumente sind intern und nur für berechtigte Personen der Professoren-Abteilung bestimmt.",
+                inline: false
+            },
+            {
+                name: "🔄 Aktualisiert",
+                value: `<t:${Math.floor(Date.now() / 1000)}:f>`,
+                inline: true
+            }
+        ],
+        footer: {
+            text: "LSMD Professoren-Abteilung • Dokumentenverwaltung"
+        },
+        timestamp: new Date().toISOString()
+    };
+
+    const embeds = [
+        introEmbed,
+        ...dokumente.map(doc => ({
+            color: doc.color,
+            title: doc.title,
+            url: doc.url,
+            description: doc.description,
+            fields: [
+                {
+                    name: "🔗 Zugriff",
+                    value: `[Dokument öffnen](${doc.url})`,
+                    inline: false
+                }
+            ],
+            footer: {
+                text: "LSMD Professoren-System"
+            },
+            timestamp: new Date().toISOString()
+        }))
+    ];
+
+    const response = await fetch(PROFESSOREN_DOKUMENTE_WEBHOOK_URL, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            username: "LSMD Professoren-System",
+            avatar_url: "https://cdn.discordapp.com/embed/avatars/0.png",
+            content: "",
+            embeds,
+            allowed_mentions: {
+                parse: []
+            }
+        })
+    });
+
+    if (!response.ok) {
+        const errorText = await response.text();
+        console.error("Professoren Dokumente Webhook Fehler:", response.status, errorText);
+        return false;
+    }
+
+    console.log("Professoren Dokumente Webhook gesendet");
+    return true;
+}
+
+async function sendProfessorenSchuelerSystemPanel() {
+    if (!PROFESSOREN_SCHUELER_SYSTEM_CHANNEL_ID) {
+        console.log("PROFESSOREN_SCHUELER_SYSTEM_CHANNEL_ID fehlt");
+        return;
+    }
+
+    const channel = await botClient.channels.fetch(PROFESSOREN_SCHUELER_SYSTEM_CHANNEL_ID).catch(() => null);
+
+    if (!channel) {
+        console.log("Professoren Schüler-System Channel nicht gefunden");
+        return;
+    }
+
+    const embed = new EmbedBuilder()
+        .setColor(0x8b5cf6)
+        .setTitle("🎓 LSMD Professoren | Schüler-System")
+        .setDescription(
+            "**Hier tragen Professoren ihre Schüler-Logs ein.**\n\n" +
+            "Der Bot erstellt automatisch einen Log und erhöht die **Prof-Punkte** im Professoren-Mastersheet.\n\n" +
+            "**Ablauf:**\n" +
+            "1. Schüler ist im Haupt-MD Discord eingetragen.\n" +
+            "2. Professor betreut Prüfung / Weiterbildung / Testphase.\n" +
+            "3. Professor klickt unten auf den Button.\n" +
+            "4. Log ausfüllen.\n" +
+            "5. Punkte werden im Mastersheet aktualisiert."
+        )
+        .addFields(
+            {
+                name: "📌 Wichtig",
+                value: "Die Professor-DN muss genau so eingetragen werden, wie sie im Mastersheet steht.",
+                inline: false
+            },
+            {
+                name: "🏆 Punkte-System",
+                value:
+                    "**Prüfung / Weiterbildung / Testphase bestanden** → Punkte eintragen\n" +
+                    "**100 Punkte** = Grundlage für Anerkennung des Professoren-Titels.",
+                inline: false
+            }
+        )
+        .setFooter({ text: "LSMD Professoren-Abteilung | Schüler-System" })
+        .setTimestamp();
+
+    const row = new ActionRowBuilder().addComponents(
+        new ButtonBuilder()
+            .setCustomId("prof_log_create")
+            .setLabel("Schüler-Log eintragen")
+            .setEmoji("📝")
+            .setStyle(ButtonStyle.Primary)
+    );
+
+    const payload = {
+        embeds: [embed],
+        components: [row],
+        allowedMentions: {
+            parse: []
+        }
+    };
+
+    if (PROFESSOREN_SCHUELER_SYSTEM_MESSAGE_ID) {
+        try {
+            const message = await channel.messages.fetch(PROFESSOREN_SCHUELER_SYSTEM_MESSAGE_ID);
+
+            await message.edit(payload);
+
+            console.log("Professoren Schüler-System Panel aktualisiert");
+            return;
+        } catch (err) {
+            console.error("PROFESSOREN_SCHUELER_SYSTEM_MESSAGE_ID falsch oder Nachricht gelöscht:", err);
+            return;
+        }
+    }
+
+    const message = await channel.send(payload);
+
+    console.log("PROFESSOREN_SCHUELER_SYSTEM_MESSAGE_ID bitte in Railway eintragen:", message.id);
+}
+
 async function sendAbmeldungPanel() {
     if (!process.env.ABMELDUNG_CHANNEL_ID) {
         console.log("ABMELDUNG_CHANNEL_ID fehlt");
@@ -1832,8 +2056,9 @@ botClient.once(Events.ClientReady, async () => {
         await updateTeamListMessage();
         await updateTherapeutenTeamListMessage();
         await updateProfessorenTeamListMessage();
+        await sendProfessorenSchuelerSystemPanel();
     } catch (err) {
-        console.error("Teamliste konnte beim Start nicht aktualisiert werden:", err);
+        console.error("Teamliste / Professoren Panel konnte beim Start nicht aktualisiert werden:", err);
     }
 });
 
@@ -1887,8 +2112,138 @@ botClient.on(Events.InteractionCreate, async (interaction) => {
     !interaction.customId.startsWith("spontan_") &&
     !interaction.customId.startsWith("abmeldung_") &&
     !interaction.customId.startsWith("einstellung_bonus_") &&
-    !interaction.customId.startsWith("bewerbung_")
+    !interaction.customId.startsWith("bewerbung_") &&
+    !interaction.customId.startsWith("prof_")
 ) {
+    return;
+}
+
+if (interaction.isButton() && interaction.customId === "prof_log_create") {
+    const modal = new ModalBuilder()
+        .setCustomId("prof_log_modal")
+        .setTitle("Professoren Schüler-Log");
+
+    const professorDnInput = new TextInputBuilder()
+        .setCustomId("professor_dn")
+        .setLabel("Deine Professor-DN")
+        .setPlaceholder("z.B. 17")
+        .setStyle(TextInputStyle.Short)
+        .setRequired(true);
+
+    const studentInput = new TextInputBuilder()
+        .setCustomId("student")
+        .setLabel("Schüler Name / Discord-ID")
+        .setPlaceholder("z.B. Max Mustermann / 123456789")
+        .setStyle(TextInputStyle.Short)
+        .setRequired(true);
+
+    const actionInput = new TextInputBuilder()
+        .setCustomId("action")
+        .setLabel("Was wurde gemacht?")
+        .setPlaceholder("Prüfung bestanden / Weiterbildung / Testphase")
+        .setStyle(TextInputStyle.Short)
+        .setRequired(true);
+
+    const pointsInput = new TextInputBuilder()
+        .setCustomId("points")
+        .setLabel("Punkte")
+        .setPlaceholder("z.B. 10")
+        .setStyle(TextInputStyle.Short)
+        .setRequired(true);
+
+    const noteInput = new TextInputBuilder()
+        .setCustomId("note")
+        .setLabel("Kurze Bemerkung")
+        .setPlaceholder("Kurz und sachlich dokumentieren")
+        .setStyle(TextInputStyle.Paragraph)
+        .setRequired(false);
+
+    modal.addComponents(
+        new ActionRowBuilder().addComponents(professorDnInput),
+        new ActionRowBuilder().addComponents(studentInput),
+        new ActionRowBuilder().addComponents(actionInput),
+        new ActionRowBuilder().addComponents(pointsInput),
+        new ActionRowBuilder().addComponents(noteInput)
+    );
+
+    return interaction.showModal(modal);
+}
+
+if (interaction.isModalSubmit() && interaction.customId === "prof_log_modal") {
+    const professorDn = interaction.fields.getTextInputValue("professor_dn");
+    const student = interaction.fields.getTextInputValue("student");
+    const action = interaction.fields.getTextInputValue("action");
+    const pointsRaw = interaction.fields.getTextInputValue("points");
+    const note = interaction.fields.getTextInputValue("note") || "Keine Bemerkung";
+
+    const points = parseInt(pointsRaw.replace(/\D/g, ""), 10);
+
+    if (isNaN(points) || points < 0 || points > 100) {
+        return interaction.reply({
+            content: "Bitte gib eine gültige Punktezahl zwischen 0 und 100 ein.",
+            flags: MessageFlags.Ephemeral
+        });
+    }
+
+    const sheetUpdate = await updateProfessorPointsInSheet(professorDn, points);
+
+    const embed = new EmbedBuilder()
+        .setColor(0x8b5cf6)
+        .setTitle("📘 Neuer Professoren Schüler-Log")
+        .addFields(
+            {
+                name: "👨‍🏫 Professor",
+                value: `${interaction.user}`,
+                inline: true
+            },
+            {
+                name: "🆔 Professor-DN",
+                value: professorDn,
+                inline: true
+            },
+            {
+                name: "👤 Schüler",
+                value: student,
+                inline: true
+            },
+            {
+                name: "📌 Aktion",
+                value: action,
+                inline: true
+            },
+            {
+                name: "🏆 Punkte",
+                value: `${points} Punkte`,
+                inline: true
+            },
+            {
+                name: "📊 Sheet-Punkte",
+                value: sheetUpdate
+                    ? `${sheetUpdate.oldPoints} → ${sheetUpdate.newPoints} Punkte`
+                    : "Konnte nicht im Sheet aktualisiert werden.",
+                inline: true
+            },
+            {
+                name: "📝 Bemerkung",
+                value: note,
+                inline: false
+            }
+        )
+        .setFooter({ text: "LSMD Professoren-Abteilung | Schüler-System" })
+        .setTimestamp();
+
+    await interaction.reply({
+        content: "✅ Der Schüler-Log wurde eingetragen.",
+        flags: MessageFlags.Ephemeral
+    });
+
+    await interaction.channel.send({
+        embeds: [embed],
+        allowedMentions: {
+            parse: []
+        }
+    });
+
     return;
 }
 
