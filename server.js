@@ -2317,9 +2317,9 @@ if (interaction.isButton() && interaction.customId === "prof_log_create") {
 }
 
 if (interaction.isModalSubmit() && interaction.customId === "prof_log_modal") {
-await interaction.deferReply({
-    flags: MessageFlags.Ephemeral
-});
+    await interaction.deferReply({
+        flags: MessageFlags.Ephemeral
+    });
 
     const selection = profLogSelections.get(interaction.user.id);
 
@@ -2418,12 +2418,11 @@ await interaction.deferReply({
         }
     });
 
-    await interaction.reply({
-        content: sheetUpdate
-            ? "✅ Schüler-Log wurde eingetragen. Der Professor hat **+1 Prof-Punkt** erhalten."
-            : "⚠️ Schüler-Log wurde gesendet, aber das Mastersheet wurde **nicht** aktualisiert.",
-        flags: MessageFlags.Ephemeral
-    });
+    await interaction.editReply({
+    content: sheetUpdate
+        ? "✅ Schüler-Log wurde eingetragen. Der Professor hat **+1 Prof-Punkt** erhalten."
+        : "⚠️ Schüler-Log wurde gesendet, aber das Mastersheet wurde **nicht** aktualisiert."
+});
 
     profLogSelections.delete(interaction.user.id);
 
