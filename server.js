@@ -3774,6 +3774,25 @@ app.post("/admin/dokumente-webhook", requireLogin, requireAdmin, async (req, res
     }
 });
 
+app.post("/admin/professoren-dokumente-webhook", requireLogin, requireAdmin, async (req, res) => {
+    try {
+        const ok = await sendProfessorenDokumenteWebhook();
+
+        if (!ok) {
+            return res.status(500).send("Professoren Dokumente Webhook konnte nicht gesendet werden.");
+        }
+
+        await addLog("Professoren Dokumente Webhook gesendet", {
+            channel: "professoren-dokumente"
+        }, req.session.user);
+
+        return res.redirect("/admin");
+    } catch (err) {
+        console.error("Professoren Dokumente Webhook Fehler:", err);
+        return res.status(500).send("Professoren Dokumente Webhook konnte nicht gesendet werden.");
+    }
+});
+
 app.post("/admin/wochen-reset", requireLogin, requireAdmin, async (req, res) => {
     try {
         const result = await pointsCollection.updateMany(
