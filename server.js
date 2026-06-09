@@ -1021,86 +1021,81 @@ async function sendProfessorenDokumenteWebhook() {
         return false;
     }
 
-    const dokumente = [
-        {
-            title: "🎓 LSMD Professoren Mastersheet",
-            description: "Zentrale Übersicht für Professoren, Schüler, freie Plätze, Punkte und Professoren-Titel.",
-            url: "https://docs.google.com/spreadsheets/d/1n9qplQUnJ1CkfoweVi7HJcwm1AiXmAl1r8p-mkB_7OI/edit?usp=sharing",
-            color: 0x8b5cf6
-        },
-        {
-            title: "📘 Leitfaden der Professoren-Abteilung",
-            description: "Offizieller interner Leitfaden für Professoren, Mentoren, Schülerbetreuung, Logs und Punktevergabe.",
-            url: "HIER_PROFESSOREN_LEITFADEN_LINK",
-            color: 0x3b82f6
-        },
-        {
-            title: "📝 Schüler-Anmeldung / Übersicht",
-            description: "Dokument oder Formular für Schüler-Anmeldungen, Professoren-Plätze und Zuweisungen.",
-            url: "HIER_SCHUELER_ANMELDUNG_LINK",
-            color: 0x22c55e
-        },
-        {
-            title: "📋 Professoren Logs",
-            description: "Vorlage und Übersicht für Schüler hinzufügen/entfernen, bestandene Prüfungen, Upranks und Punkte.",
-            url: "HIER_PROFESSOREN_LOGS_LINK",
-            color: 0xf59e0b
-        },
-        {
-            title: "🏅 Punkteübersicht Professoren",
-            description: "Übersicht für Professoren-Punkte bis zum anerkannten Professoren-Titel.",
-            url: "HIER_PUNKTEUEBERSICHT_LINK",
-            color: 0xef233c
-        }
-    ];
-
-    const introEmbed = {
+    const embed = {
         color: 0x8b5cf6,
         author: {
-            name: "LSMD Professoren-System"
+            name: "LSMD | Professoren-Abteilung",
+            icon_url: "https://cdn.discordapp.com/embed/avatars/0.png"
         },
-        title: "🎓 Professoren-Abteilung | Dokumentenübersicht",
+        title: "🎓 Professoren-Dokumentenzentrale",
         description:
-            "**Hier findest du alle wichtigen Dokumente der Professoren-Abteilung.**\n\n" +
-            "Bitte nutzt nur diese offiziellen Dokumente, damit Schüler, Logs und Punkte sauber verwaltet werden.",
+            "```ansi\n\u001b[1;35mLSMD PROFESSOREN-SYSTEM\u001b[0m\n```\n" +
+            "**Zentrale Übersicht für Professoren, Schüler, Logs, Punkte und interne Leitungskontrolle.**\n\n" +
+            "Alle wichtigen Dokumente der Professoren-Abteilung sind hier gesammelt. Bitte nutzt ausschließlich diese offiziellen Links, damit Schüler, Logs und Punkte sauber nachvollziehbar bleiben.\n\n" +
+            "━━━━━━━━━━━━━━━━━━━━",
+
         fields: [
             {
-                name: "📌 Hinweis",
-                value: "Diese Dokumente sind intern und nur für berechtigte Personen der Professoren-Abteilung bestimmt.",
+                name: "📊  Mastersheet & Übersicht",
+                value:
+                    ">>> **Professoren Mastersheet**\n" +
+                    "Zentrale Übersicht für Professoren, Schülerplätze, freie Plätze, Punkte und Status.\n" +
+                    "🔗 [Mastersheet öffnen](https://docs.google.com/spreadsheets/d/1n9qplQUnJ1CkfoweVi7HJcwm1AiXmAl1r8p-mkB_7OI/edit?usp=sharing)",
                 inline: false
             },
             {
-                name: "🔄 Aktualisiert",
+                name: "📘  Leitfaden der Professoren-Abteilung",
+                value:
+                    ">>> **Interner Professoren-Leitfaden**\n" +
+                    "Regeln, Abläufe, Schülerbetreuung, Punktesystem, Logs und Zuständigkeiten.\n" +
+                    "🔗 [Leitfaden öffnen](https://docs.google.com/document/d/1gVYgUcxbvGVAt0ImQJIHCIvD2ofGnJyWiNr1OUGxWw8/edit?usp=sharing)",
+                inline: false
+            },
+            {
+                name: "🧑‍🎓  Schüler-System",
+                value:
+                    ">>> **Schüler-Anmeldung / Schülerliste**\n" +
+                    "Übersicht für Schüler, freie Plätze und Professoren-Zuweisung.\n" +
+                    "🔗 [Schülerübersicht öffnen](https://discord.com/channels/777099974265667585/1151226981195730954)",
+                inline: false
+            },
+            {
+                name: "📝  Logs & Nachweise",
+                value:
+                    ">>> **Professoren Logs**\n" +
+                    "Vorlage und Übersicht für Schüler hinzufügen/entfernen, bestandene Prüfungen, Testphasen, Weiterbildungen und Upranks.\n" +
+                    "🔗 [Logs öffnen](https://discord.com/channels/1461093816206623004/1513462215796326450)",
+                inline: false
+         
+            },
+            {
+                name: "⚠️  Wichtige Hinweise",
+                value:
+                    "```diff\n" +
+                    "+ Logs müssen sachlich und nachvollziehbar sein\n" +
+                    "+ Schüler, Professor, Datum und Status immer angeben\n" +
+                    "+ Punkte werden nur bei gültigen Logs gewertet\n" +
+                    "- Keine unvollständigen oder falschen Einträge\n" +
+                    "- Keine veralteten Dokumente benutzen\n" +
+                    "```",
+                inline: false
+            },
+            {
+                name: "🔄  Aktualisierung",
                 value: `<t:${Math.floor(Date.now() / 1000)}:f>`,
+                inline: true
+            },
+            {
+                name: "🔐  Zugriff",
+                value: "Nur intern für Professoren / Leitung",
                 inline: true
             }
         ],
         footer: {
-            text: "LSMD Professoren-Abteilung • Dokumentenverwaltung"
+            text: "LSMD Professoren-System • Dokumentenverwaltung"
         },
         timestamp: new Date().toISOString()
     };
-
-    const embeds = [
-        introEmbed,
-        ...dokumente.map(doc => ({
-            color: doc.color,
-            title: doc.title,
-            url: doc.url,
-            description: doc.description,
-            fields: [
-                {
-                    name: "🔗 Zugriff",
-                    value: `[Dokument öffnen](${doc.url})`,
-                    inline: false
-                }
-            ],
-            footer: {
-                text: "LSMD Professoren-System"
-            },
-            timestamp: new Date().toISOString()
-        }))
-    ];
 
     const response = await fetch(PROFESSOREN_DOKUMENTE_WEBHOOK_URL, {
         method: "POST",
@@ -1111,7 +1106,7 @@ async function sendProfessorenDokumenteWebhook() {
             username: "LSMD Professoren-System",
             avatar_url: "https://cdn.discordapp.com/embed/avatars/0.png",
             content: "",
-            embeds,
+            embeds: [embed],
             allowed_mentions: {
                 parse: []
             }
@@ -1124,7 +1119,7 @@ async function sendProfessorenDokumenteWebhook() {
         return false;
     }
 
-    console.log("Professoren Dokumente Webhook gesendet");
+    console.log("Professoren Dokumentenübersicht als modernes Einzel-Embed gesendet");
     return true;
 }
 
