@@ -2346,45 +2346,137 @@ if (interaction.isStringSelectMenu() && interaction.customId === "prof_rank_sele
 }
 
 if (interaction.isButton() && interaction.customId === "prof_points_show") {
-    if (!isProfessorenLeitung(interaction)) {
-        return interaction.reply({
-            content: "❌ Nur die Professoren-Leitung darf Professoren-Punkte anschauen.",
+    try {
+        if (!isProfessorenLeitung(interaction)) {
+            return interaction.reply({
+                content: "❌ Nur die Professoren-Leitung darf Professoren-Punkte anschauen.",
+                flags: MessageFlags.Ephemeral
+            });
+        }
+
+        const selection = profLogSelections.get(interaction.user.id);
+
+        if (!selection || !selection.professorDn) {
+            return interaction.reply({
+                content: "❌ Bitte zuerst einen **Professor** auswählen.",
+                flags: MessageFlags.Ephemeral
+            });
+        }
+
+        await interaction.deferReply({
             flags: MessageFlags.Ephemeral
         });
-    }
 
-    const selection = profLogSelections.get(interaction.user.id);
+        const sheetData = await professorSheetAction(selection.professorDn, "get", 0);
 
-    if (!selection || !selection.professorDn) {
-        return interaction.reply({
-            content: "❌ Bitte zuerst einen **Professor** auswählen.",
-            flags: MessageFlags.Ephemeral
-        });
-    }
+        if (!sheetData) {
+            return interaction.editReply({
+                content: "❌ Punkte konnten nicht aus dem Mastersheet gelesen werden."
+            });
+        }
 
-    await interaction.deferReply({
-        flags: MessageFlags.Ephemeral
-    });
+        const points =
+            sheetData.points ??
+            sheetData.newPoints ??
+            sheetData.oldPoints ??
+            0;
 
-    const sheetData = await professorSheetAction(selection.professorDn, "get");
-
-    if (!sheetData) {
         return interaction.editReply({
-            content: "❌ Punkte konnten nicht aus dem Mastersheet gelesen werden."
+            content:
+                `📊 **Professoren Punkte**\n\n` +
+                `👨‍🏫 Professor: <@${selection.professorId}>\n` +
+                `📛 Name: **${selection.professorName}**\n` +
+                `🔢 DN: **${selection.professorDn}**\n` +
+                `🏆 Prof-Punkte: **${points}**`
+        });
+    } catch (err) {
+        console.error("Fehler bei prof_points_show:", err);
+
+        if (!interaction.replied && !interaction.deferred) {
+            return interaction.reply({
+                content: "❌ Fehler beim Anzeigen der Professoren-Punkte.",
+                flags: MessageFlags.Ephemeral
+            });
+        }
+
+        return interaction.editReply({
+            content: "❌ Fehler beim Anzeigen der Professoren-Punkte."
         });
     }
-
-    return interaction.editReply({
-        content:
-            `📊 **Professoren Punkte**\n\n` +
-            `👨‍🏫 Professor: <@${selection.professorId}>\n` +
-            `📛 Name: **${selection.professorName}**\n` +
-            `🔢 DN: **${selection.professorDn}**\n` +
-            `🏆 Prof-Punkte: **${sheetData.points}**`
-    });
 }
 
+if (
+    interaction.isButton() &&
+    (
+        interaction.customId === "prof_points_edit" ||
+        interaction.customId === "prof_points_add" ||
+        interaction.customId === "prof_points_remove"
+    )
+) {
+    try {
+        if (!isProfessorenLeitung(interaction)) {
+            return interaction.reply({
+                content: "❌ Nur die Professoren-Leitung darf Professoren-Punkte bearbeiten.",
+                flags: MessageFlags.Ephemeral
+            });
+        }
 
+        const selection = profLogSelections.get(interaction.user.id);
+
+        if (!selection || !selection.professorDn) {
+            return interaction.reply({
+                content: "❌ Bitte zuerst einen **Professor** auswählen.",
+                flags: MessageFlags.Ephemeral
+            });
+        }
+
+        const actionMap = {
+            prof_points_edit: "set",
+            prof_points_add: "add",
+            prof_points_remove: "remove"
+        };
+
+        const action = actionMap[interaction.customId];
+
+        const modal = new ModalBuilder()
+            .setCustomId(`prof_points_modal_${action}`)
+            .setTitle("Professoren Punkte bearbeiten");
+
+        const pointsInput = new TextInputBuilder()
+            .setCustomId("points")
+            .setLabel(
+                action === "set"
+                    ? "Neue Punktzahl setzen"
+                    : action === "add"
+                        ? "Wie viele Punkte vergeben?"
+                        : "Wie viele Punkte entfernen?"
+            )
+            .setPlaceholder("z.B. 1")
+            .setStyle(TextInputStyle.Short)
+            .setRequired(true);
+
+        const reasonInput = new TextInputBuilder()
+            .setCustomId("reason")
+            .setLabel("Grund / Notiz")
+            .setPlaceholder("z.B. Korrektur, Nachtrag, falscher Eintrag")
+            .setStyle(TextInputStyle.Paragraph)
+            .setRequired(false);
+
+        modal.addComponents(
+            new ActionRowBuilder().addComponents(pointsInput),
+            new ActionRowBuilder().addComponents(reasonInput)
+        );
+
+        return interaction.showModal(modal);
+    } catch (err) {
+        console.error("Fehler beim Öffnen vom Professoren Punkte Modal:", err);
+
+        return interaction.reply({
+            content: "❌ Punkte-Modal konnte nicht geöffnet werden.",
+            flags: MessageFlags.Ephemeral
+        });
+    }
+}
 
 if (interaction.isButton() && interaction.customId === "prof_log_create") {
     const selection = profLogSelections.get(interaction.user.id);
@@ -2423,115 +2515,133 @@ if (interaction.isButton() && interaction.customId === "prof_log_create") {
 }
 
 if (interaction.isModalSubmit() && interaction.customId.startsWith("prof_points_modal_")) {
-    if (!isProfessorenLeitung(interaction)) {
-        return interaction.reply({
-            content: "❌ Nur die Professoren-Leitung darf Professoren-Punkte bearbeiten.",
+    try {
+        if (!isProfessorenLeitung(interaction)) {
+            return interaction.reply({
+                content: "❌ Nur die Professoren-Leitung darf Professoren-Punkte bearbeiten.",
+                flags: MessageFlags.Ephemeral
+            });
+        }
+
+        await interaction.deferReply({
             flags: MessageFlags.Ephemeral
         });
-    }
 
-    await interaction.deferReply({
-        flags: MessageFlags.Ephemeral
-    });
+        const action = interaction.customId.replace("prof_points_modal_", "");
+        const selection = profLogSelections.get(interaction.user.id);
 
-    const action = interaction.customId.replace("prof_points_modal_", "");
-    const selection = profLogSelections.get(interaction.user.id);
+        if (!selection || !selection.professorDn) {
+            return interaction.editReply({
+                content: "❌ Auswahl wurde nicht gefunden. Bitte Professor erneut auswählen."
+            });
+        }
 
-    if (!selection || !selection.professorDn) {
+        const pointsRaw = interaction.fields.getTextInputValue("points");
+        const reason = interaction.fields.getTextInputValue("reason") || "Keine Notiz";
+
+        const points = parseInt(pointsRaw.replace(/\D/g, ""), 10);
+
+        if (isNaN(points) || points < 0 || points > 999) {
+            return interaction.editReply({
+                content: "❌ Bitte gib eine gültige Punktzahl zwischen 0 und 999 ein."
+            });
+        }
+
+        const sheetUpdate = await professorSheetAction(selection.professorDn, action, points);
+
+        if (!sheetUpdate) {
+            return interaction.editReply({
+                content: "❌ Mastersheet konnte nicht aktualisiert werden."
+            });
+        }
+
+        let actionText = "bearbeitet";
+
+        if (action === "set") {
+            actionText = "gesetzt";
+        }
+
+        if (action === "add") {
+            actionText = "vergeben";
+        }
+
+        if (action === "remove") {
+            actionText = "entfernt";
+        }
+
+        const oldPoints = sheetUpdate.oldPoints ?? 0;
+        const newPoints = sheetUpdate.newPoints ?? sheetUpdate.points ?? 0;
+
+        const embed = new EmbedBuilder()
+            .setColor(0xf59e0b)
+            .setTitle("✏️ Professoren Punkte aktualisiert")
+            .addFields(
+                {
+                    name: "👨‍🏫 Professor",
+                    value: `<@${selection.professorId}>\n${selection.professorName}\nDN ${selection.professorDn}`,
+                    inline: true
+                },
+                {
+                    name: "📌 Aktion",
+                    value: actionText,
+                    inline: true
+                },
+                {
+                    name: "📊 Änderung",
+                    value: `${oldPoints} → ${newPoints} Prof-Punkte`,
+                    inline: false
+                },
+                {
+                    name: "📝 Grund",
+                    value: reason,
+                    inline: false
+                },
+                {
+                    name: "📨 Eingetragen von",
+                    value: `<@${interaction.user.id}>`,
+                    inline: true
+                },
+                {
+                    name: "📅 Datum",
+                    value: `<t:${Math.floor(Date.now() / 1000)}:f>`,
+                    inline: true
+                }
+            )
+            .setFooter({ text: "LSMD Professoren-Abteilung | Punkteverwaltung" })
+            .setTimestamp();
+
+        const logChannel = PROFESSOREN_SCHUELER_LOG_CHANNEL_ID
+            ? await botClient.channels.fetch(PROFESSOREN_SCHUELER_LOG_CHANNEL_ID).catch(() => null)
+            : null;
+
+        if (logChannel) {
+            await logChannel.send({
+                embeds: [embed],
+                allowedMentions: {
+                    parse: []
+                }
+            });
+        }
+
         return interaction.editReply({
-            content: "❌ Auswahl wurde nicht gefunden. Bitte Professor erneut auswählen."
+            content:
+                `✅ Punkte wurden erfolgreich ${actionText}.\n` +
+                `📊 **${oldPoints} → ${newPoints} Prof-Punkte**`
         });
-    }
+    } catch (err) {
+        console.error("Fehler bei prof_points_modal:", err);
 
-    const pointsRaw = interaction.fields.getTextInputValue("points");
-    const reason = interaction.fields.getTextInputValue("reason") || "Keine Notiz";
+        if (!interaction.replied && !interaction.deferred) {
+            return interaction.reply({
+                content: "❌ Fehler beim Bearbeiten der Professoren-Punkte.",
+                flags: MessageFlags.Ephemeral
+            });
+        }
 
-    const points = parseInt(pointsRaw.replace(/\D/g, ""), 10);
-
-    if (isNaN(points) || points < 0 || points > 999) {
         return interaction.editReply({
-            content: "❌ Bitte gib eine gültige Punktzahl zwischen 0 und 999 ein."
+            content: "❌ Fehler beim Bearbeiten der Professoren-Punkte."
         });
     }
-
-    const sheetUpdate = await professorSheetAction(selection.professorDn, action, points);
-
-    if (!sheetUpdate) {
-        return interaction.editReply({
-            content: "❌ Mastersheet konnte nicht aktualisiert werden."
-        });
-    }
-
-    let actionText = "bearbeitet";
-
-    if (action === "set") {
-        actionText = "gesetzt";
-    }
-
-    if (action === "add") {
-        actionText = "vergeben";
-    }
-
-    if (action === "remove") {
-        actionText = "entfernt";
-    }
-
-    const embed = new EmbedBuilder()
-        .setColor(0xf59e0b)
-        .setTitle("✏️ Professoren Punkte aktualisiert")
-        .addFields(
-            {
-                name: "👨‍🏫 Professor",
-                value: `<@${selection.professorId}>\n${selection.professorName}\nDN ${selection.professorDn}`,
-                inline: true
-            },
-            {
-                name: "📌 Aktion",
-                value: actionText,
-                inline: true
-            },
-            {
-                name: "📊 Änderung",
-                value: `${sheetUpdate.oldPoints} → ${sheetUpdate.newPoints} Prof-Punkte`,
-                inline: false
-            },
-            {
-                name: "📝 Grund",
-                value: reason,
-                inline: false
-            },
-            {
-                name: "📨 Eingetragen von",
-                value: `<@${interaction.user.id}>`,
-                inline: true
-            },
-            {
-                name: "📅 Datum",
-                value: `<t:${Math.floor(Date.now() / 1000)}:f>`,
-                inline: true
-            }
-        )
-        .setFooter({ text: "LSMD Professoren-Abteilung | Punkteverwaltung" })
-        .setTimestamp();
-
-    const logChannel = PROFESSOREN_SCHUELER_LOG_CHANNEL_ID
-        ? await botClient.channels.fetch(PROFESSOREN_SCHUELER_LOG_CHANNEL_ID).catch(() => null)
-        : null;
-
-    if (logChannel) {
-        await logChannel.send({
-            embeds: [embed],
-            allowedMentions: {
-                parse: []
-            }
-        });
-    }
-
-    return interaction.editReply({
-        content:
-            `✅ Punkte wurden erfolgreich ${actionText}.\n` +
-            `📊 **${sheetUpdate.oldPoints} → ${sheetUpdate.newPoints} Prof-Punkte**`
-    });
 }
 
 if (interaction.isModalSubmit() && interaction.customId === "prof_log_modal") {
