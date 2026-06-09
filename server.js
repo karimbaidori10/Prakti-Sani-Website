@@ -93,6 +93,35 @@ async function updateProfessorPointsInSheet(professorDn, points) {
   }
 }
 
+async function professorSheetAction(professorDn, action, points = 0) {
+  try {
+    const res = await fetch(PROFESSOREN_SHEET_WEBHOOK_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        secret: PROFESSOREN_SHEET_SECRET,
+        professorDn,
+        action,
+        points
+      })
+    });
+
+    const data = await res.json();
+
+    if (!data.success) {
+      console.log("Professoren Sheet Aktion Fehler:", data.message);
+      return null;
+    }
+
+    return data;
+  } catch (err) {
+    console.error("Fehler bei Professoren Sheet Aktion:", err);
+    return null;
+  }
+}
+
 function extractDnFromName(name) {
     if (!name) {
         return null;
