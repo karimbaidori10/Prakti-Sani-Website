@@ -850,34 +850,22 @@ function getJobAnnounceText() {
 
 Das LSMD öffnet die mündliche Bewerbungsphase.
 
-Du hast Lust auf medizinisches RP, spannende Einsätze und Teamarbeit?
-Dann bewirb dich noch heute beim Los Santos Medical Department.
-
-Voraussetzung:
-PKW- & LKW-Führerschein`;
+Wenn du Lust auf medizinische Szenarien hast - dann bewirb dich noch heute! Führerscheinpflicht: PKW & LKW.`;
     }
 
     if (hour >= 17 && hour < 22) {
         return `📢 LSMD BEWERBUNGSPHASE 📢
 
-Die Bewerbungsphase des LSMD ist jetzt geöffnet!
-
-Du möchtest Leben retten und Teil eines starken Teams werden?
-Dann bewirb dich jetzt beim Los Santos Medical Department.
-
-Voraussetzung:
-PKW- & LKW-Führerschein`;
-    }
+ Die Bewerbungsphase für das Medical Department ist jetzt geöffnet!
+ Du willst Leben retten, Teil eines engagierten Teams sein & echtes RP erleben?
+ Dann bewirb dich JETZT – PKW + LKW Führerschein sind Pflicht!`;
+ }
 
     return `📢 LSMD BEWERBUNG 📢
 
-Das LSMD öffnet die spontane mündliche Bewerbungsphase.
-
-Du hast Lust auf medizinisches RP und spannende Einsätze?
-Dann komm morgen gerne vorbei und bewirb dich beim Medical Department.
-
-Voraussetzung:
-PKW- & LKW-Führerschein`;
+Das MD öffnet die spontane mündliche Bewerbungsphase! 
+Wenn du Lust auf spannende medizinische Szenarien hast, dann komm morgen gern vorbei und werde teil des Los Santos Medical Department.
+Führerscheinpflicht: PKW & LKW.`;
 }
 
 async function sendJobAnnounceReminder() {
