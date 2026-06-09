@@ -64,6 +64,7 @@ const PROFESSOREN_SCHUELER_SYSTEM_MESSAGE_ID = process.env.PROFESSOREN_SCHUELER_
 const PROFESSOREN_SHEET_WEBHOOK_URL = "https://script.google.com/macros/s/AKfycbxYFD8sbuLVSd6SE6FDitRnFTyt91yzYgnWQdSP_hK-8VFaVz55iD8XWhdlTmgabTkyew/exec";
 const PROFESSOREN_SHEET_SECRET = "LSMD_PROFESSOREN_SECRET_123";
 const PROFESSOREN_SCHUELER_LOG_CHANNEL_ID = process.env.PROFESSOREN_SCHUELER_LOG_CHANNEL_ID;
+const PROFESSOREN_LEITUNG_LOG_CHANNEL_ID = process.env.PROFESSOREN_LEITUNG_LOG_CHANNEL_ID;
 
 async function updateProfessorPointsInSheet(professorDn, points) {
   try {
@@ -2574,7 +2575,7 @@ if (interaction.isModalSubmit() && interaction.customId.startsWith("prof_points_
 
         const embed = new EmbedBuilder()
             .setColor(0xf59e0b)
-            .setTitle("✏️ Professoren Punkte aktualisiert")
+            .setTitle("🔐 Professoren-Leitung | Punkte aktualisiert")
             .addFields(
                 {
                     name: "👨‍🏫 Professor",
@@ -2610,9 +2611,9 @@ if (interaction.isModalSubmit() && interaction.customId.startsWith("prof_points_
             .setFooter({ text: "LSMD Professoren-Abteilung | Punkteverwaltung" })
             .setTimestamp();
 
-        const logChannel = PROFESSOREN_SCHUELER_LOG_CHANNEL_ID
-            ? await botClient.channels.fetch(PROFESSOREN_SCHUELER_LOG_CHANNEL_ID).catch(() => null)
-            : null;
+        const logChannel = PROFESSOREN_LEITUNG_LOG_CHANNEL_ID
+    ? await botClient.channels.fetch(PROFESSOREN_LEITUNG_LOG_CHANNEL_ID).catch(() => null)
+    : null;
 
         if (logChannel) {
             await logChannel.send({
