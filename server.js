@@ -918,56 +918,69 @@ async function sendDokumenteWebhook() {
     const embed = {
         color: 0x06b6d4,
         author: {
-            name: "LSMD Therapeuten-Abteilung",
+            name: "LSMD | Therapeuten-Abteilung",
             icon_url: "https://cdn.discordapp.com/embed/avatars/0.png"
         },
-        title: "🧠 LSMD Therapeuten-Abteilung | Dokumentenübersicht",
+        title: "🧠  Therapeuten-Dokumentenzentrale",
         description:
-            "**Willkommen in der zentralen Dokumentenübersicht der Therapeuten-Abteilung.**\n\n" +
-            "Hier findest du alle wichtigen Unterlagen, Formulare und Übersichten für die therapeutische Arbeit im LSMD.\n\n" +
-            "Bitte nutze ausschließlich die hier verlinkten Dokumente, damit alle Eintragungen sauber, aktuell und nachvollziehbar bleiben.",
+            "```ansi\n\u001b[1;36mLSMD THERAPEUTEN-SYSTEM\u001b[0m\n```\n" +
+            "**Zentrale Übersicht für Sprechstunden, Dokumentation, Atteste und interne Leitungskontrolle.**\n\n" +
+            "Alle wichtigen Dokumente sind hier gesammelt. Bitte nutzt ausschließlich diese offiziellen Links, damit alles sauber und aktuell bleibt.\n\n" +
+            "━━━━━━━━━━━━━━━━━━━━",
+
         fields: [
             {
-                name: "📊 Therapeuten Mastersheet",
+                name: "📊  Mastersheets & Übersichten",
                 value:
-                    "**Zentrale Übersicht für Fälle, Sitzungen, Atteste und Dokumentation.**\n" +
-                    "[Mastersheet öffnen](https://docs.google.com/spreadsheets/d/1DDszXZ2Xk5rrFsmBPXsABKPipMX7CXNxY48MyP4B6lU/edit?usp=sharing)",
+                    ">>> **Therapeuten Mastersheet**\n" +
+                    "Zentrale Übersicht für Patienten, Sitzungen, Atteste und Dokumentationen.\n" +
+                    "🔗 [Mastersheet öffnen](https://docs.google.com/spreadsheets/d/1DDszXZ2Xk5rrFsmBPXsABKPipMX7CXNxY48MyP4B6lU/edit?usp=sharing)\n\n" +
+
+                    "**Leitung Mastersheet Therapeuten**\n" +
+                    "Interne Übersicht für Kontrolle, Verwaltung und Leitungsentscheidungen.\n" +
+                    "🔗 [Leitungsübersicht öffnen](https://docs.google.com/spreadsheets/d/122mGv9zHHAmNCmR24-moQ_lGa5d3XW3n291pLAb8FLw/edit?usp=sharing)",
                 inline: false
             },
             {
-                name: "📝 Therapeutische Sprechstunde | Formular",
+                name: "📝  Formulare & Sprechstunden",
                 value:
-                    "**Formular für Sprechstunden, Sitzungen und interne Dokumentation.**\n" +
-                    "[Formular öffnen](https://docs.google.com/forms/d/e/1FAIpQLScB9T50A2LZkOtOhykfemftksW45lliWjakoGiyLQzOQSUvZg/viewform?usp=sharing&ouid=101346137102031307272)",
+                    ">>> **Therapeutische Sprechstunde**\n" +
+                    "Formular für Gespräche, Sitzungen und interne therapeutische Dokumentationen.\n" +
+                    "🔗 [Formular öffnen](https://docs.google.com/forms/d/e/1FAIpQLScB9T50A2LZkOtOhykfemftksW45lliWjakoGiyLQzOQSUvZg/viewform?usp=sharing&ouid=101346137102031307272)",
                 inline: false
             },
             {
-                name: "📋 Leitung Mastersheet Therapeuten",
+                name: "📘  Leitfäden & Einweisung",
                 value:
-                    "**Interne Leitungsübersicht für Kontrolle, Verwaltung und Prüfungen.**\n" +
-                    "[Leitungsübersicht öffnen](https://docs.google.com/spreadsheets/d/122mGv9zHHAmNCmR24-moQ_lGa5d3XW3n291pLAb8FLw/edit?usp=sharing)",
+                    ">>> **Therapeuten Leitfaden**\n" +
+                    "Abläufe, Gesprächsführung, Verhalten und Dokumentationsregeln.\n" +
+                    "🔗 [Leitfaden öffnen](https://docs.google.com/document/d/1srYmLkZfw4ADLdVyM0E9r9cSHa4u8whlfhU3zc4T-5A/edit?tab=t.0)\n\n" +
+
+                    "**Leitung Therapeuten Einweisung**\n" +
+                    "Einweisung für Leitung, neue Therapeuten und strukturierte Freigaben.\n" +
+                    "🔗 [Einweisung öffnen](https://docs.google.com/document/d/1tlvdjuPJVBRG_StopSjuNNLPAKm4RxSvawrzdeajMHY/edit?tab=t.0)",
                 inline: false
             },
             {
-                name: "📘 Therapeuten Leitfaden",
+                name: "⚠️  Wichtige Hinweise",
                 value:
-                    "**Offizieller Leitfaden für Gesprächsführung, Ablauf und Verhalten.**\n" +
-                    "[Leitfaden öffnen](https://docs.google.com/document/d/1srYmLkZfw4ADLdVyM0E9r9cSHa4u8whlfhU3zc4T-5A/edit?tab=t.0)",
+                    "```diff\n" +
+                    "+ Nur offizielle Dokumente verwenden\n" +
+                    "+ Sachlich, kurz und nachvollziehbar dokumentieren\n" +
+                    "- Keine unnötigen privaten Details eintragen\n" +
+                    "- Keine veralteten Dokumente benutzen\n" +
+                    "```",
                 inline: false
             },
             {
-                name: "🚑 Leitung Therapeuten Einweisung",
-                value:
-                    "**Einweisung für Leitung, neue Therapeuten und strukturierte Freigaben.**\n" +
-                    "[Einweisung öffnen](https://docs.google.com/document/d/1tlvdjuPJVBRG_StopSjuNNLPAKm4RxSvawrzdeajMHY/edit?tab=t.0)",
-                inline: false
+                name: "🔄  Aktualisierung",
+                value: `<t:${Math.floor(Date.now() / 1000)}:f>`,
+                inline: true
             },
             {
-                name: "📌 Hinweis",
-                value:
-                    "Alle Dokumente sind **intern** und nur für berechtigte Personen der Therapeuten-Abteilung bestimmt.\n" +
-                    "Bitte keine privaten oder unnötigen Details dokumentieren.",
-                inline: false
+                name: "🔐  Zugriff",
+                value: "Nur intern für berechtigte Mitglieder",
+                inline: true
             }
         ],
         footer: {
@@ -998,7 +1011,7 @@ async function sendDokumenteWebhook() {
         return false;
     }
 
-    console.log("Therapeuten Dokumentenübersicht als einzelnes Embed gesendet");
+    console.log("Therapeuten Dokumentenübersicht als modernes Einzel-Embed gesendet");
     return true;
 }
 
