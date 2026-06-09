@@ -915,86 +915,66 @@ async function sendDokumenteWebhook() {
         return false;
     }
 
-    const dokumente = [
-        {
-            title: "📊 LSMD Therapeuten Mastersheet",
-            description: "Zentrale Übersicht für Mitglieder, Fälle, Status und interne Organisation der Therapeuten-Abteilung.",
-            url: "https://docs.google.com/spreadsheets/d/1DDszXZ2Xk5rrFsmBPXsABKPipMX7CXNxY48MyP4B6lU/edit?usp=sharing",
-            color: 0x06b6d4
-        },
-        {
-            title: "📝 LSMD Therapeutische Sprechstunde | Formular",
-            description: "Formular für interne therapeutische Sprechstunden und Dokumentationen.",
-            url: "https://docs.google.com/forms/d/e/1FAIpQLScB9T50A2LZkOtOhykfemftksW45lliWjakoGiyLQzOQSUvZg/viewform?usp=sharing&ouid=101346137102031307272",
-            color: 0x22c55e
-        },
-        {
-            title: "📋 Leitung Mastersheet Therapeuten",
-            description: "Interne Leitungsübersicht für Kontrolle, Verwaltung und Prüfung der Therapeuten-Abteilung.",
-            url: "https://docs.google.com/spreadsheets/d/122mGv9zHHAmNCmR24-moQ_lGa5d3XW3n291pLAb8FLw/edit?usp=sharing",
-            color: 0x3b82f6
-        },
-        {
-            title: "📘 Therapeuten Leitfaden",
-            description: "Offizieller Leitfaden für Abläufe, Verhalten, Struktur und Durchführung therapeutischer Gespräche.",
-            url: "https://docs.google.com/document/d/1srYmLkZfw4ADLdVyM0E9r9cSHa4u8whlfhU3zc4T-5A/edit?tab=t.0",
-            color: 0x8b5cf6
-        },
-        {
-            title: "🚑 Leitung Therapeuten Einweisung",
-            description: "Einweisungsdokument für Leitung, neue Therapeuten und strukturierte Freigaben.",
-            url: "https://docs.google.com/document/d/1tlvdjuPJVBRG_StopSjuNNLPAKm4RxSvawrzdeajMHY/edit?tab=t.0",
-            color: 0xf59e0b
-        }
-    ];
-
-    const introEmbed = {
-        color: 0xef233c,
+    const embed = {
+        color: 0x06b6d4,
         author: {
-            name: "LSMD Dokumenten-System"
+            name: "LSMD Therapeuten-Abteilung",
+            icon_url: "https://cdn.discordapp.com/embed/avatars/0.png"
         },
-        title: "📚 LSMD Dokumentenübersicht",
+        title: "🧠 LSMD Therapeuten-Abteilung | Dokumentenübersicht",
         description:
-            "**Hier findest du alle wichtigen Dokumente der Abteilung.**\n\n" +
-            "Bitte nutzt immer die aktuell verlinkten Dokumente und achtet darauf, keine veralteten Versionen zu verwenden.",
+            "**Willkommen in der zentralen Dokumentenübersicht der Therapeuten-Abteilung.**\n\n" +
+            "Hier findest du alle wichtigen Unterlagen, Formulare und Übersichten für die therapeutische Arbeit im LSMD.\n\n" +
+            "Bitte nutze ausschließlich die hier verlinkten Dokumente, damit alle Eintragungen sauber, aktuell und nachvollziehbar bleiben.",
         fields: [
             {
-                name: "📌 Hinweis",
-                value: "Alle Dokumente sind intern und nur für berechtigte Personen bestimmt.",
+                name: "📊 Therapeuten Mastersheet",
+                value:
+                    "**Zentrale Übersicht für Fälle, Sitzungen, Atteste und Dokumentation.**\n" +
+                    "[Mastersheet öffnen](https://docs.google.com/spreadsheets/d/1DDszXZ2Xk5rrFsmBPXsABKPipMX7CXNxY48MyP4B6lU/edit?usp=sharing)",
                 inline: false
             },
             {
-                name: "🔄 Aktualisierung",
-                value: `<t:${Math.floor(Date.now() / 1000)}:f>`,
-                inline: true
+                name: "📝 Therapeutische Sprechstunde | Formular",
+                value:
+                    "**Formular für Sprechstunden, Sitzungen und interne Dokumentation.**\n" +
+                    "[Formular öffnen](https://docs.google.com/forms/d/e/1FAIpQLScB9T50A2LZkOtOhykfemftksW45lliWjakoGiyLQzOQSUvZg/viewform?usp=sharing&ouid=101346137102031307272)",
+                inline: false
+            },
+            {
+                name: "📋 Leitung Mastersheet Therapeuten",
+                value:
+                    "**Interne Leitungsübersicht für Kontrolle, Verwaltung und Prüfungen.**\n" +
+                    "[Leitungsübersicht öffnen](https://docs.google.com/spreadsheets/d/122mGv9zHHAmNCmR24-moQ_lGa5d3XW3n291pLAb8FLw/edit?usp=sharing)",
+                inline: false
+            },
+            {
+                name: "📘 Therapeuten Leitfaden",
+                value:
+                    "**Offizieller Leitfaden für Gesprächsführung, Ablauf und Verhalten.**\n" +
+                    "[Leitfaden öffnen](https://docs.google.com/document/d/1srYmLkZfw4ADLdVyM0E9r9cSHa4u8whlfhU3zc4T-5A/edit?tab=t.0)",
+                inline: false
+            },
+            {
+                name: "🚑 Leitung Therapeuten Einweisung",
+                value:
+                    "**Einweisung für Leitung, neue Therapeuten und strukturierte Freigaben.**\n" +
+                    "[Einweisung öffnen](https://docs.google.com/document/d/1tlvdjuPJVBRG_StopSjuNNLPAKm4RxSvawrzdeajMHY/edit?tab=t.0)",
+                inline: false
+            },
+            {
+                name: "📌 Hinweis",
+                value:
+                    "Alle Dokumente sind **intern** und nur für berechtigte Personen der Therapeuten-Abteilung bestimmt.\n" +
+                    "Bitte keine privaten oder unnötigen Details dokumentieren.",
+                inline: false
             }
         ],
         footer: {
-            text: "LSMD Abteilungen • Dokumentenverwaltung"
+            text: "LSMD Therapeuten-System • Dokumentenverwaltung"
         },
         timestamp: new Date().toISOString()
     };
-
-    const embeds = [
-        introEmbed,
-        ...dokumente.map(doc => ({
-            color: doc.color,
-            title: doc.title,
-            url: doc.url,
-            description: doc.description,
-            fields: [
-                {
-                    name: "🔗 Zugriff",
-                    value: `[Dokument öffnen](${doc.url})`,
-                    inline: false
-                }
-            ],
-            footer: {
-                text: "LSMD Dokumenten-System"
-            },
-            timestamp: new Date().toISOString()
-        }))
-    ];
 
     const response = await fetch(DOKUMENTE_WEBHOOK_URL, {
         method: "POST",
@@ -1002,10 +982,10 @@ async function sendDokumenteWebhook() {
             "Content-Type": "application/json"
         },
         body: JSON.stringify({
-            username: "LSMD Dokumenten-System",
+            username: "LSMD Therapeuten-System",
             avatar_url: "https://cdn.discordapp.com/embed/avatars/0.png",
             content: "",
-            embeds,
+            embeds: [embed],
             allowed_mentions: {
                 parse: []
             }
@@ -1018,7 +998,7 @@ async function sendDokumenteWebhook() {
         return false;
     }
 
-    console.log("Dokumente Webhook gesendet");
+    console.log("Therapeuten Dokumentenübersicht als einzelnes Embed gesendet");
     return true;
 }
 
