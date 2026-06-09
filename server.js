@@ -420,6 +420,28 @@ function isDiscordLeadership(interaction) {
     return false;
 }
 
+function isProfessorenLeitung(interaction) {
+    const roles = interaction.member?.roles;
+
+    if (!roles) {
+        return false;
+    }
+
+    const allowedRoles = [
+        process.env.ROLE_PROFESSOREN_LEITUNG
+    ].filter(Boolean);
+
+    if (roles.cache) {
+        return allowedRoles.some(roleId => roles.cache.has(roleId));
+    }
+
+    if (Array.isArray(roles)) {
+        return allowedRoles.some(roleId => roles.includes(roleId));
+    }
+
+    return false;
+}
+
 async function getAusbilderBonusStand(ausbilderDiscordId) {
     const result = await einstellungsBonusCollection.aggregate([
         {
@@ -1261,12 +1283,38 @@ const buttonRow = new ActionRowBuilder().addComponents(
         .setCustomId("prof_log_create")
         .setLabel("Schüler-Log eintragen")
         .setEmoji("📝")
-        .setStyle(ButtonStyle.Primary)
+        .setStyle(ButtonStyle.Primary),
+
+    new ButtonBuilder()
+        .setCustomId("prof_points_show")
+        .setLabel("Punkte anschauen")
+        .setEmoji("📊")
+        .setStyle(ButtonStyle.Secondary),
+
+    new ButtonBuilder()
+        .setCustomId("prof_points_edit")
+        .setLabel("Punkte bearbeiten")
+        .setEmoji("✏️")
+        .setStyle(ButtonStyle.Secondary)
+);
+
+const buttonRow2 = new ActionRowBuilder().addComponents(
+    new ButtonBuilder()
+        .setCustomId("prof_points_add")
+        .setLabel("Punkte manuell vergeben")
+        .setEmoji("➕")
+        .setStyle(ButtonStyle.Success),
+
+    new ButtonBuilder()
+        .setCustomId("prof_points_remove")
+        .setLabel("Punkte manuell entfernen")
+        .setEmoji("➖")
+        .setStyle(ButtonStyle.Danger)
 );
 
     const payload = {
         embeds: [embed],
-        components: [professorRow, rankRow, buttonRow],
+        components: [professorRow, rankRow, buttonRow, buttonRow2],
         allowedMentions: {
             parse: []
         }
@@ -3838,12 +3886,38 @@ function buildSpontanePanelComponents() {
     );
 
     const buttonRow = new ActionRowBuilder().addComponents(
-        new ButtonBuilder()
-            .setCustomId("spontan_submit")
-            .setLabel("Antrag erstellen")
-            .setEmoji("📝")
-            .setStyle(ButtonStyle.Primary)
-    );
+    new ButtonBuilder()
+        .setCustomId("prof_log_create")
+        .setLabel("Schüler-Log eintragen")
+        .setEmoji("📝")
+        .setStyle(ButtonStyle.Primary),
+
+    new ButtonBuilder()
+        .setCustomId("prof_points_show")
+        .setLabel("Punkte anschauen")
+        .setEmoji("📊")
+        .setStyle(ButtonStyle.Secondary),
+
+    new ButtonBuilder()
+        .setCustomId("prof_points_edit")
+        .setLabel("Punkte bearbeiten")
+        .setEmoji("✏️")
+        .setStyle(ButtonStyle.Secondary)
+);
+
+const buttonRow2 = new ActionRowBuilder().addComponents(
+    new ButtonBuilder()
+        .setCustomId("prof_points_add")
+        .setLabel("Punkte manuell vergeben")
+        .setEmoji("➕")
+        .setStyle(ButtonStyle.Success),
+
+    new ButtonBuilder()
+        .setCustomId("prof_points_remove")
+        .setLabel("Punkte manuell entfernen")
+        .setEmoji("➖")
+        .setStyle(ButtonStyle.Danger)
+);
 
     return [typeRow, buttonRow];
 }
