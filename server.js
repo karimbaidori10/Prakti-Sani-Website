@@ -1682,7 +1682,7 @@ async function sendEmailPanel() {
     )
     .setThumbnail("https://cdn.discordapp.com/embed/avatars/0.png")
     .setFooter({
-        text: "Medical Department | LSMD – Made by Ginshi",
+        text: "Medical Department | LSMD – Made by Karim",
         iconURL: "https://cdn.discordapp.com/embed/avatars/0.png"
     })
     .setTimestamp();
