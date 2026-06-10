@@ -848,20 +848,20 @@ function getJobAnnounceText() {
     if (hour < 17) {
         return `
 Das LSMD öffnet die mündliche Bewerbungsphase.
-Wenn du Lust auf medizinische Szenarien hast - dann bewirb dich noch heute! Führerscheinpflicht: PKW & LKW.`;
+ Wenn du Lust auf medizinische Szenarien hast - dann bewirb dich noch heute! Führerscheinpflicht: PKW & LKW.`;
     }
 
     if (hour >= 17 && hour < 22) {
         return `
  Die Bewerbungsphase für das Medical Department ist jetzt geöffnet!
- Du willst Leben retten, Teil eines engagierten Teams sein & echtes RP erleben?
- Dann bewirb dich JETZT – PKW + LKW Führerschein sind Pflicht!`;
+  Du willst Leben retten, Teil eines engagierten Teams sein & echtes RP erleben?
+  Dann bewirb dich JETZT – PKW + LKW Führerschein sind Pflicht!`;
  }
 
     return `
 Das MD öffnet die spontane mündliche Bewerbungsphase! 
-Wenn du Lust auf spannende medizinische Szenarien hast, dann komm morgen gern vorbei und werde teil des Los Santos Medical Department.
-Führerscheinpflicht: PKW & LKW.`;
+ Wenn du Lust auf spannende medizinische Szenarien hast, dann komm morgen gern vorbei und werde teil des Los Santos Medical Department.
+ Führerscheinpflicht: PKW & LKW.`;
 }
 
 async function sendJobAnnounceReminder() {
@@ -1610,6 +1610,117 @@ async function sendBewerbungsPanel() {
     console.log("Bewerbungs-Panel gesendet");
 }
 
+function getEmailTargetChannels(member) {
+    const roles = member.roles?.cache;
+    const targets = [];
+
+    if (!roles) {
+        return targets;
+    }
+
+    if (PRAKTI_SANI_ROLE_ID && roles.has(PRAKTI_SANI_ROLE_ID)) {
+        targets.push({
+            channelId: process.env.EMAIL_PRAKTI_SANI_CHANNEL_ID,
+            department: "Prakti-Sani"
+        });
+    }
+
+    if (process.env.ROLE_OVERWATCH && roles.has(process.env.ROLE_OVERWATCH)) {
+        targets.push({
+            channelId: process.env.EMAIL_OVERWATCH_CHANNEL_ID,
+            department: "Overwatch"
+        });
+    }
+
+    if (process.env.ROLE_OBERARZT && roles.has(process.env.ROLE_OBERARZT)) {
+        targets.push({
+            channelId: process.env.EMAIL_OBERARZT_CHANNEL_ID,
+            department: "Oberarzt"
+        });
+    }
+
+    if (process.env.ROLE_PROFESSOR && roles.has(process.env.ROLE_PROFESSOR)) {
+        targets.push({
+            channelId: process.env.EMAIL_PROFESSOREN_CHANNEL_ID,
+            department: "Professoren"
+        });
+    }
+
+    if (process.env.ROLE_THERAPEUTEN && roles.has(process.env.ROLE_THERAPEUTEN)) {
+        targets.push({
+            channelId: process.env.EMAIL_THERAPEUTEN_CHANNEL_ID,
+            department: "Therapeuten"
+        });
+    }
+
+    return targets.filter(target => target.channelId);
+}
+
+async function sendEmailPanel() {
+    if (!process.env.EMAIL_PANEL_CHANNEL_ID) {
+        console.log("EMAIL_PANEL_CHANNEL_ID fehlt");
+        return false;
+    }
+
+    const channel = await botClient.channels.fetch(process.env.EMAIL_PANEL_CHANNEL_ID).catch(() => null);
+
+    if (!channel) {
+        console.log("E-Mail Panel Channel nicht gefunden");
+        return false;
+    }
+
+    const embed = new EmbedBuilder()
+        .setColor(0x00d8ff)
+        .setTitle("📨 LSMD E-Mail-Erfassung")
+        .setDescription(
+            "**Hier kannst du deine E-Mail-Adresse für interne Dokumenten-Zugriffe hinterlegen.**\n\n" +
+            "Deine E-Mail wird automatisch anhand deiner Rollen den passenden Abteilungen zugeordnet.\n\n" +
+            "**Ablauf:**\n" +
+            "1. Klicke auf **E-Mail eintragen**.\n" +
+            "2. Trage deine E-Mail-Adresse ein.\n" +
+            "3. Der Bot prüft deine Rollen.\n" +
+            "4. Deine E-Mail wird in alle passenden E-Mail-Channels gesendet."
+        )
+        .addFields(
+            {
+                name: "📂 Automatische Zuordnung",
+                value:
+                    "Prakti-Sani → Prakti-Sani E-Mail-Channel\n" +
+                    "Overwatch → Overwatch E-Mail-Channel\n" +
+                    "Oberarzt → Oberarzt E-Mail-Channel\n" +
+                    "Professoren → Professoren E-Mail-Channel\n" +
+                    "Therapeuten → Therapeuten E-Mail-Channel",
+                inline: false
+            },
+            {
+                name: "🔐 Hinweis",
+                value: "Die E-Mail wird nur intern für Rechte / Dokumenten-Zugriff genutzt.",
+                inline: false
+            }
+        )
+        .setFooter({ text: "LSMD E-Mail-System" })
+        .setTimestamp();
+
+    const row = new ActionRowBuilder().addComponents(
+        new ButtonBuilder()
+            .setCustomId("email_open_modal")
+            .setLabel("E-Mail eintragen")
+            .setEmoji("📨")
+            .setStyle(ButtonStyle.Primary)
+    );
+
+    await channel.send({
+        embeds: [embed],
+        components: [row],
+        allowedMentions: {
+            parse: []
+        }
+    });
+
+    console.log("E-Mail-Erfassungs-Panel gesendet");
+    return true;
+}
+
 async function sendSpontanePruefungenPanel() {
     if (!process.env.SPONTANE_PRUEFUNGEN_CHANNEL_ID) {
         console.log("SPONTANE_PRUEFUNGEN_CHANNEL_ID fehlt");
@@ -2272,9 +2383,128 @@ botClient.on(Events.InteractionCreate, async (interaction) => {
     !interaction.customId.startsWith("abmeldung_") &&
     !interaction.customId.startsWith("einstellung_bonus_") &&
     !interaction.customId.startsWith("bewerbung_") &&
-    !interaction.customId.startsWith("prof_")
+    !interaction.customId.startsWith("prof_") &&
+    !interaction.customId.startsWith("email_")
 ) {
     return;
+}
+
+if (interaction.isButton() && interaction.customId === "email_open_modal") {
+    const modal = new ModalBuilder()
+        .setCustomId("email_submit_modal")
+        .setTitle("E-Mail-Adresse eintragen");
+
+    const emailInput = new TextInputBuilder()
+        .setCustomId("email_address")
+        .setLabel("Deine E-Mail-Adresse")
+        .setPlaceholder("beispiel@email.com")
+        .setStyle(TextInputStyle.Short)
+        .setRequired(true)
+        .setMaxLength(100);
+
+    const row = new ActionRowBuilder().addComponents(emailInput);
+
+    modal.addComponents(row);
+
+    return interaction.showModal(modal);
+}
+
+if (interaction.isModalSubmit() && interaction.customId === "email_submit_modal") {
+    const email = interaction.fields.getTextInputValue("email_address").trim();
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    if (!emailRegex.test(email)) {
+        return interaction.reply({
+            content: "❌ Bitte gib eine gültige E-Mail-Adresse ein.",
+            flags: MessageFlags.Ephemeral
+        });
+    }
+
+    const member = await interaction.guild.members.fetch(interaction.user.id).catch(() => null);
+
+    if (!member) {
+        return interaction.reply({
+            content: "❌ Dein Discord-Mitglied konnte nicht geladen werden.",
+            flags: MessageFlags.Ephemeral
+        });
+    }
+
+    const targets = getEmailTargetChannels(member);
+
+    if (!targets.length) {
+        return interaction.reply({
+            content: "❌ Ich konnte keine passende Abteilung anhand deiner Rollen erkennen.",
+            flags: MessageFlags.Ephemeral
+        });
+    }
+
+    const sentDepartments = [];
+
+    for (const target of targets) {
+        const logChannel = await interaction.guild.channels.fetch(target.channelId).catch(() => null);
+
+        if (!logChannel) {
+            console.log(`E-Mail-Channel nicht gefunden: ${target.department}`);
+            continue;
+        }
+
+        const embed = new EmbedBuilder()
+            .setColor(0x22c55e)
+            .setTitle("📨 E-Mail hinterlegt")
+            .addFields(
+                {
+                    name: "👤 Mitarbeiter",
+                    value: `<@${interaction.user.id}>`,
+                    inline: false
+                },
+                {
+                    name: "📝 Name",
+                    value: member.displayName || interaction.user.username,
+                    inline: false
+                },
+                {
+                    name: "🏷️ Abteilung",
+                    value: target.department,
+                    inline: true
+                },
+                {
+                    name: "🆔 Discord-ID",
+                    value: interaction.user.id,
+                    inline: true
+                },
+                {
+                    name: "📧 E-Mail",
+                    value: `\`${email}\``,
+                    inline: false
+                }
+            )
+            .setFooter({ text: "LSMD E-Mail-System" })
+            .setTimestamp();
+
+        await logChannel.send({
+            embeds: [embed],
+            allowedMentions: {
+                parse: []
+            }
+        });
+
+        sentDepartments.push(target.department);
+    }
+
+    if (!sentDepartments.length) {
+        return interaction.reply({
+            content: "❌ Es wurde keine E-Mail gespeichert, weil kein Ziel-Channel erreichbar war.",
+            flags: MessageFlags.Ephemeral
+        });
+    }
+
+    return interaction.reply({
+        content:
+            "✅ Deine E-Mail wurde sicher hinterlegt.\n\n" +
+            `📂 Zugeordnet zu: **${sentDepartments.join("**, **")}**`,
+        flags: MessageFlags.Ephemeral
+    });
 }
 
 if (interaction.isUserSelectMenu() && interaction.customId === "prof_professor_select") {
@@ -3986,6 +4216,25 @@ app.post("/admin/bewerbungs-panel", requireLogin, requireAdmin, async (req, res)
     }, req.session.user);
 
     res.redirect("/admin");
+});
+
+app.post("/admin/email-panel", requireLogin, requireAdmin, async (req, res) => {
+    try {
+        const ok = await sendEmailPanel();
+
+        if (!ok) {
+            return res.status(500).send("E-Mail Panel konnte nicht gesendet werden. Prüfe EMAIL_PANEL_CHANNEL_ID.");
+        }
+
+        await addLog("E-Mail Panel gesendet", {
+            channelId: process.env.EMAIL_PANEL_CHANNEL_ID
+        }, req.session.user);
+
+        return res.redirect("/admin");
+    } catch (err) {
+        console.error("E-Mail Panel Fehler:", err);
+        return res.status(500).send("E-Mail Panel konnte nicht gesendet werden.");
+    }
 });
 
 app.post("/admin/teamliste", requireLogin, requireAdmin, async (req, res) => {
