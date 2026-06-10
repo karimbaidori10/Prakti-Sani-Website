@@ -16,9 +16,9 @@
     <div class="stat-card stat-green">
         <div class="stat-icon">🎯</div>
         <div>
-            <h2><%= users ? users.filter(u => Number(u.points || 0) >= 5).length : 0 %></h2>
+            <h2><%= users ? users.filter(u => Number(u.points || 0) >= 10).length : 0 %></h2>
             <strong>Wochenziel</strong>
-            <p>Mitglieder mit 5+ Punkten</p>
+            <p>Mitglieder mit 10+ Punkten</p>
         </div>
     </div>
 
@@ -213,19 +213,6 @@
         🎓 Professoren-Teamliste senden / aktualisieren
     </button>
 </form>
-
-<div class="clean-divider"></div>
-
-<form action="/admin/wochen-reset" method="POST" style="margin-top: 16px;"
-      onsubmit="return confirm('Wirklich alle Punkte auf 0 setzen? Dieser Wochenreset kann nicht automatisch rückgängig gemacht werden.');">
-    <button type="submit" class="danger-btn">
-        🔄 Wochenreset durchführen
-    </button>
-</form>
-
-<p class="card-subtitle" style="margin-top: 12px;">
-    Setzt alle Mitgliederpunkte auf <strong>0</strong>. Bitte nur am Wochenende / Reset-Zeitpunkt benutzen.
-</p>
 
 <p class="card-subtitle" style="margin-top: 12px;">
     Aktualisiert die Discord-Teamliste im Mitglieder-Channel.
