@@ -1680,11 +1680,11 @@ async function sendEmailPanel() {
         "Klicke auf den Knopf, um deine E-Mail-Adresse einzutragen.\n" +
         "Nach dem Absenden wird dein Eintrag automatisch im internen Log-System gespeichert."
     )
-    .setThumbnail("https://cdn.discordapp.com/embed/avatars/0.png")
+    .setThumbnail(LSMD_LOGO_URL)
     .setFooter({
         text: "Medical Department | LSMD – Made by Karim",
-        iconURL: "https://cdn.discordapp.com/embed/avatars/0.png"
-    })
+        iconURL: LSMD_LOGO_URL    
+})
     .setTimestamp();
 
     const row = new ActionRowBuilder().addComponents(
