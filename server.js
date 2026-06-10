@@ -2444,10 +2444,10 @@ if (interaction.isModalSubmit() && interaction.customId === "email_submit_modal"
         `**Discord-ID:** \`${interaction.user.id}\`\n` +
         `**E-Mail:** \`${email}\``
     )
-    .setThumbnail("https://cdn.discordapp.com/embed/avatars/0.png")
+    .setThumbnail(LSMD_LOGO_URL)
     .setFooter({
         text: "Medical Department | LSMD – Made by Karim",
-        iconURL: "https://cdn.discordapp.com/embed/avatars/0.png"
+        iconURL: LSMD_LOGO_URL
     })
     .setTimestamp();
 
