@@ -65,6 +65,7 @@ const PROFESSOREN_SHEET_WEBHOOK_URL = "https://script.google.com/macros/s/AKfycb
 const PROFESSOREN_SHEET_SECRET = "LSMD_PROFESSOREN_SECRET_123";
 const PROFESSOREN_SCHUELER_LOG_CHANNEL_ID = process.env.PROFESSOREN_SCHUELER_LOG_CHANNEL_ID;
 const PROFESSOREN_LEITUNG_LOG_CHANNEL_ID = process.env.PROFESSOREN_LEITUNG_LOG_CHANNEL_ID;
+const LSMD_LOGO_URL = "https://cdn.discordapp.com/attachments/1461110262395310160/1514333137487003790/p7NyS81.png?ex=6a2afc22&is=6a29aaa2&hm=b4ff181b7f8052507370699cf1024fc42b20330a20d09ed785366da8d1bfb8e1&";
 
 async function updateProfessorPointsInSheet(professorDn, points) {
   try {
@@ -955,7 +956,7 @@ async function sendDokumenteWebhook() {
         color: 0x06b6d4,
         author: {
             name: "LSMD | Therapeuten-Abteilung",
-            icon_url: "https://cdn.discordapp.com/embed/avatars/0.png"
+            icon_url: LSMD_LOGO_URL
         },
         title: "🧠  Therapeuten-Dokumentenzentrale",
         description:
@@ -1670,43 +1671,28 @@ async function sendEmailPanel() {
     }
 
     const embed = new EmbedBuilder()
-        .setColor(0x00d8ff)
-        .setTitle("📨 LSMD E-Mail-Erfassung")
-        .setDescription(
-            "**Hier kannst du deine E-Mail-Adresse für interne Dokumenten-Zugriffe hinterlegen.**\n\n" +
-            "Deine E-Mail wird automatisch anhand deiner Rollen den passenden Abteilungen zugeordnet.\n\n" +
-            "**Ablauf:**\n" +
-            "1. Klicke auf **E-Mail eintragen**.\n" +
-            "2. Trage deine E-Mail-Adresse ein.\n" +
-            "3. Der Bot prüft deine Rollen.\n" +
-            "4. Deine E-Mail wird in alle passenden E-Mail-Channels gesendet."
-        )
-        .addFields(
-            {
-                name: "📂 Automatische Zuordnung",
-                value:
-                    "Prakti-Sani → Prakti-Sani E-Mail-Channel\n" +
-                    "Overwatch → Overwatch E-Mail-Channel\n" +
-                    "Oberarzt → Oberarzt E-Mail-Channel\n" +
-                    "Professoren → Professoren E-Mail-Channel\n" +
-                    "Therapeuten → Therapeuten E-Mail-Channel",
-                inline: false
-            },
-            {
-                name: "🔐 Hinweis",
-                value: "Die E-Mail wird nur intern für Rechte / Dokumenten-Zugriff genutzt.",
-                inline: false
-            }
-        )
-        .setFooter({ text: "LSMD E-Mail-System" })
-        .setTimestamp();
+    .setColor(0x2b2d31)
+    .setTitle("📨 E-Mail-Erfassung")
+    .setDescription(
+        "**Mit dieser Funktion kannst du deine E-Mail-Adresse vertraulich und sicher übermitteln.**\n\n" +
+        "Sie wird ausschließlich für interne Zwecke genutzt (z. B. Dokumenten-Zugriffe).\n\n" +
+        "**Ablauf:**\n" +
+        "Klicke auf den Knopf, um deine E-Mail-Adresse einzutragen.\n" +
+        "Nach dem Absenden wird dein Eintrag automatisch im internen Log-System gespeichert."
+    )
+    .setThumbnail("https://cdn.discordapp.com/embed/avatars/0.png")
+    .setFooter({
+        text: "Medical Department | LSMD – Made by Ginshi",
+        iconURL: "https://cdn.discordapp.com/embed/avatars/0.png"
+    })
+    .setTimestamp();
 
     const row = new ActionRowBuilder().addComponents(
         new ButtonBuilder()
             .setCustomId("email_open_modal")
             .setLabel("E-Mail eintragen")
             .setEmoji("📨")
-            .setStyle(ButtonStyle.Primary)
+            .setStyle(ButtonStyle.Secondary)
     );
 
     await channel.send({
@@ -2450,37 +2436,20 @@ if (interaction.isModalSubmit() && interaction.customId === "email_submit_modal"
         }
 
         const embed = new EmbedBuilder()
-            .setColor(0x22c55e)
-            .setTitle("📨 E-Mail hinterlegt")
-            .addFields(
-                {
-                    name: "👤 Mitarbeiter",
-                    value: `<@${interaction.user.id}>`,
-                    inline: false
-                },
-                {
-                    name: "📝 Name",
-                    value: member.displayName || interaction.user.username,
-                    inline: false
-                },
-                {
-                    name: "🏷️ Abteilung",
-                    value: target.department,
-                    inline: true
-                },
-                {
-                    name: "🆔 Discord-ID",
-                    value: interaction.user.id,
-                    inline: true
-                },
-                {
-                    name: "📧 E-Mail",
-                    value: `\`${email}\``,
-                    inline: false
-                }
-            )
-            .setFooter({ text: "LSMD E-Mail-System" })
-            .setTimestamp();
+    .setColor(0x2b2d31)
+    .setTitle("E-Mail hinterlegt")
+    .setDescription(
+        `**Mitarbeiter:** <@${interaction.user.id}>\n` +
+        `**Name:** ${member.displayName || interaction.user.username}\n` +
+        `**Discord-ID:** \`${interaction.user.id}\`\n` +
+        `**E-Mail:** \`${email}\``
+    )
+    .setThumbnail("https://cdn.discordapp.com/embed/avatars/0.png")
+    .setFooter({
+        text: "Medical Department | LSMD – Made by Karim",
+        iconURL: "https://cdn.discordapp.com/embed/avatars/0.png"
+    })
+    .setTimestamp();
 
         await logChannel.send({
             embeds: [embed],
