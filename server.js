@@ -846,23 +846,19 @@ function getJobAnnounceText() {
     const hour = berlin.hour;
 
     if (hour < 17) {
-        return `📢 LSMD BEWERBUNGSPHASE 📢
-
+        return `
 Das LSMD öffnet die mündliche Bewerbungsphase.
-
 Wenn du Lust auf medizinische Szenarien hast - dann bewirb dich noch heute! Führerscheinpflicht: PKW & LKW.`;
     }
 
     if (hour >= 17 && hour < 22) {
-        return `📢 LSMD BEWERBUNGSPHASE 📢
-
+        return `
  Die Bewerbungsphase für das Medical Department ist jetzt geöffnet!
  Du willst Leben retten, Teil eines engagierten Teams sein & echtes RP erleben?
  Dann bewirb dich JETZT – PKW + LKW Führerschein sind Pflicht!`;
  }
 
-    return `📢 LSMD BEWERBUNG 📢
-
+    return `
 Das MD öffnet die spontane mündliche Bewerbungsphase! 
 Wenn du Lust auf spannende medizinische Szenarien hast, dann komm morgen gern vorbei und werde teil des Los Santos Medical Department.
 Führerscheinpflicht: PKW & LKW.`;
