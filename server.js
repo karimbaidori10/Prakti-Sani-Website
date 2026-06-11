@@ -1767,7 +1767,7 @@ async function sendAttestPanel() {
             "**Hier können berechtigte Mitglieder ein Attest ausstellen.**\n\n" +
             "**Ablauf:**\n" +
             "1. Auf **Attest ausstellen** klicken\n" +
-            "2. DN & Name vom Patienten eintragen\n" +
+            "2. Name vom Patienten eintragen\n" +
             "3. Attest auswählen\n" +
             "4. Genehmigende Person auswählen\n" +
             "5. Das fertige Attest wird automatisch in den Ausgabe-Channel gesendet"
@@ -2478,8 +2478,8 @@ if (interaction.isButton() && interaction.customId === "attest_open_modal") {
 
     const patientInput = new TextInputBuilder()
         .setCustomId("patient_dn_name")
-        .setLabel("DN & Name vom Patienten")
-        .setPlaceholder("z. B. MD-17 | Max Mustermann")
+        .setLabel("Name vom Patienten")
+        .setPlaceholder("z. B. Max Mustermann")
         .setStyle(TextInputStyle.Short)
         .setRequired(true);
 
@@ -2491,12 +2491,12 @@ if (interaction.isButton() && interaction.customId === "attest_open_modal") {
 }
 
 if (interaction.isModalSubmit() && interaction.customId === "attest_patient_modal") {
-    const patientDnName = interaction.fields.getTextInputValue("patient_dn_name");
+    const patientName = interaction.fields.getTextInputValue("patient_dn_name");
 
     attestTempData.set(interaction.user.id, {
-        patientDnName
-    });
-
+    patientName
+});
+    
     const attestOptions = Object.entries(attestListe).map(([key, attest]) => ({
         label: attest.name,
         value: key,
@@ -2574,7 +2574,7 @@ if (interaction.isUserSelectMenu() && interaction.customId === "attest_select_ap
         .addFields(
             {
                 name: "👤 Patient",
-                value: data.patientDnName,
+                value: data.patientName,
                 inline: false
             },
             {
