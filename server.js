@@ -168,6 +168,46 @@ const bewerbungRequests = new Map();
 let bewerbungRequestCounter = 1;
 
 const profLogSelections = new Map();
+const attestTempData = new Map();
+
+const attestListe = {
+    klaustro_1: {
+        name: "Klaustrophobie Variante 1",
+        gueltigkeit: "1 Monat",
+        inhalt: "Patient darf in keine Einzelhaft gesteckt werden.",
+        stunden: "2"
+    },
+    klaustro_2: {
+        name: "Klaustrophobie Variante 2",
+        gueltigkeit: "1 Monat",
+        inhalt: "Patient darf maximal mit einer Person gleichzeitig im Auto sitzen.",
+        stunden: "3"
+    },
+    soziale_angst: {
+        name: "Soziale Angststörung",
+        gueltigkeit: "1 Monat",
+        inhalt: "Patient darf jederzeit eine Maske tragen.",
+        stunden: "3"
+    },
+    depression: {
+        name: "Depression",
+        gueltigkeit: "1 Monat",
+        inhalt: "Patient darf Weed bei sich tragen max. 3g.",
+        stunden: "3"
+    },
+    existenzangst: {
+        name: "Existenzangst",
+        gueltigkeit: "1 Woche",
+        inhalt: "Patient darf bis max. Visumstufe 10 die Hälfte des Rechnungsbetrags bekommen.",
+        stunden: "3"
+    },
+    ruhezeit_staatsfraktion: {
+        name: "Ruhezeit Staatsfraktion",
+        gueltigkeit: "1 Woche",
+        inhalt: "Patient darf Dienstpflicht missachten. Die Leitung muss informiert werden.",
+        stunden: "2"
+    }
+};
 
 
 app.set("view engine", "ejs");
@@ -1707,6 +1747,61 @@ async function sendEmailPanel() {
     return true;
 }
 
+async function sendAttestPanel() {
+    if (!process.env.ATTEST_PANEL_CHANNEL_ID) {
+        console.log("ATTEST_PANEL_CHANNEL_ID fehlt");
+        return false;
+    }
+
+    const channel = await botClient.channels.fetch(process.env.ATTEST_PANEL_CHANNEL_ID).catch(() => null);
+
+    if (!channel) {
+        console.log("Attest Panel Channel nicht gefunden");
+        return false;
+    }
+
+    const embed = new EmbedBuilder()
+        .setColor(0x06b6d4)
+        .setTitle("📄 LSMD Attest ausstellen")
+        .setDescription(
+            "**Hier können berechtigte Mitglieder ein Attest ausstellen.**\n\n" +
+            "**Ablauf:**\n" +
+            "1. Auf **Attest ausstellen** klicken\n" +
+            "2. DN & Name vom Patienten eintragen\n" +
+            "3. Attest auswählen\n" +
+            "4. Genehmigende Person auswählen\n" +
+            "5. Das fertige Attest wird automatisch in den Ausgabe-Channel gesendet"
+        )
+        .addFields(
+            {
+                name: "📌 Hinweis",
+                value: "Bitte nur vollständige und korrekt genehmigte Atteste ausstellen.",
+                inline: false
+            }
+        )
+        .setFooter({ text: "LSMD Therapeuten-Abteilung" })
+        .setTimestamp();
+
+    const row = new ActionRowBuilder().addComponents(
+        new ButtonBuilder()
+            .setCustomId("attest_open_modal")
+            .setLabel("Attest ausstellen")
+            .setEmoji("📄")
+            .setStyle(ButtonStyle.Primary)
+    );
+
+    await channel.send({
+        embeds: [embed],
+        components: [row],
+        allowedMentions: {
+            parse: []
+        }
+    });
+
+    console.log("Attest-Panel gesendet");
+    return true;
+}
+
 async function sendSpontanePruefungenPanel() {
     if (!process.env.SPONTANE_PRUEFUNGEN_CHANNEL_ID) {
         console.log("SPONTANE_PRUEFUNGEN_CHANNEL_ID fehlt");
@@ -2370,9 +2465,181 @@ botClient.on(Events.InteractionCreate, async (interaction) => {
     !interaction.customId.startsWith("einstellung_bonus_") &&
     !interaction.customId.startsWith("bewerbung_") &&
     !interaction.customId.startsWith("prof_") &&
-    !interaction.customId.startsWith("email_")
+    !interaction.customId.startsWith("email_") &&
+    !interaction.customId.startsWith("attest_")
 ) {
     return;
+}
+
+if (interaction.isButton() && interaction.customId === "attest_open_modal") {
+    const modal = new ModalBuilder()
+        .setCustomId("attest_patient_modal")
+        .setTitle("Attest ausstellen");
+
+    const patientInput = new TextInputBuilder()
+        .setCustomId("patient_dn_name")
+        .setLabel("DN & Name vom Patienten")
+        .setPlaceholder("z. B. MD-17 | Max Mustermann")
+        .setStyle(TextInputStyle.Short)
+        .setRequired(true);
+
+    const row = new ActionRowBuilder().addComponents(patientInput);
+
+    modal.addComponents(row);
+
+    return interaction.showModal(modal);
+}
+
+if (interaction.isModalSubmit() && interaction.customId === "attest_patient_modal") {
+    const patientDnName = interaction.fields.getTextInputValue("patient_dn_name");
+
+    attestTempData.set(interaction.user.id, {
+        patientDnName
+    });
+
+    const attestOptions = Object.entries(attestListe).map(([key, attest]) => ({
+        label: attest.name,
+        value: key,
+        description: `${attest.gueltigkeit} | ${attest.stunden} Stunden`
+    }));
+
+    const selectMenu = new StringSelectMenuBuilder()
+        .setCustomId("attest_select_type")
+        .setPlaceholder("Attest auswählen")
+        .addOptions(attestOptions);
+
+    const row = new ActionRowBuilder().addComponents(selectMenu);
+
+    return interaction.reply({
+        content: "Bitte wähle jetzt das Attest aus:",
+        components: [row],
+        flags: MessageFlags.Ephemeral
+    });
+}
+
+if (interaction.isStringSelectMenu() && interaction.customId === "attest_select_type") {
+    const selectedAttest = interaction.values[0];
+    const data = attestTempData.get(interaction.user.id);
+
+    if (!data) {
+        return interaction.reply({
+            content: "Fehler: Deine Eingabe wurde nicht gefunden. Bitte starte erneut.",
+            flags: MessageFlags.Ephemeral
+        });
+    }
+
+    data.attestKey = selectedAttest;
+    attestTempData.set(interaction.user.id, data);
+
+    const userSelect = new UserSelectMenuBuilder()
+        .setCustomId("attest_select_approved_by")
+        .setPlaceholder("Genehmigt von auswählen")
+        .setMinValues(1)
+        .setMaxValues(1);
+
+    const row = new ActionRowBuilder().addComponents(userSelect);
+
+    return interaction.update({
+        content: "Bitte wähle jetzt aus, wer das Attest genehmigt hat:",
+        components: [row]
+    });
+}
+
+if (interaction.isUserSelectMenu() && interaction.customId === "attest_select_approved_by") {
+    const approvedUserId = interaction.values[0];
+    const approvedUser = `<@${approvedUserId}>`;
+
+    const data = attestTempData.get(interaction.user.id);
+
+    if (!data || !data.attestKey) {
+        return interaction.reply({
+            content: "Fehler: Daten fehlen. Bitte starte erneut.",
+            flags: MessageFlags.Ephemeral
+        });
+    }
+
+    const attest = attestListe[data.attestKey];
+
+    if (!attest) {
+        return interaction.reply({
+            content: "Fehler: Attest wurde nicht gefunden.",
+            flags: MessageFlags.Ephemeral
+        });
+    }
+
+    const attestEmbed = new EmbedBuilder()
+        .setColor(0x06b6d4)
+        .setTitle("✅ LSMD Attest ausgestellt")
+        .setDescription("Ein neues Attest wurde offiziell ausgestellt.")
+        .addFields(
+            {
+                name: "👤 Patient",
+                value: data.patientDnName,
+                inline: false
+            },
+            {
+                name: "📄 Attest",
+                value: attest.name,
+                inline: true
+            },
+            {
+                name: "⏳ Gültigkeit",
+                value: attest.gueltigkeit,
+                inline: true
+            },
+            {
+                name: "🕒 Benötigte Stunden",
+                value: attest.stunden,
+                inline: true
+            },
+            {
+                name: "📋 Inhalt",
+                value: attest.inhalt,
+                inline: false
+            },
+            {
+                name: "✅ Genehmigt von",
+                value: approvedUser,
+                inline: true
+            },
+            {
+                name: "✍️ Ausgestellt von",
+                value: `<@${interaction.user.id}>`,
+                inline: true
+            }
+        )
+        .setFooter({ text: "LSMD Therapeuten-Abteilung" })
+        .setTimestamp();
+
+    attestTempData.delete(interaction.user.id);
+
+    await interaction.update({
+        content: "✅ Attest wurde erfolgreich ausgestellt und in den Ausgabe-Channel gesendet.",
+        components: []
+    });
+
+    if (!process.env.ATTEST_AUSGABE_CHANNEL_ID) {
+        return interaction.followUp({
+            content: "Fehler: ATTEST_AUSGABE_CHANNEL_ID fehlt.",
+            flags: MessageFlags.Ephemeral
+        });
+    }
+
+    const ausgabeChannel = await botClient.channels.fetch(process.env.ATTEST_AUSGABE_CHANNEL_ID).catch(() => null);
+
+    if (!ausgabeChannel) {
+        return interaction.followUp({
+            content: "Fehler: Attest-Ausgabe-Channel wurde nicht gefunden.",
+            flags: MessageFlags.Ephemeral
+        });
+    }
+
+    return ausgabeChannel.send({
+        embeds: [attestEmbed],
+        allowedMentions: {
+            parse: []
+        }
+    });
 }
 
 if (interaction.isButton() && interaction.customId === "email_open_modal") {
@@ -4175,6 +4442,25 @@ app.post("/admin/spontane-panel", requireLogin, requireAdmin, async (req, res) =
     }, req.session.user);
 
     res.redirect("/admin");
+});
+
+app.post("/admin/attest-panel", requireLogin, requireAdmin, async (req, res) => {
+    try {
+        const ok = await sendAttestPanel();
+
+        if (!ok) {
+            return res.status(500).send("Attest-Panel konnte nicht gesendet werden. Prüfe ATTEST_PANEL_CHANNEL_ID.");
+        }
+
+        await addLog("Attest-Panel gesendet", {
+            channelId: process.env.ATTEST_PANEL_CHANNEL_ID
+        }, req.session.user);
+
+        return res.redirect("/admin");
+    } catch (err) {
+        console.error("Attest-Panel Fehler:", err);
+        return res.status(500).send("Attest-Panel konnte nicht gesendet werden.");
+    }
 });
 
 app.post("/admin/bewerbungs-panel", requireLogin, requireAdmin, async (req, res) => {
