@@ -5060,6 +5060,42 @@ app.get("/termine", requireLogin, async (req, res) => {
     }
 });
 
+app.get("/overwatch", requireLogin, async (req, res) => {
+    try {
+        const licensesRaw = await overwatchLicensesCollection
+            .find({})
+            .sort({ issuedAt: -1, createdAt: -1 })
+            .toArray();
+
+        const licenses = licensesRaw.map((license) => {
+            const status = getOverwatchStatus(license.issuedAt);
+            const dueDate = getOverwatchDueDate(license.issuedAt);
+
+            return {
+                ...license,
+                status,
+                issuedAtFormatted: formatOverwatchDate(license.issuedAt),
+                dueDateFormatted: formatOverwatchDate(dueDate)
+            };
+        });
+
+        const stats = {
+            total: licenses.length,
+            green: licenses.filter(l => l.status.key === "green").length,
+            yellow: licenses.filter(l => l.status.key === "yellow").length,
+            red: licenses.filter(l => l.status.key === "red").length
+        };
+
+        res.render("overwatch", viewData(req, {
+            active: "overwatch",
+            licenses,
+            stats
+        }));
+    } catch (err) {
+        console.error("Overwatch Seite Fehler:", err);
+        res.status(500).send("Overwatch Seite konnte nicht geladen werden.");
+    }
+});
 
 app.get("/dokumente", requireLogin, async (req, res) => {
     const docs = await docsCollection.find({}).sort({ createdAt: -1 }).toArray();

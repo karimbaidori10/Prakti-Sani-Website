@@ -1,0 +1,126 @@
+<section class="page-header sheet-hero">
+    <div>
+        <h1>Overwatch-System</h1>
+        <p>Lizenzverwaltung, Auffrischungen und Statusübersicht für Overwatch, Overwatch+ und Osprey.</p>
+    </div>
+
+    <div class="sheet-hero-count">
+        <strong><%= stats.total %></strong>
+        <span>Lizenz(en)</span>
+    </div>
+</section>
+
+<section class="stats-grid">
+    <div class="stat-card stat-blue">
+        <div class="stat-icon">👁️</div>
+        <div>
+            <h2><%= stats.total %></h2>
+            <strong>Gesamt</strong>
+            <p>Alle Lizenzen</p>
+        </div>
+    </div>
+
+    <div class="stat-card stat-green">
+        <div class="stat-icon">✅</div>
+        <div>
+            <h2><%= stats.green %></h2>
+            <strong>Gültig</strong>
+            <p>0–11 Tage</p>
+        </div>
+    </div>
+
+    <div class="stat-card stat-yellow">
+        <div class="stat-icon">🟡</div>
+        <div>
+            <h2><%= stats.yellow %></h2>
+            <strong>Bald fällig</strong>
+            <p>ab 12 Tagen</p>
+        </div>
+    </div>
+
+    <div class="stat-card stat-red">
+        <div class="stat-icon">🔴</div>
+        <div>
+            <h2><%= stats.red %></h2>
+            <strong>Auffrischung nötig</strong>
+            <p>ab 25 Tagen</p>
+        </div>
+    </div>
+</section>
+
+<section class="card sheet-main">
+    <div class="card-header">
+        <div>
+            <h2>Overwatch-Lizenzen</h2>
+            <p class="card-subtitle">Alle Einträge aus Website und Discord-Panel.</p>
+        </div>
+
+        <span class="chip blue"><%= licenses.length %> Eintrag(e)</span>
+    </div>
+
+    <% if (licenses.length === 0) { %>
+        <div class="empty-state">
+            <h3>Keine Lizenzen eingetragen</h3>
+            <p>Trage die erste Lizenz über das Discord-Panel ein.</p>
+        </div>
+    <% } else { %>
+        <div class="ow-table">
+            <div class="ow-table-head">
+                <span>Mitglied</span>
+                <span>Lizenz</span>
+                <span>Seit</span>
+                <span>Fällig ab</span>
+                <span>Status</span>
+                <span>Prüfer</span>
+                <span>Quelle</span>
+            </div>
+
+            <% licenses.forEach((license) => { %>
+                <div class="ow-row ow-<%= license.status.key %>">
+                    <div>
+                        <small>DN / Name</small>
+                        <strong><%= license.dn %> | <%= license.name %></strong>
+                    </div>
+
+                    <div>
+                        <small>Lizenz</small>
+                        <strong><%= license.licenseType %></strong>
+                    </div>
+
+                    <div>
+                        <small>Seit</small>
+                        <strong><%= license.issuedAtFormatted %></strong>
+                    </div>
+
+                    <div>
+                        <small>Fällig ab</small>
+                        <strong><%= license.dueDateFormatted %></strong>
+                    </div>
+
+                    <div>
+                        <small>Status</small>
+                        <strong><%= license.status.emoji %> <%= license.status.label %></strong>
+                        <span><%= license.status.days %> Tag(e)</span>
+                    </div>
+
+                    <div>
+                        <small>Prüfer</small>
+                        <strong><%= license.examiner || "-" %></strong>
+                    </div>
+
+                    <div>
+                        <small>Quelle</small>
+                        <strong><%= license.source === "discord-panel" ? "Discord Panel" : "Website" %></strong>
+                    </div>
+
+                    <% if (license.notes) { %>
+                        <div class="ow-note">
+                            <small>Notiz</small>
+                            <p><%= license.notes %></p>
+                        </div>
+                    <% } %>
+                </div>
+            <% }) %>
+        </div>
+    <% } %>
+</section>
