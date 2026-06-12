@@ -2878,9 +2878,242 @@ botClient.on(Events.InteractionCreate, async (interaction) => {
     !interaction.customId.startsWith("bewerbung_") &&
     !interaction.customId.startsWith("prof_") &&
     !interaction.customId.startsWith("email_") &&
+    !interaction.customId.startsWith("overwatch_") &&
     !interaction.customId.startsWith("attest_")
 ) {
     return;
+}
+
+// ===============================
+// OVERWATCH LIZENZ SYSTEM
+// ===============================
+
+if (interaction.isButton() && interaction.customId === "overwatch_license_start") {
+    const row = new ActionRowBuilder().addComponents(
+        new StringSelectMenuBuilder()
+            .setCustomId("overwatch_license_type")
+            .setPlaceholder("Lizenz auswählen")
+            .addOptions(
+                {
+                    label: "Overwatch",
+                    value: "Overwatch",
+                    emoji: "👁️"
+                },
+                {
+                    label: "Overwatch+",
+                    value: "Overwatch+",
+                    emoji: "👁️"
+                },
+                {
+                    label: "Osprey",
+                    value: "Osprey",
+                    emoji: "🦅"
+                }
+            )
+    );
+
+    return interaction.reply({
+        content: "Bitte wähle aus, welche Lizenz eingetragen werden soll:",
+        components: [row],
+        flags: MessageFlags.Ephemeral
+    });
+}
+
+if (interaction.isStringSelectMenu() && interaction.customId === "overwatch_license_type") {
+    const licenseType = interaction.values[0];
+
+    overwatchTempData.set(interaction.user.id, {
+        licenseType
+    });
+
+    const modal = new ModalBuilder()
+        .setCustomId("overwatch_license_modal")
+        .setTitle("Overwatch Lizenz eintragen");
+
+    const dnInput = new TextInputBuilder()
+        .setCustomId("dn")
+        .setLabel("Dienstnummer")
+        .setPlaceholder("z. B. MD-03")
+        .setStyle(TextInputStyle.Short)
+        .setRequired(true);
+
+    const nameInput = new TextInputBuilder()
+        .setCustomId("name")
+        .setLabel("Name")
+        .setPlaceholder("z. B. Prof. Dr. Kevin Fresh")
+        .setStyle(TextInputStyle.Short)
+        .setRequired(true);
+
+    const dateInput = new TextInputBuilder()
+        .setCustomId("issuedAt")
+        .setLabel("Lizenz seit wann?")
+        .setPlaceholder("Format: 2026-06-12")
+        .setStyle(TextInputStyle.Short)
+        .setRequired(true);
+
+    const examinerInput = new TextInputBuilder()
+        .setCustomId("examiner")
+        .setLabel("Prüfer / Ausbilder")
+        .setPlaceholder("z. B. Karim")
+        .setStyle(TextInputStyle.Short)
+        .setRequired(true);
+
+    const notesInput = new TextInputBuilder()
+        .setCustomId("notes")
+        .setLabel("Notiz optional")
+        .setPlaceholder("z. B. Auffrischung bestanden")
+        .setStyle(TextInputStyle.Paragraph)
+        .setRequired(false);
+
+    modal.addComponents(
+        new ActionRowBuilder().addComponents(dnInput),
+        new ActionRowBuilder().addComponents(nameInput),
+        new ActionRowBuilder().addComponents(dateInput),
+        new ActionRowBuilder().addComponents(examinerInput),
+        new ActionRowBuilder().addComponents(notesInput)
+    );
+
+    return interaction.showModal(modal);
+}
+
+if (interaction.isModalSubmit() && interaction.customId === "overwatch_license_modal") {
+    const temp = overwatchTempData.get(interaction.user.id);
+
+    if (!temp) {
+        return interaction.reply({
+            content: "❌ Bitte starte den Vorgang erneut über das Overwatch-Panel.",
+            flags: MessageFlags.Ephemeral
+        });
+    }
+
+    const dn = interaction.fields.getTextInputValue("dn");
+    const name = interaction.fields.getTextInputValue("name");
+    const issuedAt = interaction.fields.getTextInputValue("issuedAt");
+    const examiner = interaction.fields.getTextInputValue("examiner");
+    const notes = interaction.fields.getTextInputValue("notes") || "";
+
+    const issuedDate = normalizeOverwatchDate(issuedAt);
+
+    if (!issuedDate) {
+        return interaction.reply({
+            content: "❌ Ungültiges Datum. Bitte nutze dieses Format: `2026-06-12`",
+            flags: MessageFlags.Ephemeral
+        });
+    }
+
+    const status = getOverwatchStatus(issuedDate);
+    const dueDate = getOverwatchDueDate(issuedDate);
+
+    const doc = {
+        dn,
+        name,
+        licenseType: temp.licenseType,
+        issuedAt: issuedDate,
+        dueDate,
+        examiner,
+        notes,
+        source: "discord-panel",
+        createdBy: interaction.user.id,
+        createdByName: interaction.user.tag,
+        lastReminderAt: null,
+        lastReminderLevel: null,
+        refreshedAt: null,
+        createdAt: new Date(),
+        updatedAt: new Date()
+    };
+
+    const insertResult = await overwatchLicensesCollection.insertOne(doc);
+
+    overwatchTempData.delete(interaction.user.id);
+
+    const embed = new EmbedBuilder()
+        .setColor(status.color)
+        .setTitle("✅ Overwatch Lizenz eingetragen")
+        .setDescription(
+            `Die Lizenz wurde erfolgreich gespeichert und erscheint jetzt auch auf der Website.`
+        )
+        .addFields(
+            {
+                name: "👤 Mitglied",
+                value: `**${dn} | ${name}**`,
+                inline: false
+            },
+            {
+                name: "👁️ Lizenz",
+                value: `**${temp.licenseType}**`,
+                inline: true
+            },
+            {
+                name: "📅 Seit",
+                value: `**${formatOverwatchDate(issuedDate)}**`,
+                inline: true
+            },
+            {
+                name: "⏰ Fällig ab",
+                value: `**${formatOverwatchDate(dueDate)}**`,
+                inline: true
+            },
+            {
+                name: "📌 Status",
+                value: `${status.emoji} **${status.label}**`,
+                inline: true
+            },
+            {
+                name: "👨‍🏫 Prüfer",
+                value: `**${examiner}**`,
+                inline: true
+            },
+            {
+                name: "✍️ Eingetragen von",
+                value: `<@${interaction.user.id}>`,
+                inline: true
+            }
+        )
+        .setFooter({
+            text: "LSMD Overwatch-System",
+            iconURL: LSMD_LOGO_URL
+        })
+        .setTimestamp();
+
+    if (notes.trim() !== "") {
+        embed.addFields({
+            name: "📝 Notiz",
+            value: notes.slice(0, 1000),
+            inline: false
+        });
+    }
+
+    if (OVERWATCH_LOG_CHANNEL_ID) {
+        const logChannel = await botClient.channels.fetch(OVERWATCH_LOG_CHANNEL_ID).catch(() => null);
+
+        if (logChannel) {
+            await logChannel.send({
+                embeds: [embed],
+                allowedMentions: {
+                    parse: []
+                }
+            });
+        }
+    }
+
+    await addLog("Overwatch Lizenz eingetragen", {
+        id: insertResult.insertedId.toString(),
+        dn,
+        name,
+        licenseType: temp.licenseType,
+        issuedAt,
+        examiner,
+        source: "discord-panel"
+    }, {
+        id: interaction.user.id,
+        discordId: interaction.user.id,
+        username: interaction.user.tag
+    });
+
+    return interaction.reply({
+        content: "✅ Lizenz wurde gespeichert und ist auf der Website verfügbar.",
+        flags: MessageFlags.Ephemeral
+    });
 }
 
 if (interaction.isButton() && interaction.customId === "attest_open_modal") {
