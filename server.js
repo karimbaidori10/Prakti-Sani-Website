@@ -386,6 +386,48 @@ function getRankFromRoles(roles = []) {
     return "Kein Rang";
 }
 
+async function getPraktiSaniAusbilderOptions() {
+    try {
+        const guild = await botClient.guilds.fetch(process.env.DISCORD_GUILD_ID).catch(() => null);
+
+        if (!guild) {
+            console.log("Guild nicht gefunden für Ausbilder Dropdown");
+            return [];
+        }
+
+        await fetchGuildMembersSafe(guild);
+
+        const allowedRoles = [
+            ADMIN_ROLE_ID,
+            PRAKTI_SANI_ROLE_ID,
+            ROLE_TESTPHASE,
+            ROLE_FESTES_MITGLIED,
+            ROLE_SENIOR,
+            ROLE_UNTERE_LEITUNG,
+            ROLE_STV_LEITUNG,
+            ROLE_LEITUNG
+        ].filter(Boolean);
+
+        const members = Array.from(guild.members.cache.values())
+            .filter(member => !member.user.bot)
+            .filter(member => allowedRoles.some(roleId => member.roles.cache.has(roleId)))
+            .map(member => ({
+                id: member.id,
+                name:
+                    member.displayName ||
+                    member.user.globalName ||
+                    member.user.username ||
+                    member.id
+            }))
+            .sort((a, b) => a.name.localeCompare(b.name, "de"));
+
+        return members;
+    } catch (err) {
+        console.error("Fehler beim Laden der Ausbilder-Liste:", err);
+        return [];
+    }
+}
+
 async function getDiscordMemberInfo(userId) {
     try {
         if (!userId) {
@@ -4599,9 +4641,12 @@ app.get("/termine", requireLogin, async (req, res) => {
             .sort({ date: 1, time: 1 })
             .toArray();
 
+        const ausbilderOptions = await getPraktiSaniAusbilderOptions();
+
         return res.render("termine", viewData(req, {
             active: "termine",
-            termine
+            termine,
+            ausbilderOptions
         }));
     } catch (err) {
         console.error("Fehler beim Laden der Termine:", err);

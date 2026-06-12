@@ -103,7 +103,17 @@
         <input type="date" name="date" required>
         <input type="time" name="time">
 
-        <input name="examiner" placeholder="Ausbilder / Pr&uuml;fer" required>
+        <select name="examiner" required>
+    <option value="">Ausbilder / Pr&uuml;fer w&auml;hlen</option>
+
+    <% if (typeof ausbilderOptions !== "undefined" && ausbilderOptions.length > 0) { %>
+        <% ausbilderOptions.forEach((member) => { %>
+            <option value="<%= member.name %>"><%= member.name %></option>
+        <% }) %>
+    <% } else { %>
+        <option value="" disabled>Keine Ausbilder gefunden</option>
+    <% } %>
+</select>
 
         <textarea name="notes" placeholder="Notiz optional"></textarea>
 
