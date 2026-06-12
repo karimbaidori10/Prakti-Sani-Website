@@ -1064,3 +1064,342 @@ strong{color:#fff}
         grid-template-columns: 1fr !important;
     }
 }
+
+/* ===============================
+   OVERWATCH MINI DESIGN FINAL
+   wie Mitglieder kompakter
+   =============================== */
+
+.ow-page {
+    max-width: 1180px !important;
+    margin: 0 auto !important;
+}
+
+/* Hero viel kleiner */
+.ow-hero {
+    padding: 18px 22px !important;
+    border-radius: 18px !important;
+    margin-bottom: 16px !important;
+}
+
+.ow-hero h1 {
+    font-size: 26px !important;
+    line-height: 1.1 !important;
+    margin: 0 0 6px 0 !important;
+}
+
+.ow-hero p {
+    font-size: 13px !important;
+    line-height: 1.4 !important;
+    margin: 0 !important;
+}
+
+/* Filter Buttons kleiner + schöner */
+.ow-filters {
+    display: flex !important;
+    gap: 8px !important;
+    margin-top: 14px !important;
+    flex-wrap: wrap !important;
+}
+
+.ow-filter-btn,
+.ow-alert button,
+.ow-alert a,
+.ow-action-btn,
+.ow-create-submit,
+.ow-edit-submit {
+    min-height: 34px !important;
+    padding: 8px 13px !important;
+    border-radius: 10px !important;
+    font-size: 12px !important;
+    font-weight: 800 !important;
+    letter-spacing: 0 !important;
+    border: 1px solid rgba(255,255,255,.12) !important;
+    background: rgba(255,255,255,.06) !important;
+    color: #e5e7eb !important;
+    box-shadow: none !important;
+    transition: .18s ease !important;
+}
+
+.ow-filter-btn:hover,
+.ow-alert button:hover,
+.ow-alert a:hover,
+.ow-action-btn:hover,
+.ow-create-submit:hover,
+.ow-edit-submit:hover {
+    transform: translateY(-1px) !important;
+    background: rgba(255,255,255,.1) !important;
+    border-color: rgba(255,255,255,.2) !important;
+}
+
+.ow-filter-btn.active,
+.ow-filter-btn[data-filter="red"] {
+    background: linear-gradient(135deg, #ef233c, #991b1b) !important;
+    color: white !important;
+    border-color: rgba(255,255,255,.16) !important;
+}
+
+/* Stats viel kleiner */
+.ow-stats {
+    display: grid !important;
+    grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+    gap: 10px !important;
+    margin-bottom: 14px !important;
+}
+
+.ow-stat-card {
+    min-height: 68px !important;
+    padding: 12px 14px !important;
+    border-radius: 14px !important;
+    gap: 10px !important;
+}
+
+.ow-stat-icon {
+    width: 36px !important;
+    height: 36px !important;
+    min-width: 36px !important;
+    border-radius: 12px !important;
+    font-size: 16px !important;
+}
+
+.ow-stat-value {
+    font-size: 24px !important;
+    line-height: 1 !important;
+}
+
+.ow-stat-label {
+    font-size: 12px !important;
+    margin-top: 2px !important;
+}
+
+/* Roter Hinweis kleiner */
+.ow-alert {
+    padding: 14px 18px !important;
+    border-radius: 15px !important;
+    margin-bottom: 16px !important;
+    min-height: unset !important;
+}
+
+.ow-alert h2 {
+    font-size: 18px !important;
+    margin-bottom: 4px !important;
+}
+
+.ow-alert p {
+    font-size: 13px !important;
+}
+
+/* Cards deutlich kleiner */
+.ow-license-grid {
+    display: grid !important;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)) !important;
+    gap: 12px !important;
+}
+
+.ow-license-card {
+    padding: 15px 16px !important;
+    border-radius: 16px !important;
+    min-height: unset !important;
+    box-shadow: none !important;
+}
+
+.ow-license-card::before {
+    width: 4px !important;
+}
+
+.ow-license-head {
+    margin-bottom: 12px !important;
+    gap: 10px !important;
+}
+
+.ow-license-badge {
+    padding: 5px 9px !important;
+    border-radius: 999px !important;
+    font-size: 10px !important;
+}
+
+.ow-license-name {
+    font-size: 18px !important;
+    margin: 6px 0 0 0 !important;
+    line-height: 1.15 !important;
+}
+
+.ow-status-pill {
+    padding: 6px 9px !important;
+    border-radius: 999px !important;
+    font-size: 10px !important;
+    white-space: nowrap !important;
+}
+
+/* Lizenzbox kompakter */
+.ow-license-type {
+    padding: 12px 13px !important;
+    border-radius: 13px !important;
+    margin-bottom: 10px !important;
+    gap: 10px !important;
+}
+
+.ow-license-type-icon {
+    width: 34px !important;
+    height: 34px !important;
+    min-width: 34px !important;
+    border-radius: 11px !important;
+    font-size: 15px !important;
+}
+
+.ow-license-type small,
+.ow-detail small {
+    font-size: 9px !important;
+    letter-spacing: .06em !important;
+}
+
+.ow-license-type strong {
+    font-size: 14px !important;
+}
+
+/* Details kleiner und enger */
+.ow-details {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 8px !important;
+    margin-bottom: 10px !important;
+}
+
+.ow-detail {
+    padding: 10px 11px !important;
+    border-radius: 12px !important;
+    min-height: 54px !important;
+}
+
+.ow-detail strong {
+    font-size: 14px !important;
+    line-height: 1.1 !important;
+}
+
+/* Notiz kleiner */
+.ow-note {
+    padding: 10px 11px !important;
+    border-radius: 12px !important;
+    font-size: 12px !important;
+    margin-bottom: 10px !important;
+    line-height: 1.35 !important;
+}
+
+/* Meta unten kleiner */
+.ow-license-meta {
+    padding-top: 10px !important;
+    font-size: 10px !important;
+    gap: 8px !important;
+}
+
+/* Actions schöner wie kleine Management Buttons */
+.ow-actions {
+    display: flex !important;
+    gap: 8px !important;
+    margin-top: 10px !important;
+    flex-wrap: wrap !important;
+}
+
+.ow-actions form {
+    flex: 1 1 auto !important;
+}
+
+.ow-action-btn {
+    width: 100% !important;
+}
+
+.ow-action-btn.success {
+    background: rgba(34,197,94,.13) !important;
+    border-color: rgba(34,197,94,.35) !important;
+    color: #86efac !important;
+}
+
+.ow-action-btn.success:hover {
+    background: rgba(34,197,94,.22) !important;
+}
+
+.ow-action-btn.danger {
+    background: rgba(239,35,60,.13) !important;
+    border-color: rgba(239,35,60,.35) !important;
+    color: #fca5a5 !important;
+}
+
+.ow-action-btn.danger:hover {
+    background: rgba(239,35,60,.22) !important;
+}
+
+/* Bearbeiten Box kleiner */
+.ow-edit-box {
+    margin-top: 10px !important;
+    border-radius: 12px !important;
+}
+
+.ow-edit-box summary {
+    padding: 9px 11px !important;
+    font-size: 12px !important;
+}
+
+.ow-edit-form {
+    padding: 10px !important;
+    gap: 8px !important;
+}
+
+.ow-edit-form label {
+    font-size: 11px !important;
+}
+
+.ow-edit-form input,
+.ow-edit-form select,
+.ow-edit-form textarea,
+.ow-create-form input,
+.ow-create-form select,
+.ow-create-form textarea {
+    min-height: 34px !important;
+    padding: 8px 10px !important;
+    border-radius: 9px !important;
+    font-size: 12px !important;
+}
+
+/* Create Card auch kleiner */
+.ow-create-card {
+    padding: 16px 18px !important;
+    border-radius: 16px !important;
+    margin-bottom: 16px !important;
+}
+
+.ow-create-card h2 {
+    font-size: 20px !important;
+}
+
+.ow-create-card p {
+    font-size: 13px !important;
+}
+
+.ow-create-form {
+    gap: 10px !important;
+}
+
+.ow-create-form label {
+    font-size: 11px !important;
+}
+
+/* Auf kleinen Screens sauber */
+@media (max-width: 1200px) {
+    .ow-stats {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    }
+}
+
+@media (max-width: 750px) {
+    .ow-license-grid {
+        grid-template-columns: 1fr !important;
+    }
+
+    .ow-details {
+        grid-template-columns: 1fr !important;
+    }
+
+    .ow-stats {
+        grid-template-columns: 1fr !important;
+    }
+}
