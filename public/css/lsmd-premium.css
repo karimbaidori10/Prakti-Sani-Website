@@ -174,3 +174,454 @@ strong{color:#fff}
   .card,.clean-panel,.admin-glow{padding:20px!important}
   .nav a{min-height:54px!important}
 }
+
+/* =========================================================
+   OVERWATCH PREMIUM PAGE
+========================================================= */
+
+.ow-hero {
+    display: flex;
+    justify-content: space-between;
+    align-items: stretch;
+    gap: 24px;
+    padding: 34px;
+    border-radius: 32px;
+    background:
+        radial-gradient(circle at 90% 20%, rgba(88,101,242,0.25), transparent 30%),
+        radial-gradient(circle at 10% 100%, rgba(239,35,60,0.18), transparent 34%),
+        linear-gradient(135deg, rgba(8,13,28,0.98), rgba(15,23,42,0.94));
+    border: 1px solid rgba(255,255,255,0.10);
+    box-shadow: 0 30px 90px rgba(0,0,0,0.42);
+    margin-bottom: 24px;
+    overflow: hidden;
+    position: relative;
+}
+
+.ow-hero::after {
+    content: "";
+    position: absolute;
+    inset: -120px;
+    background: linear-gradient(120deg, transparent, rgba(255,255,255,0.05), transparent);
+    transform: translateX(-60%);
+    animation: owHeroShine 8s ease-in-out infinite;
+    pointer-events: none;
+}
+
+@keyframes owHeroShine {
+    0%, 70% { transform: translateX(-60%); }
+    100% { transform: translateX(60%); }
+}
+
+.ow-kicker {
+    display: inline-flex;
+    padding: 8px 13px;
+    border-radius: 999px;
+    background: rgba(88,101,242,0.16);
+    border: 1px solid rgba(88,101,242,0.28);
+    color: #c7d2fe;
+    font-size: 12px;
+    font-weight: 1000;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 16px;
+}
+
+.ow-hero h1 {
+    font-size: clamp(42px, 5vw, 64px);
+    line-height: 0.95;
+    letter-spacing: -2px;
+    margin: 0 0 14px;
+    color: #fff;
+    font-weight: 1000;
+}
+
+.ow-hero p {
+    max-width: 760px;
+    color: #cbd5e1;
+    font-size: 16px;
+    line-height: 1.6;
+}
+
+.ow-hero-badge {
+    min-width: 220px;
+    border-radius: 28px;
+    background:
+        linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.02));
+    border: 1px solid rgba(255,255,255,0.10);
+    display: grid;
+    place-items: center;
+    text-align: center;
+    padding: 24px;
+    z-index: 1;
+}
+
+.ow-hero-badge strong {
+    display: block;
+    color: #fff;
+    font-size: 58px;
+    line-height: 1;
+    font-weight: 1000;
+}
+
+.ow-hero-badge span {
+    color: #94a3b8;
+    font-weight: 800;
+}
+
+.ow-filter-bar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 24px;
+    position: relative;
+    z-index: 2;
+}
+
+.ow-filter {
+    border: 1px solid rgba(255,255,255,0.10);
+    background: rgba(255,255,255,0.05);
+    color: #dbeafe;
+    padding: 11px 16px;
+    border-radius: 999px;
+    font-weight: 1000;
+    cursor: pointer;
+    transition: 0.18s ease;
+}
+
+.ow-filter:hover,
+.ow-filter.active {
+    background: linear-gradient(135deg, #2563eb, #06b6d4);
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 14px 32px rgba(37,99,235,0.28);
+}
+
+.ow-filter.danger.active,
+.ow-filter.danger:hover {
+    background: linear-gradient(135deg, #ef233c, #991b1b);
+    box-shadow: 0 14px 32px rgba(239,35,60,0.28);
+}
+
+.ow-stats {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 18px;
+    margin-bottom: 24px;
+}
+
+.ow-stat-card {
+    display: flex;
+    gap: 16px;
+    align-items: center;
+    padding: 22px;
+    border-radius: 26px;
+    background:
+        linear-gradient(180deg, rgba(15,23,42,0.96), rgba(5,10,25,0.98));
+    border: 1px solid rgba(255,255,255,0.08);
+    box-shadow: 0 22px 58px rgba(0,0,0,0.30);
+}
+
+.ow-stat-card span {
+    width: 58px;
+    height: 58px;
+    border-radius: 20px;
+    display: grid;
+    place-items: center;
+    font-size: 28px;
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.08);
+}
+
+.ow-stat-card h2 {
+    font-size: 34px;
+    line-height: 1;
+    margin: 0 0 6px;
+    color: #fff;
+    font-weight: 1000;
+}
+
+.ow-stat-card p {
+    margin: 0;
+    color: #94a3b8;
+    font-weight: 800;
+}
+
+.ow-stat-card.green {
+    border-color: rgba(34,197,94,0.24);
+}
+
+.ow-stat-card.yellow {
+    border-color: rgba(250,204,21,0.24);
+}
+
+.ow-stat-card.red {
+    border-color: rgba(239,35,60,0.30);
+    box-shadow: 0 22px 58px rgba(239,35,60,0.10);
+}
+
+.ow-alert {
+    display: flex;
+    justify-content: space-between;
+    gap: 18px;
+    align-items: center;
+    padding: 22px 24px;
+    margin-bottom: 24px;
+    border-radius: 26px;
+    background:
+        radial-gradient(circle at 100% 0%, rgba(239,35,60,0.18), transparent 34%),
+        rgba(127, 29, 29, 0.18);
+    border: 1px solid rgba(239,35,60,0.32);
+    box-shadow: 0 22px 58px rgba(239,35,60,0.12);
+}
+
+.ow-alert h2 {
+    margin: 0 0 6px;
+    color: #fff;
+}
+
+.ow-alert p {
+    margin: 0;
+    color: #fecaca;
+}
+
+.ow-alert > span {
+    padding: 10px 14px;
+    border-radius: 999px;
+    background: rgba(239,35,60,0.18);
+    color: #fecaca;
+    border: 1px solid rgba(239,35,60,0.28);
+    font-weight: 1000;
+}
+
+.ow-license-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 20px;
+}
+
+.ow-license-card {
+    position: relative;
+    overflow: hidden;
+    padding: 22px;
+    border-radius: 28px;
+    background:
+        radial-gradient(circle at 100% 0%, rgba(88,101,242,0.13), transparent 30%),
+        linear-gradient(180deg, rgba(15,23,42,0.96), rgba(5,10,25,0.98));
+    border: 1px solid rgba(255,255,255,0.08);
+    box-shadow: 0 24px 64px rgba(0,0,0,0.34);
+    transition: 0.22s ease;
+}
+
+.ow-license-card:hover {
+    transform: translateY(-4px);
+    border-color: rgba(88,101,242,0.32);
+}
+
+.ow-status-green {
+    border-left: 6px solid #22c55e;
+}
+
+.ow-status-yellow {
+    border-left: 6px solid #facc15;
+    box-shadow: 0 24px 64px rgba(250,204,21,0.10);
+}
+
+.ow-status-red {
+    border-left: 6px solid #ef233c;
+    box-shadow: 0 24px 64px rgba(239,35,60,0.16);
+}
+
+.ow-card-top {
+    display: flex;
+    justify-content: space-between;
+    gap: 14px;
+    align-items: flex-start;
+    margin-bottom: 20px;
+}
+
+.ow-dn {
+    display: inline-flex;
+    padding: 7px 11px;
+    border-radius: 999px;
+    background: rgba(37,99,235,0.14);
+    border: 1px solid rgba(37,99,235,0.28);
+    color: #bfdbfe;
+    font-size: 12px;
+    font-weight: 1000;
+    margin-bottom: 10px;
+}
+
+.ow-card-top h2 {
+    margin: 0;
+    color: #fff;
+    font-size: 22px;
+    line-height: 1.15;
+}
+
+.ow-status-pill {
+    white-space: nowrap;
+    padding: 9px 12px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 1000;
+    border: 1px solid rgba(255,255,255,0.10);
+}
+
+.ow-status-pill.green {
+    background: rgba(34,197,94,0.14);
+    color: #86efac;
+    border-color: rgba(34,197,94,0.26);
+}
+
+.ow-status-pill.yellow {
+    background: rgba(250,204,21,0.14);
+    color: #fde68a;
+    border-color: rgba(250,204,21,0.26);
+}
+
+.ow-status-pill.red {
+    background: rgba(239,35,60,0.16);
+    color: #fecaca;
+    border-color: rgba(239,35,60,0.30);
+}
+
+.ow-license-main {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 16px;
+    border-radius: 20px;
+    background: rgba(255,255,255,0.045);
+    border: 1px solid rgba(255,255,255,0.07);
+    margin-bottom: 16px;
+}
+
+.ow-license-icon {
+    width: 52px;
+    height: 52px;
+    border-radius: 18px;
+    display: grid;
+    place-items: center;
+    font-size: 26px;
+    background: linear-gradient(135deg, rgba(88,101,242,0.25), rgba(6,182,212,0.12));
+    border: 1px solid rgba(88,101,242,0.30);
+}
+
+.ow-license-main small,
+.ow-info-grid small,
+.ow-card-note small {
+    display: block;
+    color: #94a3b8;
+    font-size: 11px;
+    font-weight: 1000;
+    text-transform: uppercase;
+    margin-bottom: 5px;
+}
+
+.ow-license-main strong,
+.ow-info-grid strong {
+    display: block;
+    color: #fff;
+    font-weight: 1000;
+}
+
+.ow-info-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+}
+
+.ow-info-grid > div {
+    padding: 14px;
+    border-radius: 18px;
+    background: rgba(255,255,255,0.035);
+    border: 1px solid rgba(255,255,255,0.065);
+}
+
+.ow-card-note {
+    margin-top: 14px;
+    padding: 14px;
+    border-radius: 18px;
+    background: rgba(37,99,235,0.08);
+    border: 1px solid rgba(37,99,235,0.18);
+}
+
+.ow-card-note p {
+    margin: 0;
+    color: #cbd5e1;
+}
+
+.ow-card-footer {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    justify-content: space-between;
+    margin-top: 16px;
+    padding-top: 14px;
+    border-top: 1px solid rgba(255,255,255,0.07);
+    color: #94a3b8;
+    font-size: 12px;
+}
+
+.ow-card-footer strong {
+    color: #dbeafe;
+}
+
+.ow-empty {
+    grid-column: 1 / -1;
+    padding: 34px;
+    border-radius: 28px;
+    text-align: center;
+    background: rgba(255,255,255,0.035);
+    border: 1px dashed rgba(148,163,184,0.24);
+}
+
+.ow-empty h2 {
+    color: #fff;
+    margin-bottom: 8px;
+}
+
+.ow-empty p {
+    color: #94a3b8;
+}
+
+@media (max-width: 1150px) {
+    .ow-hero {
+        flex-direction: column;
+    }
+
+    .ow-hero-badge {
+        min-width: 100%;
+    }
+
+    .ow-stats {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .ow-license-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 700px) {
+    .ow-hero {
+        padding: 24px;
+        border-radius: 24px;
+    }
+
+    .ow-stats {
+        grid-template-columns: 1fr;
+    }
+
+    .ow-card-top {
+        flex-direction: column;
+    }
+
+    .ow-status-pill {
+        white-space: normal;
+    }
+
+    .ow-info-grid {
+        grid-template-columns: 1fr;
+    }
+}

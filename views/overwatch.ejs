@@ -1,126 +1,180 @@
-<section class="page-header sheet-hero">
-    <div>
-        <h1>Overwatch-System</h1>
-        <p>Lizenzverwaltung, Auffrischungen und Statusübersicht für Overwatch, Overwatch+ und Osprey.</p>
+<section class="ow-hero">
+    <div class="ow-hero-left">
+        <div class="ow-kicker">LSMD • Overwatch-Abteilung</div>
+        <h1>Overwatch Lizenzsystem</h1>
+        <p>
+            Übersicht aller Overwatch-, Overwatch+ und Osprey-Lizenzen.
+            Status wird automatisch nach Ablauf berechnet.
+        </p>
+
+        <div class="ow-filter-bar">
+            <button class="ow-filter active" data-filter="all">Alle</button>
+            <button class="ow-filter" data-filter="Overwatch">Overwatch</button>
+            <button class="ow-filter" data-filter="Overwatch+">Overwatch+</button>
+            <button class="ow-filter" data-filter="Osprey">Osprey</button>
+            <button class="ow-filter danger" data-filter="red">Nur fällig</button>
+        </div>
     </div>
 
-    <div class="sheet-hero-count">
+    <div class="ow-hero-badge">
         <strong><%= stats.total %></strong>
-        <span>Lizenz(en)</span>
+        <span>aktive Lizenz(en)</span>
     </div>
 </section>
 
-<section class="stats-grid">
-    <div class="stat-card stat-blue">
-        <div class="stat-icon">👁️</div>
+<section class="ow-stats">
+    <div class="ow-stat-card">
+        <span>👁️</span>
         <div>
             <h2><%= stats.total %></h2>
-            <strong>Gesamt</strong>
-            <p>Alle Lizenzen</p>
+            <p>Gesamt</p>
         </div>
     </div>
 
-    <div class="stat-card stat-green">
-        <div class="stat-icon">✅</div>
+    <div class="ow-stat-card green">
+        <span>✅</span>
         <div>
             <h2><%= stats.green %></h2>
-            <strong>Gültig</strong>
-            <p>0–11 Tage</p>
+            <p>Gültig</p>
         </div>
     </div>
 
-    <div class="stat-card stat-yellow">
-        <div class="stat-icon">🟡</div>
+    <div class="ow-stat-card yellow">
+        <span>🟡</span>
         <div>
             <h2><%= stats.yellow %></h2>
-            <strong>Bald fällig</strong>
-            <p>ab 12 Tagen</p>
+            <p>Bald fällig</p>
         </div>
     </div>
 
-    <div class="stat-card stat-red">
-        <div class="stat-icon">🔴</div>
+    <div class="ow-stat-card red">
+        <span>🔴</span>
         <div>
             <h2><%= stats.red %></h2>
-            <strong>Auffrischung nötig</strong>
-            <p>ab 25 Tagen</p>
+            <p>Auffrischung nötig</p>
         </div>
     </div>
 </section>
 
-<section class="card sheet-main">
-    <div class="card-header">
+<% const redLicenses = licenses.filter(l => l.status.key === "red"); %>
+
+<% if (redLicenses.length > 0) { %>
+    <section class="ow-alert">
         <div>
-            <h2>Overwatch-Lizenzen</h2>
-            <p class="card-subtitle">Alle Einträge aus Website und Discord-Panel.</p>
+            <h2>🔴 Auffrischungen fällig</h2>
+            <p>
+                <strong><%= redLicenses.length %></strong> Lizenz(en) benötigen aktuell eine Auffrischungsprüfung.
+            </p>
         </div>
+        <span>Overwatch-Abteilung informieren</span>
+    </section>
+<% } %>
 
-        <span class="chip blue"><%= licenses.length %> Eintrag(e)</span>
-    </div>
-
+<section class="ow-license-grid" id="owLicenseGrid">
     <% if (licenses.length === 0) { %>
-        <div class="empty-state">
-            <h3>Keine Lizenzen eingetragen</h3>
+        <div class="ow-empty">
+            <h2>Keine Lizenzen vorhanden</h2>
             <p>Trage die erste Lizenz über das Discord-Panel ein.</p>
         </div>
-    <% } else { %>
-        <div class="ow-table">
-            <div class="ow-table-head">
-                <span>Mitglied</span>
-                <span>Lizenz</span>
-                <span>Seit</span>
-                <span>Fällig ab</span>
-                <span>Status</span>
-                <span>Prüfer</span>
-                <span>Quelle</span>
+    <% } %>
+
+    <% licenses.forEach((license) => { %>
+        <article 
+            class="ow-license-card ow-status-<%= license.status.key %>"
+            data-license="<%= license.licenseType %>"
+            data-status="<%= license.status.key %>"
+        >
+            <div class="ow-card-top">
+                <div>
+                    <span class="ow-dn"><%= license.dn || "Keine DN" %></span>
+                    <h2><%= license.name || "Unbekannt" %></h2>
+                </div>
+
+                <div class="ow-status-pill <%= license.status.key %>">
+                    <%= license.status.emoji %> <%= license.status.label %>
+                </div>
             </div>
 
-            <% licenses.forEach((license) => { %>
-                <div class="ow-row ow-<%= license.status.key %>">
-                    <div>
-                        <small>DN / Name</small>
-                        <strong><%= license.dn %> | <%= license.name %></strong>
-                    </div>
-
-                    <div>
-                        <small>Lizenz</small>
-                        <strong><%= license.licenseType %></strong>
-                    </div>
-
-                    <div>
-                        <small>Seit</small>
-                        <strong><%= license.issuedAtFormatted %></strong>
-                    </div>
-
-                    <div>
-                        <small>Fällig ab</small>
-                        <strong><%= license.dueDateFormatted %></strong>
-                    </div>
-
-                    <div>
-                        <small>Status</small>
-                        <strong><%= license.status.emoji %> <%= license.status.label %></strong>
-                        <span><%= license.status.days %> Tag(e)</span>
-                    </div>
-
-                    <div>
-                        <small>Prüfer</small>
-                        <strong><%= license.examiner || "-" %></strong>
-                    </div>
-
-                    <div>
-                        <small>Quelle</small>
-                        <strong><%= license.source === "discord-panel" ? "Discord Panel" : "Website" %></strong>
-                    </div>
-
-                    <% if (license.notes) { %>
-                        <div class="ow-note">
-                            <small>Notiz</small>
-                            <p><%= license.notes %></p>
-                        </div>
+            <div class="ow-license-main">
+                <div class="ow-license-icon">
+                    <% if (license.licenseType === "Osprey") { %>
+                        🦅
+                    <% } else { %>
+                        👁️
                     <% } %>
                 </div>
-            <% }) %>
-        </div>
-    <% } %>
+
+                <div>
+                    <small>Lizenz</small>
+                    <strong><%= license.licenseType %></strong>
+                </div>
+            </div>
+
+            <div class="ow-info-grid">
+                <div>
+                    <small>Seit</small>
+                    <strong><%= license.issuedAtFormatted %></strong>
+                </div>
+
+                <div>
+                    <small>Fällig ab</small>
+                    <strong><%= license.dueDateFormatted %></strong>
+                </div>
+
+                <div>
+                    <small>Alter</small>
+                    <strong><%= license.status.days %> Tag(e)</strong>
+                </div>
+
+                <div>
+                    <small>Prüfer</small>
+                    <strong><%= license.examiner || "-" %></strong>
+                </div>
+            </div>
+
+            <% if (license.notes) { %>
+                <div class="ow-card-note">
+                    <small>Notiz</small>
+                    <p><%= license.notes %></p>
+                </div>
+            <% } %>
+
+            <div class="ow-card-footer">
+                <span>
+                    Quelle:
+                    <strong><%= license.source === "discord-panel" ? "Discord Panel" : "Website" %></strong>
+                </span>
+
+                <% if (license.createdByName) { %>
+                    <span>
+                        Eingetragen von:
+                        <strong><%= license.createdByName %></strong>
+                    </span>
+                <% } %>
+            </div>
+        </article>
+    <% }) %>
 </section>
+
+<script>
+    document.querySelectorAll(".ow-filter").forEach((button) => {
+        button.addEventListener("click", () => {
+            const filter = button.dataset.filter;
+
+            document.querySelectorAll(".ow-filter").forEach(btn => btn.classList.remove("active"));
+            button.classList.add("active");
+
+            document.querySelectorAll(".ow-license-card").forEach((card) => {
+                const license = card.dataset.license;
+                const status = card.dataset.status;
+
+                const show =
+                    filter === "all" ||
+                    filter === license ||
+                    filter === status;
+
+                card.style.display = show ? "" : "none";
+            });
+        });
+    });
+</script>
