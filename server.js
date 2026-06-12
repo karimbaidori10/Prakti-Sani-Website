@@ -3043,6 +3043,77 @@ botClient.on(Events.InteractionCreate, async (interaction) => {
 // OVERWATCH LIZENZ SYSTEM
 // ===============================
 
+if (interaction.isButton() && interaction.customId === "overwatch_due_show") {
+    const licensesRaw = await overwatchLicensesCollection
+        .find({})
+        .sort({ issuedAt: 1, createdAt: 1 })
+        .toArray();
+
+    const dueLicenses = licensesRaw
+        .map((license) => {
+            const status = getOverwatchStatus(license.issuedAt);
+            const dueDate = getOverwatchDueDate(license.issuedAt);
+
+            return {
+                ...license,
+                status,
+                dueDate
+            };
+        })
+        .filter((license) => license.status.key === "yellow" || license.status.key === "red")
+        .sort((a, b) => {
+            if (a.status.key === "red" && b.status.key !== "red") return -1;
+            if (a.status.key !== "red" && b.status.key === "red") return 1;
+            return b.status.days - a.status.days;
+        });
+
+    if (dueLicenses.length === 0) {
+        return interaction.reply({
+            content: "✅ Aktuell sind keine Overwatch-Lizenzen bald fällig oder überfällig.",
+            flags: MessageFlags.Ephemeral
+        });
+    }
+
+    const listText = dueLicenses
+        .slice(0, 20)
+        .map((license, index) => {
+            return (
+                `**${index + 1}. ${license.status.emoji} ${license.dn} | ${license.name}**\n` +
+                `Lizenz: **${license.licenseType}**\n` +
+                `Seit: **${formatOverwatchDate(license.issuedAt)}** | Fällig ab: **${formatOverwatchDate(license.dueDate)}**\n` +
+                `Status: **${license.status.label}** (${license.status.days} Tag(e))`
+            );
+        })
+        .join("\n\n");
+
+    const embed = new EmbedBuilder()
+        .setColor(0xfacc15)
+        .setTitle("📋 Overwatch Auffrischungs-Übersicht")
+        .setDescription(
+            "Hier sind alle Lizenzen, die **bald fällig** oder bereits **auffrischungspflichtig** sind.\n\n" +
+            listText
+        )
+        .addFields(
+            {
+                name: "📌 Hinweis",
+                value: dueLicenses.length > 20
+                    ? `Es werden nur die ersten 20 von ${dueLicenses.length} Einträgen angezeigt. Die vollständige Liste ist auf der Website.`
+                    : "Die vollständige Liste ist auch auf der Website sichtbar.",
+                inline: false
+            }
+        )
+        .setFooter({
+            text: "LSMD Overwatch-System • Fällige anzeigen",
+            iconURL: LSMD_LOGO_URL
+        })
+        .setTimestamp();
+
+    return interaction.reply({
+        embeds: [embed],
+        flags: MessageFlags.Ephemeral
+    });
+}
+
 if (interaction.isButton() && interaction.customId === "overwatch_license_start") {
     const row = new ActionRowBuilder().addComponents(
         new StringSelectMenuBuilder()
