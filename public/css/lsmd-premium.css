@@ -1403,3 +1403,14 @@ strong{color:#fff}
         grid-template-columns: 1fr !important;
     }
 }
+
+.ow-license-card {
+    max-width: 420px !important;
+    padding: 10px !important;
+    border-radius: 12px !important;
+}
+
+.ow-license-grid {
+    grid-template-columns: repeat(auto-fit, minmax(260px, 420px)) !important;
+    justify-content: start !important;
+}
