@@ -173,6 +173,30 @@
             <% } %>
 
 <% if (isAdmin || (user && user.role === "Prakti-Sani")) { %>
+    <details class="ow-edit-box">
+        <summary>✏️ Lizenz bearbeiten</summary>
+
+        <form method="POST" action="/overwatch/<%= license._id %>/update" class="ow-edit-form">
+            <input name="dn" value="<%= license.dn || '' %>" placeholder="Dienstnummer" required>
+
+            <input name="name" value="<%= license.name || '' %>" placeholder="Name" required>
+
+            <select name="licenseType" required>
+                <option value="Overwatch" <%= license.licenseType === "Overwatch" ? "selected" : "" %>>👁️ Overwatch</option>
+                <option value="Overwatch+" <%= license.licenseType === "Overwatch+" ? "selected" : "" %>>👁️ Overwatch+</option>
+                <option value="Osprey" <%= license.licenseType === "Osprey" ? "selected" : "" %>>🦅 Osprey</option>
+            </select>
+
+            <input type="date" name="issuedAt" value="<%= license.issuedAt ? new Date(license.issuedAt).toISOString().slice(0, 10) : '' %>" required>
+
+            <input name="examiner" value="<%= license.examiner || '' %>" placeholder="Prüfer / Ausbilder" required>
+
+            <textarea name="notes" placeholder="Notiz optional"><%= license.notes || '' %></textarea>
+
+            <button type="submit">Änderung speichern</button>
+        </form>
+    </details>
+
     <div class="ow-actions">
         <form method="POST" action="/overwatch/<%= license._id %>/refresh">
             <button type="submit" class="ow-action-btn success">

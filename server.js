@@ -5505,6 +5505,72 @@ app.post("/overwatch/create", requireLogin, requireAusbilderOrAdmin, async (req,
     }
 });
 
+app.post("/overwatch/:id/update", requireLogin, requireAusbilderOrAdmin, async (req, res) => {
+    try {
+        const licenseId = req.params.id;
+        const { dn, name, licenseType, issuedAt, examiner, notes } = req.body;
+
+        if (!dn || !name || !licenseType || !issuedAt || !examiner) {
+            return res.status(400).send("Bitte alle Pflichtfelder ausfüllen.");
+        }
+
+        if (!OVERWATCH_LICENSE_TYPES.includes(licenseType)) {
+            return res.status(400).send("Ungültige Lizenz.");
+        }
+
+        const license = await overwatchLicensesCollection.findOne({
+            _id: new ObjectId(licenseId)
+        });
+
+        if (!license) {
+            return res.status(404).send("Lizenz nicht gefunden.");
+        }
+
+        const issuedDate = normalizeOverwatchDate(issuedAt);
+
+        if (!issuedDate) {
+            return res.status(400).send("Ungültiges Datum. Nutze YYYY-MM-DD.");
+        }
+
+        const dueDate = getOverwatchDueDate(issuedDate);
+
+        await overwatchLicensesCollection.updateOne(
+            { _id: license._id },
+            {
+                $set: {
+                    dn: dn.trim(),
+                    name: name.trim(),
+                    licenseType,
+                    issuedAt: issuedDate,
+                    dueDate,
+                    examiner: examiner.trim(),
+                    notes: notes?.trim() || "",
+                    lastReminderAt: null,
+                    lastReminderDayKey: null,
+                    lastReminderLevel: null,
+                    updatedAt: new Date(),
+                    updatedBy: req.session.user?.discordId || null,
+                    updatedByName: req.session.user?.username || "Unbekannt"
+                }
+            }
+        );
+
+        await addLog("Overwatch Lizenz bearbeitet", {
+            id: license._id.toString(),
+            dn: dn.trim(),
+            name: name.trim(),
+            licenseType,
+            issuedAt,
+            examiner: examiner.trim()
+        }, req.session.user);
+
+        return res.redirect("/overwatch");
+    } catch (err) {
+        console.error("Overwatch Lizenz bearbeiten Fehler:", err);
+        return res.status(500).send("Lizenz konnte nicht bearbeitet werden.");
+    }
+});
+
 app.post("/overwatch/:id/refresh", requireLogin, requireAusbilderOrAdmin, async (req, res) => {
     try {
         const licenseId = req.params.id;
