@@ -3568,12 +3568,11 @@ return interaction.update({
 if (
     interaction.isStringSelectMenu() &&
     [
-        [
-    "overwatch_date_year",
-    "overwatch_date_month",
-    "overwatch_date_day_1",
-    "overwatch_date_day_2"
-].includes(interaction.customId)
+        "overwatch_date_year",
+        "overwatch_date_month",
+        "overwatch_date_day_1",
+        "overwatch_date_day_2"
+    ].includes(interaction.customId)
 ) {
     const oldData = overwatchTempData.get(interaction.user.id) || {};
 
@@ -3585,7 +3584,10 @@ if (
         oldData.month = interaction.values[0];
     }
 
-    if (interaction.customId === "overwatch_date_day") {
+    if (
+        interaction.customId === "overwatch_date_day_1" ||
+        interaction.customId === "overwatch_date_day_2"
+    ) {
         oldData.day = interaction.values[0];
     }
 
