@@ -312,10 +312,38 @@ function requireLogin(req, res, next) {
 
 function requireAdmin(req, res, next) {
     if (!req.session.isAdmin) {
-        return res.status(403).send("Kein Zugriff auf diesen Bereich.");
+        return res.status(403).send("Werd Leitung hier dann darfst reinschnuppern Höhöhö.");
     }
 
     next();
+}
+
+function requireAusbilderOrAdmin(req, res, next) {
+    if (req.session.isAdmin) {
+        return next();
+    }
+
+    const userRole = req.session.user?.role || "";
+    const userRank = req.session.user?.rank || "";
+
+    const allowedRoles = [
+        "Prakti-Sani"
+    ];
+
+    const allowedRanks = [
+        "Prakti-Sani Testphase",
+        "Prakti-Sani Festes Mitglied",
+        "Senior Prakti-Sani",
+        "Untere Leitung",
+        "Stv Leitung",
+        "Leitung"
+    ];
+
+    if (allowedRoles.includes(userRole) || allowedRanks.includes(userRank)) {
+        return next();
+    }
+
+    return res.status(403).send("Kein Zugriff auf diese Funktion.");
 }
 
 function viewData(req, extra = {}) {
@@ -4834,7 +4862,7 @@ res.redirect("/admin");
 // TERMINE
 // =====================
 
-app.post("/termine/create", requireLogin, requireAdmin, async (req, res) => {
+app.post("/termine/create", requireLogin, requireAusbilderOrAdmin, async (req, res) => {
     try {
         const {
             name,

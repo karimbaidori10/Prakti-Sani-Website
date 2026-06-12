@@ -80,7 +80,7 @@
     </div>
 </div>
 
-<% if (isAdmin) { %>
+<% if (isAdmin || (user && user.role === "Prakti-Sani")) { %>
 <section class="card md-small-entry-card admin-glow">
     <div class="card-header">
         <div>
