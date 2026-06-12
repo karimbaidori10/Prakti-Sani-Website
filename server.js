@@ -287,10 +287,18 @@ passport.use(new DiscordStrategy({
         const isAdmin = roles.includes(ADMIN_ROLE_ID);
         const isPraktiSani = roles.includes(PRAKTI_SANI_ROLE_ID);
         const hasWebsiteKey = roles.includes(WEBSITE_KEY_ROLE_ID);
+        const isOverwatchLeitung = roles.includes(ROLE_OVERWATCH_LEITUNG);
+        const canEditOverwatchRole = roles.includes(ROLE_OVERWATCH_LICENSE_EDIT);
         const rank = getRankFromRoles(roles);
 
 
-        if (!isAdmin && !isPraktiSani && !hasWebsiteKey) {
+        if (
+    !isAdmin &&
+    !isPraktiSani &&
+    !hasWebsiteKey &&
+    !isOverwatchLeitung &&
+    !canEditOverwatchRole
+) {
     return done(null, false);
 }
 
@@ -310,8 +318,16 @@ return done(null, {
     avatar: avatarUrl,
     roles,
     isAdmin,
-    isViewOnly: hasWebsiteKey && !isAdmin && !isPraktiSani,
-    role: isAdmin ? "Admin" : hasWebsiteKey ? "Website Schlüssel" : "Prakti-Sani",
+    isViewOnly: hasWebsiteKey && !isAdmin && !isPraktiSani && !isOverwatchLeitung && !canEditOverwatchRole,
+    role: isAdmin
+        ? "Admin"
+        : isOverwatchLeitung
+            ? "Overwatch Leitung"
+            : canEditOverwatchRole
+                ? "Lizenz bearbeiten Overwatch"
+                : hasWebsiteKey
+                    ? "Website Schlüssel"
+                    : "Prakti-Sani",
     rank
 });
 
@@ -5535,7 +5551,8 @@ app.get(
     role: req.user.role,
     rank: req.user.rank,
     avatar: req.user.avatar || null,
-    isViewOnly: req.user.isViewOnly || false
+    isViewOnly: req.user.isViewOnly || false,
+    roles: req.user.roles || []
 };
 
         await pointsCollection.updateOne(
