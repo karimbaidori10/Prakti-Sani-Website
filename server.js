@@ -46,6 +46,7 @@ const POINTS_LIST_CACHE_TIME = 1000 * 30;
 
 const ADMIN_ROLE_ID = process.env.ADMIN_ROLE_ID;
 const PRAKTI_SANI_ROLE_ID = process.env.PRAKTI_SANI_ROLE_ID;
+const WEBSITE_KEY_ROLE_ID = process.env.WEBSITE_KEY_ROLE_ID;
 const ROLE_TESTPHASE = process.env.PRAKTI_SANI_ROLE_ID;
 const ROLE_FESTES_MITGLIED = process.env.ROLE_FESTES_MITGLIED;
 const ROLE_SENIOR = process.env.ROLE_SENIOR;
@@ -267,12 +268,13 @@ passport.use(new DiscordStrategy({
 
         const isAdmin = roles.includes(ADMIN_ROLE_ID);
         const isPraktiSani = roles.includes(PRAKTI_SANI_ROLE_ID);
+        const hasWebsiteKey = roles.includes(WEBSITE_KEY_ROLE_ID);
         const rank = getRankFromRoles(roles);
 
 
-        if (!isAdmin && !isPraktiSani) {
-            return done(null, false);
-        }
+        if (!isAdmin && !isPraktiSani && !hasWebsiteKey) {
+    return done(null, false);
+}
 
 const displayName =
     member.nick ||
@@ -290,7 +292,8 @@ return done(null, {
     avatar: avatarUrl,
     roles,
     isAdmin,
-    role: isAdmin ? "Admin" : "Prakti-Sani",
+    isViewOnly: hasWebsiteKey && !isAdmin && !isPraktiSani,
+    role: isAdmin ? "Admin" : hasWebsiteKey ? "Website Schlüssel" : "Prakti-Sani",
     rank
 });
 
@@ -319,6 +322,7 @@ function viewData(req, extra = {}) {
     return {
         user: req.session.user || null,
         isAdmin: req.session.isAdmin || false,
+        isViewOnly: req.session.user?.isViewOnly || false,
         active: "",
         ...extra
     };
@@ -4352,12 +4356,13 @@ app.get(
         req.session.isAdmin = req.user.isAdmin;
 
         req.session.user = {
-            username: req.user.username,
-            discordId: req.user.id,
-            role: req.user.role,
-            rank: req.user.rank,
-avatar: req.user.avatar || null
-        };
+    username: req.user.username,
+    discordId: req.user.id,
+    role: req.user.role,
+    rank: req.user.rank,
+    avatar: req.user.avatar || null,
+    isViewOnly: req.user.isViewOnly || false
+};
 
         await pointsCollection.updateOne(
             { userId: req.user.id },
