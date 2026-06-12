@@ -6134,6 +6134,10 @@ app.post("/overwatch/:id/delete", requireLogin, requireAdmin, async (req, res) =
     try {
         const licenseId = req.params.id;
 
+        const licenseBeforeDelete = await overwatchLicensesCollection.findOne({
+        _id: new ObjectId(req.params.id)
+        });
+
         const license = await overwatchLicensesCollection.findOne({
             _id: new ObjectId(licenseId)
         });
@@ -6145,6 +6149,51 @@ app.post("/overwatch/:id/delete", requireLogin, requireAdmin, async (req, res) =
         await overwatchLicensesCollection.deleteOne({
             _id: license._id
         });
+
+if (licenseBeforeDelete && OVERWATCH_LOG_CHANNEL_ID) {
+    const logChannel = await botClient.channels.fetch(OVERWATCH_LOG_CHANNEL_ID).catch(() => null);
+
+    if (logChannel) {
+        const embed = new EmbedBuilder()
+            .setColor(0xef233c)
+            .setTitle("🗑️ Overwatch Lizenz gelöscht")
+            .setDescription("Eine Overwatch-Lizenz wurde von der Website gelöscht.")
+            .addFields(
+                {
+                    name: "👤 Mitglied",
+                    value: `**${licenseBeforeDelete.dn || "-"} | ${licenseBeforeDelete.name || "-"}**`,
+                    inline: false
+                },
+                {
+                    name: "👁️ Lizenz",
+                    value: `**${licenseBeforeDelete.licenseType || "-"}**`,
+                    inline: true
+                },
+                {
+                    name: "📅 Lizenz seit",
+                    value: `**${formatOverwatchDate(licenseBeforeDelete.issuedAt)}**`,
+                    inline: true
+                },
+                {
+                    name: "🗑️ Gelöscht von",
+                    value: `**${req.session.user?.username || "Unbekannt"}**`,
+                    inline: false
+                }
+            )
+            .setFooter({
+                text: "LSMD Overwatch-System • Löschung",
+                iconURL: LSMD_LOGO_URL
+            })
+            .setTimestamp();
+
+        await logChannel.send({
+            embeds: [embed],
+            allowedMentions: {
+                parse: []
+            }
+        });
+    }
+}
 
         await addLog("Overwatch Lizenz gelöscht", {
             id: license._id.toString(),
