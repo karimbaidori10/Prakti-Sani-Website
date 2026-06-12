@@ -3114,6 +3114,183 @@ if (interaction.isButton() && interaction.customId === "overwatch_due_show") {
     });
 }
 
+if (interaction.isButton() && interaction.customId === "overwatch_refresh_start") {
+    const licensesRaw = await overwatchLicensesCollection
+        .find({})
+        .sort({ issuedAt: 1, createdAt: 1 })
+        .limit(25)
+        .toArray();
+
+    if (licensesRaw.length === 0) {
+        return interaction.reply({
+            content: "❌ Es sind noch keine Overwatch-Lizenzen eingetragen.",
+            flags: MessageFlags.Ephemeral
+        });
+    }
+
+    const options = licensesRaw.map((license) => {
+        const status = getOverwatchStatus(license.issuedAt);
+
+        return {
+            label: `${license.dn} | ${license.name}`.slice(0, 100),
+            value: license._id.toString(),
+            description: `${license.licenseType} • ${status.label}`.slice(0, 100),
+            emoji: status.key === "red" ? "🔴" : status.key === "yellow" ? "🟡" : "✅"
+        };
+    });
+
+    const row = new ActionRowBuilder().addComponents(
+        new StringSelectMenuBuilder()
+            .setCustomId("overwatch_refresh_select")
+            .setPlaceholder("Lizenz auswählen für Auffrischung")
+            .setMinValues(1)
+            .setMaxValues(1)
+            .addOptions(options)
+    );
+
+    return interaction.reply({
+        content: "Wähle die Lizenz aus, die aufgefrischt wurde:",
+        components: [row],
+        flags: MessageFlags.Ephemeral
+    });
+}
+
+if (interaction.isStringSelectMenu() && interaction.customId === "overwatch_refresh_select") {
+    const licenseId = interaction.values[0];
+
+    let license;
+
+    try {
+        license = await overwatchLicensesCollection.findOne({
+            _id: new ObjectId(licenseId)
+        });
+    } catch (err) {
+        return interaction.update({
+            content: "❌ Ungültige Lizenz-ID.",
+            components: []
+        });
+    }
+
+    if (!license) {
+        return interaction.update({
+            content: "❌ Lizenz wurde nicht gefunden.",
+            components: []
+        });
+    }
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const newDueDate = getOverwatchDueDate(today);
+    const status = getOverwatchStatus(today);
+
+    await overwatchLicensesCollection.updateOne(
+        { _id: license._id },
+        {
+            $set: {
+                issuedAt: today,
+                dueDate: newDueDate,
+                refreshedAt: new Date(),
+                refreshedBy: interaction.user.id,
+                refreshedByName: interaction.user.tag,
+                lastReminderAt: null,
+                lastReminderDayKey: null,
+                lastReminderLevel: null,
+                updatedAt: new Date()
+            }
+        }
+    );
+
+    const embed = new EmbedBuilder()
+        .setColor(0x22c55e)
+        .setTitle("✅ Overwatch Auffrischung eingetragen")
+        .setDescription(
+            `**${license.dn} | ${license.name}** wurde über das Discord-Panel aufgefrischt.\n\n` +
+            "Die Lizenz ist jetzt wieder gültig und wird auf der Website wieder grün angezeigt."
+        )
+        .addFields(
+            {
+                name: "👤 Mitglied",
+                value: `**${license.dn} | ${license.name}**`,
+                inline: false
+            },
+            {
+                name: "👁️ Lizenz",
+                value: `**${license.licenseType}**`,
+                inline: true
+            },
+            {
+                name: "📅 Neues Datum",
+                value: `**${formatOverwatchDate(today)}**`,
+                inline: true
+            },
+            {
+                name: "⏰ Nächste Auffrischung",
+                value: `**${formatOverwatchDate(newDueDate)}**`,
+                inline: true
+            },
+            {
+                name: "📌 Status",
+                value: `${status.emoji} **${status.label}**`,
+                inline: true
+            },
+            {
+                name: "✅ Aufgefrischt von",
+                value: `<@${interaction.user.id}>`,
+                inline: true
+            }
+        )
+        .setFooter({
+            text: "LSMD Overwatch-System • Discord Panel",
+            iconURL: LSMD_LOGO_URL
+        })
+        .setTimestamp();
+
+    if (OVERWATCH_REMINDER_CHANNEL_ID) {
+        const reminderChannel = await botClient.channels.fetch(OVERWATCH_REMINDER_CHANNEL_ID).catch(() => null);
+
+        if (reminderChannel) {
+            await reminderChannel.send({
+                embeds: [embed],
+                allowedMentions: {
+                    parse: []
+                }
+            });
+        }
+    }
+
+    if (OVERWATCH_LOG_CHANNEL_ID) {
+        const logChannel = await botClient.channels.fetch(OVERWATCH_LOG_CHANNEL_ID).catch(() => null);
+
+        if (logChannel) {
+            await logChannel.send({
+                embeds: [embed],
+                allowedMentions: {
+                    parse: []
+                }
+            });
+        }
+    }
+
+    await addLog("Overwatch Auffrischung über Discord Panel abgeschlossen", {
+        id: license._id.toString(),
+        dn: license.dn,
+        name: license.name,
+        licenseType: license.licenseType,
+        refreshedBy: interaction.user.id
+    }, {
+        id: interaction.user.id,
+        discordId: interaction.user.id,
+        username: interaction.user.tag
+    });
+
+    return interaction.update({
+        content: "✅ Auffrischung wurde gespeichert. Website ist wieder grün.",
+        embeds: [],
+        components: []
+    });
+}
+
 if (interaction.isButton() && interaction.customId === "overwatch_license_start") {
     const row = new ActionRowBuilder().addComponents(
         new StringSelectMenuBuilder()
