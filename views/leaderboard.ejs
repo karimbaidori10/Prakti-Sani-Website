@@ -73,9 +73,9 @@
     <div class="stat-card stat-green">
         <div class="stat-icon">OK</div>
         <div>
-            <h2><%= users ? users.filter(u => Number(u.points || 0) >= 5).length : 0 %></h2>
+            <h2><%= users ? users.filter(u => Number(u.points || 0) >= 10).length : 0 %></h2>
             <strong>Ziel erreicht</strong>
-            <p>Mindestens 5 Punkte</p>
+            <p>Mindestens 10 Punkte</p>
         </div>
     </div>
 
@@ -139,7 +139,7 @@
                     </div>
 
                     <div class="leader-status">
-                        <% if (Number(user.points || 0) >= 5) { %>
+                        <% if (Number(user.points || 0) >= 10) { %>
                             <span class="badge success">Ziel erreicht</span>
                         <% } else { %>
                             <span class="badge warning">Noch offen</span>

@@ -16,18 +16,18 @@
     <div class="stat-card stat-green">
         <div class="stat-icon">✅</div>
         <div>
-            <h2><%= users ? users.filter(u => Number(u.points || 0) >= 5).length : 0 %></h2>
+            <h2><%= users ? users.filter(u => Number(u.points || 0) >= 10).length : 0 %></h2>
             <strong>Wochenziel</strong>
-            <p>5+ Punkte erreicht</p>
+            <p>10+ Punkte erreicht</p>
         </div>
     </div>
 
     <div class="stat-card stat-yellow">
         <div class="stat-icon">⏳</div>
         <div>
-            <h2><%= users ? users.filter(u => Number(u.points || 0) < 5).length : 0 %></h2>
+            <h2><%= users ? users.filter(u => Number(u.points || 0) < 10).length : 0 %></h2>
             <strong>Noch offen</strong>
-            <p>Unter 5 Punkte</p>
+            <p>Unter 10 Punkte</p>
         </div>
     </div>
 
@@ -88,7 +88,7 @@
             <% users.forEach((member, index) => { %>
                 <%
                     const points = Number(member.points || 0);
-                    const goalDone = points >= 5;
+                    const goalDone = points >= 10;
                     const displayName = member.displayName || member.username || ("User " + (index + 1));
                     const firstLetter = displayName.toString().charAt(0).toUpperCase();
                 %>
@@ -140,7 +140,7 @@
                         <% if (goalDone) { %>
                             <span class="badge success">Erreicht</span>
                         <% } else { %>
-                            <span class="badge warning">Noch <%= 5 - points %> offen</span>
+                            <span class="badge warning">Noch <%= 10 - points %> offen</span>
                         <% } %>
                     </div>
                 </div>

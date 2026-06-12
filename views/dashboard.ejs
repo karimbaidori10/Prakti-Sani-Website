@@ -34,7 +34,7 @@
 
     const saniCount = termineAll.filter(t => t.examType === "Sanitaeter-Pruefung").length;
     const fahrCount = termineAll.filter(t => t.examType === "Darf alleine fahren").length;
-    const goalDoneCount = allUsers.filter(u => Number(u.points || 0) >= 5).length;
+    const goalDoneCount = allUsers.filter(u => Number(u.points || 0) >= 10).length;
     const topPoints = allUsers.length > 0 ? Number(allUsers[0].points || 0) : 0;
 %>
 
@@ -85,7 +85,7 @@
         <div>
             <h2><%= goalDoneCount %></h2>
             <strong>Wochenziel</strong>
-            <p>Mitglieder mit 5+ Punkten</p>
+            <p>Mitglieder mit 10+ Punkten</p>
         </div>
     </div>
 
