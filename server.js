@@ -4668,7 +4668,7 @@ function buildSpontanePanelComponents() {
 
     const buttonRow = new ActionRowBuilder().addComponents(
         new ButtonBuilder()
-            .setCustomId(`spontan_create_${resetId}`)
+            .setCustomId("spontan_submit")
             .setLabel("Antrag erstellen")
             .setEmoji("📝")
             .setStyle(ButtonStyle.Primary)
