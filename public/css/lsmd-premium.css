@@ -1,0 +1,176 @@
+/* LSMD PREMIUM SAFE DESIGN UPGRADE
+   Datei: public/css/lsmd-premium.css
+   Alte CSS bleibt unverändert. Zum Rückgängig machen nur den Link entfernen.
+*/
+
+:root{
+  --p-bg:#020617;--p-card:rgba(10,17,34,.9);--p-border:rgba(255,255,255,.1);
+  --p-red:#ef233c;--p-blue:#2f80ff;--p-cyan:#06b6d4;--p-text:#f8fafc;--p-muted:#a8b3c7;
+}
+
+body{
+  background:
+    radial-gradient(circle at 82% 0%,rgba(47,128,255,.24),transparent 34%),
+    radial-gradient(circle at 14% 18%,rgba(239,35,60,.2),transparent 34%),
+    radial-gradient(circle at 50% 105%,rgba(6,182,212,.1),transparent 35%),
+    linear-gradient(135deg,#020617 0%,#061124 50%,#030712 100%)!important;
+  color:var(--p-text)!important;
+}
+body::before{opacity:.35!important}
+.main{padding:26px 34px 46px!important}
+.page-content{animation:lsmdPageEnter .45s ease both}
+@keyframes lsmdPageEnter{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+
+.sidebar{
+  background:linear-gradient(180deg,rgba(3,7,18,.98),rgba(8,13,28,.98))!important;
+  border-right:1px solid rgba(255,255,255,.09)!important;
+  box-shadow:22px 0 80px rgba(0,0,0,.44)!important;
+}
+.brand{
+  padding:16px 14px!important;border-radius:24px!important;
+  background:linear-gradient(135deg,rgba(239,35,60,.14),rgba(47,128,255,.1)),rgba(255,255,255,.025)!important;
+  border:1px solid rgba(255,255,255,.09)!important;margin-bottom:34px!important;
+}
+.brand-icon{
+  border-radius:20px!important;background:linear-gradient(135deg,#ef233c,#2563eb)!important;
+  box-shadow:0 0 30px rgba(239,35,60,.38),0 0 60px rgba(37,99,235,.18)!important;
+}
+.brand h2{
+  background:linear-gradient(90deg,#ff3048,#fff,#60a5fa);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;font-weight:1000!important;
+}
+.nav{gap:14px!important}
+.nav a{
+  min-height:60px!important;border-radius:20px!important;background:rgba(255,255,255,.025)!important;
+  border:1px solid rgba(255,255,255,.055)!important;color:#dbeafe!important;font-weight:850!important;
+}
+.nav a span{
+  width:32px!important;height:32px!important;display:grid!important;place-items:center!important;
+  border-radius:12px!important;background:rgba(255,255,255,.045)!important;
+}
+.nav a:hover{
+  background:linear-gradient(90deg,rgba(47,128,255,.16),rgba(239,35,60,.08))!important;
+  border-color:rgba(47,128,255,.38)!important;transform:translateX(6px)!important;
+}
+.nav a.active{
+  background:linear-gradient(90deg,rgba(239,35,60,.36),rgba(47,128,255,.2))!important;
+  border-color:rgba(47,128,255,.62)!important;color:white!important;
+  box-shadow:0 0 35px rgba(47,128,255,.22),inset 4px 0 0 rgba(239,35,60,1)!important;
+}
+
+.topbar{
+  height:auto!important;padding:12px 16px!important;border-radius:24px!important;
+  background:rgba(8,13,28,.56)!important;border:1px solid rgba(255,255,255,.075)!important;
+  backdrop-filter:blur(24px)!important;box-shadow:0 18px 45px rgba(0,0,0,.18)!important;
+}
+
+.hero,.page-header{
+  position:relative!important;overflow:hidden!important;border-radius:32px!important;padding:34px!important;
+  background:
+    radial-gradient(circle at 90% 15%,rgba(47,128,255,.32),transparent 28%),
+    linear-gradient(135deg,rgba(239,35,60,.22),rgba(47,128,255,.18)),
+    rgba(8,13,28,.92)!important;
+  border:1px solid rgba(255,255,255,.11)!important;
+  box-shadow:0 28px 90px rgba(0,0,0,.42),0 0 65px rgba(47,128,255,.13),inset 0 1px 0 rgba(255,255,255,.065)!important;
+}
+.hero h1,.page-header h1{
+  font-size:clamp(38px,5vw,60px)!important;line-height:1.02!important;letter-spacing:-1.7px!important;font-weight:1000!important;
+}
+.hero p,.page-header p{color:#d5ddec!important;font-size:16px!important;max-width:780px!important}
+
+.card,.stat-card,.clean-panel,.admin-glow,.doc-card,.training-entry,.training-card,.termin-card,.exam-card,.podium-card,.leaderboard-row,.member-table-row,.sheet-week-card,.lsmd-calendar-day,.calendar-day{
+  border-radius:26px!important;
+  background:linear-gradient(180deg,rgba(15,23,42,.94),rgba(5,10,25,.96))!important;
+  border:1px solid rgba(255,255,255,.085)!important;
+  box-shadow:0 22px 62px rgba(0,0,0,.33),inset 0 1px 0 rgba(255,255,255,.042)!important;
+  backdrop-filter:blur(22px)!important;
+}
+.card,.clean-panel,.admin-glow{padding:26px!important}
+.card:hover,.stat-card:hover,.doc-card:hover,.training-entry:hover,.training-card:hover,.termin-card:hover,.exam-card:hover,.leaderboard-row:hover,.member-table-row:hover,.lsmd-calendar-day:hover,.calendar-day:hover{
+  transform:translateY(-5px)!important;border-color:rgba(47,128,255,.42)!important;
+  box-shadow:0 28px 76px rgba(0,0,0,.44),0 0 45px rgba(47,128,255,.13),inset 0 1px 0 rgba(255,255,255,.06)!important;
+}
+.card-header{padding-bottom:18px!important;margin-bottom:20px!important;border-bottom:1px solid rgba(255,255,255,.08)!important}
+.card-header h2,.card h2{font-size:24px!important;font-weight:1000!important;letter-spacing:-.5px!important}
+.card-subtitle{color:var(--p-muted)!important}
+
+.stats-grid{gap:22px!important}
+.stat-card{min-height:132px!important;position:relative!important;overflow:hidden!important}
+.stat-card::after{content:"";position:absolute;right:-42px;bottom:-42px;width:120px;height:120px;border-radius:999px;background:rgba(255,255,255,.045)}
+.stat-icon{
+  width:66px!important;height:66px!important;border-radius:22px!important;font-size:30px!important;
+  background:linear-gradient(135deg,rgba(255,255,255,.09),rgba(255,255,255,.025))!important;
+  border:1px solid rgba(255,255,255,.075)!important;
+}
+.stat-card h2{font-size:38px!important;font-weight:1000!important}
+
+button,.btn,.admin-btn,.open-doc-btn,.discord-login,.logout,.mini-btn{
+  min-height:46px;border-radius:17px!important;color:white!important;font-weight:1000!important;letter-spacing:.15px!important;
+  border:1px solid rgba(255,255,255,.1)!important;background:linear-gradient(135deg,#2563eb 0%,#06b6d4 100%)!important;
+  box-shadow:0 16px 34px rgba(37,99,235,.28),inset 0 1px 0 rgba(255,255,255,.14)!important;
+  transition:transform .18s ease,box-shadow .18s ease,filter .18s ease!important;
+}
+button:hover,.btn:hover,.admin-btn:hover,.open-doc-btn:hover,.discord-login:hover,.logout:hover,.mini-btn:hover{
+  transform:translateY(-3px)!important;filter:brightness(1.08)!important;opacity:1!important;
+}
+.danger-btn,.danger,.logout{
+  background:linear-gradient(135deg,#ef233c 0%,#991b1b 100%)!important;
+  box-shadow:0 16px 34px rgba(239,35,60,.28),inset 0 1px 0 rgba(255,255,255,.14)!important;
+}
+
+input,select,textarea{
+  min-height:46px!important;background:rgba(2,6,23,.76)!important;
+  border:1px solid rgba(255,255,255,.1)!important;border-radius:17px!important;color:white!important;
+}
+input:focus,select:focus,textarea:focus{border-color:rgba(47,128,255,.85)!important;box-shadow:0 0 0 4px rgba(47,128,255,.15)!important}
+
+.quick-card,.admin-box{
+  border-radius:24px!important;padding:26px!important;
+  background:radial-gradient(circle at 95% 0%,rgba(47,128,255,.18),transparent 34%),linear-gradient(135deg,rgba(255,255,255,.045),rgba(255,255,255,.018))!important;
+  border:1px solid rgba(255,255,255,.09)!important;
+}
+.quick-card:hover,.admin-box:hover{transform:translateY(-5px)!important;border-color:rgba(47,128,255,.42)!important;box-shadow:0 28px 70px rgba(0,0,0,.36),0 0 42px rgba(47,128,255,.11)!important}
+.quick-card h3,.admin-box h3{font-size:21px!important;font-weight:1000!important}
+
+.clean-status-list>div,.info-list>div,.doc-info-list div,.training-info-grid div,.points-box,.mini-stat,.training-note-box{
+  border-radius:20px!important;background:linear-gradient(135deg,rgba(255,255,255,.045),rgba(255,255,255,.018))!important;
+  border:1px solid rgba(255,255,255,.075)!important;
+}
+.chip,.badge,.role-pill,.status-pill,.champion-badge{
+  border-radius:999px!important;border:1px solid rgba(255,255,255,.13)!important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.08),0 10px 22px rgba(0,0,0,.12)!important;font-weight:1000!important;
+}
+
+table,.table{border-collapse:separate!important;border-spacing:0 12px!important}
+table tr,.table tr{background:rgba(8,13,28,.62)!important}
+table td,table th,.table td,.table th{border-bottom:none!important;padding:16px!important}
+table tr td:first-child,table tr th:first-child{border-radius:18px 0 0 18px!important}
+table tr td:last-child,table tr th:last-child{border-radius:0 18px 18px 0!important}
+
+.lsmd-calendar-day.is-today,.calendar-day.today{
+  border-color:rgba(239,35,60,.9)!important;
+  box-shadow:0 0 36px rgba(239,35,60,.22),inset 0 0 28px rgba(239,35,60,.05)!important;
+}
+.lsmd-calendar-number{border-radius:14px!important}
+
+.login-card,.login-box{
+  border-radius:34px!important;
+  background:radial-gradient(circle at 90% 0%,rgba(47,128,255,.22),transparent 32%),linear-gradient(180deg,rgba(15,23,42,.9),rgba(5,10,25,.95))!important;
+  border:1px solid rgba(255,255,255,.11)!important;
+  box-shadow:0 42px 130px rgba(0,0,0,.62),0 0 85px rgba(47,128,255,.18)!important;
+}
+.login-logo{
+  border-radius:26px!important;background:linear-gradient(135deg,#ef233c,#2563eb)!important;
+  box-shadow:0 0 40px rgba(239,35,60,.34),0 0 50px rgba(37,99,235,.2)!important;
+}
+
+p{line-height:1.62!important}
+strong{color:#fff}
+::-webkit-scrollbar-thumb{background:linear-gradient(180deg,#ef233c,#2563eb)!important}
+
+@media(max-width:780px){
+  .main{padding:18px!important}
+  .page-header,.hero{padding:24px!important;border-radius:26px!important}
+  .card,.clean-panel,.admin-glow{padding:20px!important}
+  .nav a{min-height:54px!important}
+}
