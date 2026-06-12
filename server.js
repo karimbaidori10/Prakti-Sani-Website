@@ -513,6 +513,36 @@ async function getPraktiSaniAusbilderOptions() {
     }
 }
 
+async function getOverwatchExaminerOptions() {
+    try {
+        const guild = await botClient.guilds.fetch(process.env.DISCORD_GUILD_ID).catch(() => null);
+
+        if (!guild) {
+            console.log("Guild nicht gefunden für Overwatch Prüfer Dropdown");
+            return [];
+        }
+
+        await fetchGuildMembersSafe(guild);
+
+        const members = Array.from(guild.members.cache.values())
+            .filter(member => !member.user.bot)
+            .map(member => ({
+                id: member.id,
+                name:
+                    member.displayName ||
+                    member.user.globalName ||
+                    member.user.username ||
+                    member.id
+            }))
+            .sort((a, b) => a.name.localeCompare(b.name, "de"));
+
+        return members;
+    } catch (err) {
+        console.error("Fehler beim Laden der Overwatch Prüfer-Liste:", err);
+        return [];
+    }
+}
+
 async function getDiscordMemberInfo(userId) {
     try {
         if (!userId) {
@@ -5910,11 +5940,13 @@ app.get("/overwatch", requireLogin, requireOverwatchOrAdmin, async (req, res) =>
             red: licenses.filter(l => l.status.key === "red").length
         };
 
-        res.render("overwatch", viewData(req, {
-            active: "overwatch",
-            licenses,
-            stats
-        }));
+    const overwatchExaminerOptions = await getOverwatchExaminerOptions();
+    res.render("overwatch", viewData(req, {
+    active: "overwatch",
+    licenses,
+    stats,
+    overwatchExaminerOptions
+}));
     } catch (err) {
         console.error("Overwatch Seite Fehler:", err);
         res.status(500).send("Overwatch Seite konnte nicht geladen werden.");

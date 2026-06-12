@@ -1414,3 +1414,111 @@ strong{color:#fff}
     grid-template-columns: repeat(auto-fit, minmax(260px, 420px)) !important;
     justify-content: start !important;
 }
+
+/* ===============================
+   OVERWATCH TOOLBAR + FORM COMPACT
+   =============================== */
+
+.ow-filter-bar,
+.ow-filter {
+    display: none !important;
+}
+
+.ow-toolbar {
+    display: grid !important;
+    grid-template-columns: 1fr 260px !important;
+    gap: 12px !important;
+    margin-top: 18px !important;
+}
+
+.ow-search-box input,
+.ow-filter-box select,
+.ow-create-form select {
+    width: 100% !important;
+    height: 38px !important;
+    border-radius: 10px !important;
+    border: 1px solid rgba(96, 165, 250, .25) !important;
+    background: rgba(2, 6, 23, .72) !important;
+    color: #f8fafc !important;
+    padding: 0 12px !important;
+    font-size: 12px !important;
+    font-weight: 700 !important;
+    outline: none !important;
+}
+
+.ow-search-box input:focus,
+.ow-filter-box select:focus,
+.ow-create-form select:focus {
+    border-color: rgba(59, 130, 246, .8) !important;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, .18) !important;
+}
+
+.ow-create-form {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr 220px 170px 240px !important;
+    gap: 10px !important;
+    align-items: center !important;
+}
+
+.ow-create-form input,
+.ow-create-form select {
+    height: 38px !important;
+    min-height: 38px !important;
+    border-radius: 10px !important;
+    font-size: 12px !important;
+}
+
+.ow-create-form textarea {
+    grid-column: 1 / 5 !important;
+    min-height: 38px !important;
+    height: 38px !important;
+    border-radius: 10px !important;
+    font-size: 12px !important;
+    resize: vertical !important;
+}
+
+.ow-create-form button {
+    min-height: 38px !important;
+    height: 38px !important;
+    border-radius: 10px !important;
+    font-size: 12px !important;
+    font-weight: 800 !important;
+}
+
+.ow-hero {
+    padding: 18px 22px !important;
+    border-radius: 18px !important;
+    margin-bottom: 14px !important;
+}
+
+.ow-hero h1 {
+    font-size: 26px !important;
+    margin-bottom: 6px !important;
+}
+
+.ow-hero p {
+    font-size: 13px !important;
+}
+
+.ow-hero-badge {
+    padding: 14px 18px !important;
+    border-radius: 16px !important;
+}
+
+.ow-hero-badge strong {
+    font-size: 28px !important;
+}
+
+@media (max-width: 1200px) {
+    .ow-toolbar {
+        grid-template-columns: 1fr !important;
+    }
+
+    .ow-create-form {
+        grid-template-columns: 1fr 1fr !important;
+    }
+
+    .ow-create-form textarea {
+        grid-column: 1 / -1 !important;
+    }
+}

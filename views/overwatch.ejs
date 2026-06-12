@@ -7,13 +7,21 @@
             Status wird automatisch nach Ablauf berechnet.
         </p>
 
-        <div class="ow-filter-bar">
-            <button class="ow-filter active" data-filter="all">Alle</button>
-            <button class="ow-filter" data-filter="Overwatch">Overwatch</button>
-            <button class="ow-filter" data-filter="Overwatch+">Overwatch+</button>
-            <button class="ow-filter" data-filter="Osprey">Osprey</button>
-            <button class="ow-filter danger" data-filter="red">Nur fällig</button>
-        </div>
+        <div class="ow-toolbar">
+    <div class="ow-search-box">
+        <input id="owSearch" type="text" placeholder="Suche nach Name, DN oder Lizenz...">
+    </div>
+
+    <div class="ow-filter-box">
+        <select id="owFilter">
+            <option value="all">Alle Lizenzen</option>
+            <option value="Overwatch">Overwatch</option>
+            <option value="Overwatch+">Overwatch+</option>
+            <option value="Osprey">Osprey</option>
+            <option value="red">Nur fällige</option>
+        </select>
+    </div>
+</div>
     </div>
 
     <div class="ow-hero-badge">
@@ -56,7 +64,7 @@
     </div>
 </section>
 
-<% if (isAdmin || (user && user.role === "Prakti-Sani")) { %>
+<% if (canEditOverwatch) { %>
     <section class="ow-create-card">
         <div class="ow-create-head">
             <div>
@@ -80,7 +88,15 @@
 
             <input type="date" name="issuedAt" required>
 
-            <input name="examiner" placeholder="Prüfer / Ausbilder" required>
+            <select name="examiner" required>
+    <option value="">Prüfer / Ausbilder auswählen</option>
+
+    <% (overwatchExaminerOptions || []).forEach(member => { %>
+        <option value="<%= member.name %>">
+            <%= member.name %>
+        </option>
+    <% }) %>
+</select>
 
             <textarea name="notes" placeholder="Notiz optional"></textarea>
 
@@ -172,7 +188,7 @@
                 </div>
             <% } %>
 
-<% if (isAdmin || (user && user.role === "Prakti-Sani")) { %>
+<% if (canEditOverwatch) { %>
     <details class="ow-edit-box">
         <summary>✏️ Lizenz bearbeiten</summary>
 
@@ -189,7 +205,15 @@
 
             <input type="date" name="issuedAt" value="<%= license.issuedAt ? new Date(license.issuedAt).toISOString().slice(0, 10) : '' %>" required>
 
-            <input name="examiner" value="<%= license.examiner || '' %>" placeholder="Prüfer / Ausbilder" required>
+            <select name="examiner" required>
+    <option value="">Prüfer / Ausbilder auswählen</option>
+
+    <% (overwatchExaminerOptions || []).forEach(member => { %>
+        <option value="<%= member.name %>" <%= license.examiner === member.name ? "selected" : "" %>>
+            <%= member.name %>
+        </option>
+    <% }) %>
+</select>
 
             <textarea name="notes" placeholder="Notiz optional"><%= license.notes || '' %></textarea>
 
@@ -232,24 +256,37 @@
 </section>
 
 <script>
-    document.querySelectorAll(".ow-filter").forEach((button) => {
-        button.addEventListener("click", () => {
-            const filter = button.dataset.filter;
+    const owFilter = document.getElementById("owFilter");
+    const owSearch = document.getElementById("owSearch");
+    const owCards = document.querySelectorAll(".ow-license-card");
 
-            document.querySelectorAll(".ow-filter").forEach(btn => btn.classList.remove("active"));
-            button.classList.add("active");
+    function applyOverwatchFilters() {
+        const filter = owFilter ? owFilter.value : "all";
+        const search = owSearch ? owSearch.value.toLowerCase().trim() : "";
 
-            document.querySelectorAll(".ow-license-card").forEach((card) => {
-                const license = card.dataset.license;
-                const status = card.dataset.status;
+        owCards.forEach(card => {
+            const license = card.dataset.license || "";
+            const status = card.dataset.status || "";
+            const text = card.innerText.toLowerCase();
 
-                const show =
-                    filter === "all" ||
-                    filter === license ||
-                    filter === status;
+            const matchesFilter =
+                filter === "all" ||
+                license === filter ||
+                status === filter;
 
-                card.style.display = show ? "" : "none";
-            });
+            const matchesSearch =
+                search === "" ||
+                text.includes(search);
+
+            card.style.display = matchesFilter && matchesSearch ? "" : "none";
         });
-    });
+    }
+
+    if (owFilter) {
+        owFilter.addEventListener("change", applyOverwatchFilters);
+    }
+
+    if (owSearch) {
+        owSearch.addEventListener("input", applyOverwatchFilters);
+    }
 </script>
