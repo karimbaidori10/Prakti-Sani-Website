@@ -3434,40 +3434,88 @@ if (interaction.isStringSelectMenu() && interaction.customId === "overwatch_lice
         licenseType
     });
 
+    const examinerRow = new ActionRowBuilder().addComponents(
+        new UserSelectMenuBuilder()
+            .setCustomId("overwatch_examiner_select")
+            .setPlaceholder("Prüfer / Ausbilder auswählen")
+            .setMinValues(1)
+            .setMaxValues(1)
+    );
+
+    return interaction.update({
+        content: `👁️ Lizenz ausgewählt: **${licenseType}**\n\nWähle jetzt den **Prüfer / Ausbilder** aus:`,
+        components: [examinerRow]
+    });
+}
+
+if (interaction.isUserSelectMenu() && interaction.customId === "overwatch_examiner_select") {
+    const selectedUserId = interaction.values[0];
+
+    const selectedMember = await interaction.guild.members.fetch(selectedUserId).catch(() => null);
+
+    if (!selectedMember) {
+        return interaction.update({
+            content: "❌ Prüfer / Ausbilder wurde nicht gefunden.",
+            components: []
+        });
+    }
+
+    const allowedExaminerRoles = [
+        ADMIN_ROLE_ID,
+        ROLE_OVERWATCH_LEITUNG,
+        ROLE_OVERWATCH_LICENSE_EDIT
+    ].filter(Boolean);
+
+    const canBeExaminer = allowedExaminerRoles.some(roleId =>
+        selectedMember.roles.cache.has(roleId)
+    );
+
+    if (!canBeExaminer) {
+        return interaction.update({
+            content: "❌ Diese Person darf nicht als Overwatch-Prüfer / Ausbilder ausgewählt werden.",
+            components: []
+        });
+    }
+
+    const oldData = overwatchTempData.get(interaction.user.id) || {};
+
+    overwatchTempData.set(interaction.user.id, {
+        ...oldData,
+        examinerId: selectedMember.id,
+        examinerName:
+            selectedMember.displayName ||
+            selectedMember.user.globalName ||
+            selectedMember.user.username ||
+            selectedMember.id
+    });
+
     const modal = new ModalBuilder()
         .setCustomId("overwatch_license_modal")
         .setTitle("Overwatch Lizenz eintragen");
 
     const dnInput = new TextInputBuilder()
-        .setCustomId("dn")
+        .setCustomId("overwatch_dn")
         .setLabel("Dienstnummer")
         .setPlaceholder("z. B. MD-03")
         .setStyle(TextInputStyle.Short)
         .setRequired(true);
 
     const nameInput = new TextInputBuilder()
-        .setCustomId("name")
+        .setCustomId("overwatch_name")
         .setLabel("Name")
         .setPlaceholder("z. B. Prof. Dr. Kevin Fresh")
         .setStyle(TextInputStyle.Short)
         .setRequired(true);
 
-    const dateInput = new TextInputBuilder()
-        .setCustomId("issuedAt")
+    const issuedAtInput = new TextInputBuilder()
+        .setCustomId("overwatch_issued_at")
         .setLabel("Lizenz seit wann?")
         .setPlaceholder("Format: 2026-06-12")
         .setStyle(TextInputStyle.Short)
         .setRequired(true);
 
-    const examinerInput = new TextInputBuilder()
-        .setCustomId("examiner")
-        .setLabel("Prüfer / Ausbilder")
-        .setPlaceholder("z. B. Karim")
-        .setStyle(TextInputStyle.Short)
-        .setRequired(true);
-
     const notesInput = new TextInputBuilder()
-        .setCustomId("notes")
+        .setCustomId("overwatch_notes")
         .setLabel("Notiz optional")
         .setPlaceholder("z. B. Auffrischung bestanden")
         .setStyle(TextInputStyle.Paragraph)
@@ -3476,8 +3524,7 @@ if (interaction.isStringSelectMenu() && interaction.customId === "overwatch_lice
     modal.addComponents(
         new ActionRowBuilder().addComponents(dnInput),
         new ActionRowBuilder().addComponents(nameInput),
-        new ActionRowBuilder().addComponents(dateInput),
-        new ActionRowBuilder().addComponents(examinerInput),
+        new ActionRowBuilder().addComponents(issuedAtInput),
         new ActionRowBuilder().addComponents(notesInput)
     );
 
@@ -3497,8 +3544,8 @@ if (interaction.isModalSubmit() && interaction.customId === "overwatch_license_m
     const dn = interaction.fields.getTextInputValue("dn");
     const name = interaction.fields.getTextInputValue("name");
     const issuedAt = interaction.fields.getTextInputValue("issuedAt");
-    const examiner = interaction.fields.getTextInputValue("examiner");
-    const notes = interaction.fields.getTextInputValue("notes") || "";
+    const examiner = tempData.examinerName || "Nicht ausgewählt";
+    const examinerId = tempData.examinerId || null;
 
     const issuedDate = normalizeOverwatchDate(issuedAt);
 
@@ -3519,6 +3566,7 @@ if (interaction.isModalSubmit() && interaction.customId === "overwatch_license_m
         issuedAt: issuedDate,
         dueDate,
         examiner,
+        examinerId,
         notes,
         source: "discord-panel",
         createdBy: interaction.user.id,
