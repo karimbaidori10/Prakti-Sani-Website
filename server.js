@@ -36,6 +36,7 @@ let examsCollection;
 let docsCollection;
 let logsCollection;
 let einstellungsBonusCollection;
+let overwatchLicensesCollection;
 
 const discordMemberCache = new Map();
 const DISCORD_CACHE_TIME = 1000 * 60 * 10;
@@ -60,6 +61,9 @@ const DOKUMENTE_WEBHOOK_URL = process.env.DOKUMENTE_WEBHOOK_URL;
 const PROFESSOREN_DOKUMENTE_WEBHOOK_URL = process.env.PROFESSOREN_DOKUMENTE_WEBHOOK_URL;
 const JOB_ANNOUNCE_PING_ROLE_ID = process.env.JOB_ANNOUNCE_PING_ROLE_ID || PRAKTI_SANI_ROLE_ID;
 const BEWERBUNG_CHANNEL_ID = process.env.BEWERBUNG_CHANNEL_ID;
+const OVERWATCH_PANEL_CHANNEL_ID = process.env.OVERWATCH_PANEL_CHANNEL_ID;
+const OVERWATCH_REMINDER_CHANNEL_ID = process.env.OVERWATCH_REMINDER_CHANNEL_ID;
+const OVERWATCH_LOG_CHANNEL_ID = process.env.OVERWATCH_LOG_CHANNEL_ID;
 const PROFESSOREN_SCHUELER_SYSTEM_CHANNEL_ID = process.env.PROFESSOREN_SCHUELER_SYSTEM_CHANNEL_ID;
 const PROFESSOREN_SCHUELER_SYSTEM_MESSAGE_ID = process.env.PROFESSOREN_SCHUELER_SYSTEM_MESSAGE_ID;
 const PROFESSOREN_SHEET_WEBHOOK_URL = "https://script.google.com/macros/s/AKfycbxYFD8sbuLVSd6SE6FDitRnFTyt91yzYgnWQdSP_hK-8VFaVz55iD8XWhdlTmgabTkyew/exec";
@@ -172,6 +176,16 @@ let bewerbungRequestCounter = 1;
 
 const profLogSelections = new Map();
 const attestTempData = new Map();
+const overwatchTempData = new Map();
+
+const OVERWATCH_LICENSE_TYPES = [
+    "Overwatch",
+    "Overwatch+",
+    "Osprey"
+];
+
+const OVERWATCH_YELLOW_DAYS = 12;
+const OVERWATCH_RED_DAYS = 25;
 
 const attestListe = {
     klaustro_1: {
@@ -1930,6 +1944,90 @@ async function sendAttestPanel() {
     return true;
 }
 
+function normalizeOverwatchDate(dateValue) {
+    if (!dateValue) {
+        return null;
+    }
+
+    const parsed = new Date(dateValue);
+
+    if (isNaN(parsed)) {
+        return null;
+    }
+
+    parsed.setHours(0, 0, 0, 0);
+    return parsed;
+}
+
+function getOverwatchDaysSince(dateValue) {
+    const issuedDate = normalizeOverwatchDate(dateValue);
+
+    if (!issuedDate) {
+        return 0;
+    }
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const diffMs = today.getTime() - issuedDate.getTime();
+    return Math.max(0, Math.floor(diffMs / (1000 * 60 * 60 * 24)));
+}
+
+function getOverwatchDueDate(dateValue) {
+    const issuedDate = normalizeOverwatchDate(dateValue);
+
+    if (!issuedDate) {
+        return null;
+    }
+
+    const dueDate = new Date(issuedDate);
+    dueDate.setDate(dueDate.getDate() + OVERWATCH_RED_DAYS);
+
+    return dueDate;
+}
+
+function getOverwatchStatus(dateValue) {
+    const days = getOverwatchDaysSince(dateValue);
+
+    if (days >= OVERWATCH_RED_DAYS) {
+        return {
+            key: "red",
+            label: "Auffrischung nötig",
+            emoji: "🔴",
+            color: 0xef233c,
+            days
+        };
+    }
+
+    if (days >= OVERWATCH_YELLOW_DAYS) {
+        return {
+            key: "yellow",
+            label: "Bald fällig",
+            emoji: "🟡",
+            color: 0xfacc15,
+            days
+        };
+    }
+
+    return {
+        key: "green",
+        label: "Gültig",
+        emoji: "✅",
+        color: 0x22c55e,
+        days
+    };
+}
+
+function formatOverwatchDate(dateValue) {
+    const date = normalizeOverwatchDate(dateValue);
+
+    if (!date) {
+        return "-";
+    }
+
+    return date.toLocaleDateString("de-DE");
+}
+
 function formatTerminDateForDiscord(date, time) {
     if (!date) {
         return null;
@@ -2039,6 +2137,81 @@ async function sendAusbildungsterminDiscordEmbed(data) {
         console.error("Fehler beim Senden vom Ausbildungstermin Embed:", err);
         return false;
     }
+}
+
+async function sendOverwatchPanel() {
+    if (!OVERWATCH_PANEL_CHANNEL_ID) {
+        console.log("OVERWATCH_PANEL_CHANNEL_ID fehlt");
+        return false;
+    }
+
+    const channel = await botClient.channels.fetch(OVERWATCH_PANEL_CHANNEL_ID).catch(() => null);
+
+    if (!channel) {
+        console.log("Overwatch Panel Channel nicht gefunden");
+        return false;
+    }
+
+    const embed = new EmbedBuilder()
+        .setColor(0x5865f2)
+        .setTitle("👁️ LSMD Overwatch Lizenz-System")
+        .setDescription(
+            "**Hier verwaltet die Overwatch-Abteilung ihre Lizenzen und Auffrischungen.**\n\n" +
+            "Alle Einträge werden automatisch gespeichert und erscheinen später auch auf der Website.\n\n" +
+            "**Status-System:**\n" +
+            "✅ **0–11 Tage:** Gültig\n" +
+            "🟡 **ab 12 Tagen:** Bald fällig\n" +
+            "🔴 **ab 25 Tagen:** Auffrischung nötig\n\n" +
+            "Wähle unten eine Aktion aus."
+        )
+        .addFields(
+            {
+                name: "📋 Lizenzen",
+                value: "Overwatch\nOverwatch+\nOsprey",
+                inline: true
+            },
+            {
+                name: "📌 Hinweis",
+                value: "Bitte nur echte und geprüfte Lizenzen eintragen.",
+                inline: true
+            }
+        )
+        .setFooter({
+            text: "LSMD Overwatch-System • Made by Prof. Dr. Karim Tranquile",
+            iconURL: LSMD_LOGO_URL
+        })
+        .setTimestamp();
+
+    const row = new ActionRowBuilder().addComponents(
+        new ButtonBuilder()
+            .setCustomId("overwatch_license_start")
+            .setLabel("Lizenz eintragen")
+            .setEmoji("➕")
+            .setStyle(ButtonStyle.Primary),
+
+        new ButtonBuilder()
+            .setCustomId("overwatch_due_show")
+            .setLabel("Fällige anzeigen")
+            .setEmoji("📋")
+            .setStyle(ButtonStyle.Secondary),
+
+        new ButtonBuilder()
+            .setCustomId("overwatch_refresh_start")
+            .setLabel("Auffrischung eintragen")
+            .setEmoji("✅")
+            .setStyle(ButtonStyle.Success)
+    );
+
+    await channel.send({
+        embeds: [embed],
+        components: [row],
+        allowedMentions: {
+            parse: []
+        }
+    });
+
+    console.log("Overwatch Panel gesendet");
+    return true;
 }
 
 async function sendSpontanePruefungenPanel() {
@@ -4712,6 +4885,25 @@ app.post("/admin/regelwerk-embed", requireLogin, requireAdmin, async (req, res) 
     }
 });
 
+app.post("/admin/overwatch-panel", requireLogin, requireAdmin, async (req, res) => {
+    try {
+        const ok = await sendOverwatchPanel();
+
+        if (!ok) {
+            return res.status(500).send("Overwatch-Panel konnte nicht gesendet werden. Prüfe OVERWATCH_PANEL_CHANNEL_ID.");
+        }
+
+        await addLog("Overwatch-Panel gesendet", {
+            channelId: OVERWATCH_PANEL_CHANNEL_ID
+        }, req.session.user);
+
+        return res.redirect("/admin");
+    } catch (err) {
+        console.error("Overwatch-Panel Fehler:", err);
+        return res.status(500).send("Overwatch-Panel Fehler.");
+    }
+});
+
 app.post("/admin/attest-panel", requireLogin, requireAdmin, async (req, res) => {
     try {
         const ok = await sendAttestPanel();
@@ -5286,6 +5478,7 @@ async function start() {
     docsCollection = db.collection("documents");
     logsCollection = db.collection("dashboardLogs");
     einstellungsBonusCollection = db.collection("einstellungsBonus");
+    overwatchLicensesCollection = db.collection("overwatchLicenses");
 
     await pointsCollection.createIndex({ points: -1 });
     await pointsCollection.createIndex({ userId: 1 });
