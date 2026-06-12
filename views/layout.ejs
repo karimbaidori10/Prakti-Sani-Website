@@ -45,10 +45,12 @@
                 <strong>Dokumente</strong>
             </a>
             
-            <a href="/overwatch" class="<%= active === 'overwatch' ? 'active' : '' %>">
-                <span>👁️</span>
-                <strong>Overwatch</strong>
-            </a>
+            <% if (canEditOverwatch) { %>
+    <a href="/overwatch" class="<%= active === 'overwatch' ? 'active' : '' %>">
+        <span>👁️</span>
+        <strong>Overwatch</strong>
+    </a>
+<% } %>
 
             <a href="/regelwerk" class="<%= active === 'regelwerk' ? 'active' : '' %>">
                 <span>👥</span>

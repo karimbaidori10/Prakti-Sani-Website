@@ -5662,7 +5662,7 @@ app.get("/termine", requireLogin, async (req, res) => {
     }
 });
 
-app.get("/overwatch", requireLogin, async (req, res) => {
+app.get("/overwatch", requireLogin, requireOverwatchOrAdmin, async (req, res) => {
     try {
         const licensesRaw = await overwatchLicensesCollection
             .find({})
