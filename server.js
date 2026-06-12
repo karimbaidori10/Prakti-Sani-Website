@@ -2139,6 +2139,160 @@ async function sendAusbildungsterminDiscordEmbed(data) {
     }
 }
 
+function getOverwatchReminderDayKey(date = new Date()) {
+    return date.toISOString().slice(0, 10);
+}
+
+async function sendOverwatchRefreshReminder(license) {
+    try {
+        if (!OVERWATCH_REMINDER_CHANNEL_ID) {
+            console.log("OVERWATCH_REMINDER_CHANNEL_ID fehlt");
+            return false;
+        }
+
+        const channel = await botClient.channels.fetch(OVERWATCH_REMINDER_CHANNEL_ID).catch(() => null);
+
+        if (!channel) {
+            console.log("Overwatch Auffrischung Channel nicht gefunden");
+            return false;
+        }
+
+        const status = getOverwatchStatus(license.issuedAt);
+        const dueDate = getOverwatchDueDate(license.issuedAt);
+
+        const embed = new EmbedBuilder()
+            .setColor(0xef233c)
+            .setTitle("🔴 Overwatch Auffrischung fällig")
+            .setDescription(
+                `**${license.dn} | ${license.name}** benötigt eine Auffrischungsprüfung.\n\n` +
+                "Die Lizenz ist abgelaufen und muss durch die Overwatch-Abteilung geprüft werden."
+            )
+            .addFields(
+                {
+                    name: "👤 Mitglied",
+                    value: `**${license.dn} | ${license.name}**`,
+                    inline: false
+                },
+                {
+                    name: "👁️ Lizenz",
+                    value: `**${license.licenseType}**`,
+                    inline: true
+                },
+                {
+                    name: "📅 Lizenz seit",
+                    value: `**${formatOverwatchDate(license.issuedAt)}**`,
+                    inline: true
+                },
+                {
+                    name: "⏰ Fällig seit",
+                    value: `**${formatOverwatchDate(dueDate)}**`,
+                    inline: true
+                },
+                {
+                    name: "📌 Status",
+                    value: `${status.emoji} **${status.label}**\n${status.days} Tag(e) alt`,
+                    inline: true
+                },
+                {
+                    name: "👨‍🏫 Letzter Prüfer",
+                    value: `**${license.examiner || "-"}**`,
+                    inline: true
+                }
+            )
+            .setFooter({
+                text: "LSMD Overwatch-System • Auffrischung",
+                iconURL: LSMD_LOGO_URL
+            })
+            .setTimestamp();
+
+        if (license.notes) {
+            embed.addFields({
+                name: "📝 Notiz",
+                value: String(license.notes).slice(0, 1000),
+                inline: false
+            });
+        }
+
+        const row = new ActionRowBuilder().addComponents(
+            new ButtonBuilder()
+                .setCustomId(`overwatch_refresh_done_${license._id.toString()}`)
+                .setLabel("Auffrischungsprüfung gemacht")
+                .setEmoji("✅")
+                .setStyle(ButtonStyle.Success)
+        );
+
+        await channel.send({
+            embeds: [embed],
+            components: [row],
+            allowedMentions: {
+                parse: []
+            }
+        });
+
+        console.log("Overwatch Auffrischung Reminder gesendet:", license.dn, license.name);
+        return true;
+    } catch (err) {
+        console.error("Overwatch Reminder Fehler:", err);
+        return false;
+    }
+}
+
+async function checkOverwatchRefreshReminders() {
+    try {
+        if (!overwatchLicensesCollection) {
+            return;
+        }
+
+        const todayKey = getOverwatchReminderDayKey();
+
+        const licenses = await overwatchLicensesCollection
+            .find({})
+            .toArray();
+
+        for (const license of licenses) {
+            const status = getOverwatchStatus(license.issuedAt);
+
+            if (status.key !== "red") {
+                continue;
+            }
+
+            if (license.lastReminderDayKey === todayKey) {
+                continue;
+            }
+
+            const sent = await sendOverwatchRefreshReminder(license);
+
+            if (sent) {
+                await overwatchLicensesCollection.updateOne(
+                    { _id: license._id },
+                    {
+                        $set: {
+                            lastReminderAt: new Date(),
+                            lastReminderDayKey: todayKey,
+                            lastReminderLevel: "red",
+                            updatedAt: new Date()
+                        }
+                    }
+                );
+            }
+        }
+    } catch (err) {
+        console.error("Overwatch Reminder Check Fehler:", err);
+    }
+}
+
+function startOverwatchReminderWatcher() {
+    console.log("Overwatch Reminder Watcher gestartet");
+
+    setTimeout(async () => {
+        await checkOverwatchRefreshReminders();
+    }, 15 * 1000);
+
+    setInterval(async () => {
+        await checkOverwatchRefreshReminders();
+    }, 60 * 60 * 1000);
+}
+
 async function sendOverwatchPanel() {
     if (!OVERWATCH_PANEL_CHANNEL_ID) {
         console.log("OVERWATCH_PANEL_CHANNEL_ID fehlt");
@@ -2814,6 +2968,7 @@ botClient.once(Events.ClientReady, async () => {
     console.log("Discord Bot ist bereit");
 
     startJobAnnounceReminderWatcher();
+    startOverwatchReminderWatcher();
 
     try {
         await updateTeamListMessage();
