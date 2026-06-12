@@ -5376,6 +5376,135 @@ app.get("/overwatch", requireLogin, async (req, res) => {
     }
 });
 
+app.post("/overwatch/create", requireLogin, requireAusbilderOrAdmin, async (req, res) => {
+    try {
+        const { dn, name, licenseType, issuedAt, examiner, notes } = req.body;
+
+        if (!dn || !name || !licenseType || !issuedAt || !examiner) {
+            return res.status(400).send("Bitte alle Pflichtfelder ausfüllen.");
+        }
+
+        if (!OVERWATCH_LICENSE_TYPES.includes(licenseType)) {
+            return res.status(400).send("Ungültige Lizenz.");
+        }
+
+        const issuedDate = normalizeOverwatchDate(issuedAt);
+
+        if (!issuedDate) {
+            return res.status(400).send("Ungültiges Datum. Nutze YYYY-MM-DD.");
+        }
+
+        const dueDate = getOverwatchDueDate(issuedDate);
+
+        const doc = {
+            dn: dn.trim(),
+            name: name.trim(),
+            licenseType,
+            issuedAt: issuedDate,
+            dueDate,
+            examiner: examiner.trim(),
+            notes: notes?.trim() || "",
+            source: "website",
+            createdBy: req.session.user?.discordId || null,
+            createdByName: req.session.user?.username || "Unbekannt",
+            lastReminderAt: null,
+            lastReminderDayKey: null,
+            lastReminderLevel: null,
+            refreshedAt: null,
+            createdAt: new Date(),
+            updatedAt: new Date()
+        };
+
+        const insertResult = await overwatchLicensesCollection.insertOne(doc);
+
+        await addLog("Overwatch Lizenz über Website eingetragen", {
+            id: insertResult.insertedId.toString(),
+            dn: doc.dn,
+            name: doc.name,
+            licenseType: doc.licenseType,
+            issuedAt,
+            examiner: doc.examiner,
+            source: "website"
+        }, req.session.user);
+
+        if (OVERWATCH_LOG_CHANNEL_ID) {
+            const status = getOverwatchStatus(issuedDate);
+            const logChannel = await botClient.channels.fetch(OVERWATCH_LOG_CHANNEL_ID).catch(() => null);
+
+            if (logChannel) {
+                const embed = new EmbedBuilder()
+                    .setColor(status.color)
+                    .setTitle("✅ Overwatch Lizenz über Website eingetragen")
+                    .setDescription("Eine neue Lizenz wurde über die Website gespeichert.")
+                    .addFields(
+                        {
+                            name: "👤 Mitglied",
+                            value: `**${doc.dn} | ${doc.name}**`,
+                            inline: false
+                        },
+                        {
+                            name: "👁️ Lizenz",
+                            value: `**${doc.licenseType}**`,
+                            inline: true
+                        },
+                        {
+                            name: "📅 Seit",
+                            value: `**${formatOverwatchDate(doc.issuedAt)}**`,
+                            inline: true
+                        },
+                        {
+                            name: "⏰ Fällig ab",
+                            value: `**${formatOverwatchDate(doc.dueDate)}**`,
+                            inline: true
+                        },
+                        {
+                            name: "📌 Status",
+                            value: `${status.emoji} **${status.label}**`,
+                            inline: true
+                        },
+                        {
+                            name: "👨‍🏫 Prüfer",
+                            value: `**${doc.examiner}**`,
+                            inline: true
+                        },
+                        {
+                            name: "✍️ Eingetragen von",
+                            value: req.session.user?.discordId
+                                ? `<@${req.session.user.discordId}>`
+                                : `**${req.session.user?.username || "Unbekannt"}**`,
+                            inline: true
+                        }
+                    )
+                    .setFooter({
+                        text: "LSMD Overwatch-System • Website",
+                        iconURL: LSMD_LOGO_URL
+                    })
+                    .setTimestamp();
+
+                if (doc.notes) {
+                    embed.addFields({
+                        name: "📝 Notiz",
+                        value: doc.notes.slice(0, 1000),
+                        inline: false
+                    });
+                }
+
+                await logChannel.send({
+                    embeds: [embed],
+                    allowedMentions: {
+                        parse: []
+                    }
+                });
+            }
+        }
+
+        return res.redirect("/overwatch");
+    } catch (err) {
+        console.error("Overwatch Website Eintrag Fehler:", err);
+        return res.status(500).send("Overwatch Lizenz konnte nicht eingetragen werden.");
+    }
+});
+
 app.get("/dokumente", requireLogin, async (req, res) => {
     const docs = await docsCollection.find({}).sort({ createdAt: -1 }).toArray();
 

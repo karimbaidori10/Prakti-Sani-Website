@@ -56,6 +56,39 @@
     </div>
 </section>
 
+<% if (isAdmin || (user && user.role === "Prakti-Sani")) { %>
+    <section class="ow-create-card">
+        <div class="ow-create-head">
+            <div>
+                <span>➕ Neuer Eintrag</span>
+                <h2>Overwatch Lizenz eintragen</h2>
+                <p>Trage hier eine Lizenz direkt über die Website ein. Der Eintrag wird automatisch gespeichert.</p>
+            </div>
+        </div>
+
+        <form method="POST" action="/overwatch/create" class="ow-create-form">
+            <input name="dn" placeholder="Dienstnummer, z. B. MD-03" required>
+
+            <input name="name" placeholder="Name, z. B. Prof. Dr. Kevin Fresh" required>
+
+            <select name="licenseType" required>
+                <option value="">Lizenz auswählen</option>
+                <option value="Overwatch">👁️ Overwatch</option>
+                <option value="Overwatch+">👁️ Overwatch+</option>
+                <option value="Osprey">🦅 Osprey</option>
+            </select>
+
+            <input type="date" name="issuedAt" required>
+
+            <input name="examiner" placeholder="Prüfer / Ausbilder" required>
+
+            <textarea name="notes" placeholder="Notiz optional"></textarea>
+
+            <button type="submit">Lizenz speichern</button>
+        </form>
+    </section>
+<% } %>
+
 <% const redLicenses = licenses.filter(l => l.status.key === "red"); %>
 
 <% if (redLicenses.length > 0) { %>
