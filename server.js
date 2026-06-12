@@ -54,6 +54,8 @@ const ROLE_SENIOR = process.env.ROLE_SENIOR;
 const ROLE_UNTERE_LEITUNG = process.env.ROLE_UNTERE_LEITUNG;
 const ROLE_STV_LEITUNG = process.env.ROLE_STV_LEITUNG;
 const ROLE_LEITUNG = process.env.ROLE_LEITUNG;
+const ROLE_OVERWATCH_LEITUNG = process.env.ROLE_OVERWATCH_LEITUNG;
+const ROLE_OVERWATCH_LICENSE_EDIT = process.env.ROLE_OVERWATCH_LICENSE_EDIT;
 const BONUS_HQ_CHANNEL_ID = process.env.BONUS_HQ_CHANNEL_ID;
 const BONUS_WEEKLY_PING_ROLE_ID = process.env.BONUS_WEEKLY_PING_ROLE_ID || PRAKTI_SANI_ROLE_ID;
 const JOB_ANNOUNCE_CHANNEL_ID = process.env.JOB_ANNOUNCE_CHANNEL_ID;
@@ -362,11 +364,33 @@ function requireAusbilderOrAdmin(req, res, next) {
     return res.status(403).send("Kein Zugriff auf diese Funktion.");
 }
 
+function canUseOverwatchWebsite(req) {
+    if (req.session.isAdmin) {
+        return true;
+    }
+
+    const roles = req.session.user?.roles || [];
+
+    return [
+        ROLE_OVERWATCH_LEITUNG,
+        ROLE_OVERWATCH_LICENSE_EDIT
+    ].filter(Boolean).some(roleId => roles.includes(roleId));
+}
+
+function requireOverwatchOrAdmin(req, res, next) {
+    if (canUseOverwatchWebsite(req)) {
+        return next();
+    }
+
+    return res.status(403).send("Kein Zugriff auf das Overwatch-System.");
+}
+
 function viewData(req, extra = {}) {
     return {
         user: req.session.user || null,
         isAdmin: req.session.isAdmin || false,
         isViewOnly: req.session.user?.isViewOnly || false,
+        canEditOverwatch: canUseOverwatchWebsite(req),
         active: "",
         ...extra
     };
@@ -568,6 +592,30 @@ function isDiscordLeadership(interaction) {
         process.env.ROLE_LEITUNG,
         process.env.ROLE_STV_LEITUNG,
         process.env.ROLE_UNTERE_LEITUNG
+    ].filter(Boolean);
+
+    if (roles.cache) {
+        return allowedRoles.some(roleId => roles.cache.has(roleId));
+    }
+
+    if (Array.isArray(roles)) {
+        return allowedRoles.some(roleId => roles.includes(roleId));
+    }
+
+    return false;
+}
+
+function canUseOverwatchDiscord(interaction) {
+    const roles = interaction.member?.roles;
+
+    if (!roles) {
+        return false;
+    }
+
+    const allowedRoles = [
+        ADMIN_ROLE_ID,
+        ROLE_OVERWATCH_LEITUNG,
+        ROLE_OVERWATCH_LICENSE_EDIT
     ].filter(Boolean);
 
     if (roles.cache) {
@@ -3042,6 +3090,16 @@ botClient.on(Events.InteractionCreate, async (interaction) => {
 // ===============================
 // OVERWATCH LIZENZ SYSTEM
 // ===============================
+if (
+    interaction.customId.startsWith("overwatch_") &&
+    !canUseOverwatchDiscord(interaction)
+) {
+    return interaction.reply({
+        content: "❌ Du hast keine Berechtigung für das Overwatch-System.",
+        flags: MessageFlags.Ephemeral
+    });
+}
+
 
 if (interaction.isButton() && interaction.customId === "overwatch_due_show") {
     const licensesRaw = await overwatchLicensesCollection
@@ -5624,7 +5682,7 @@ app.get("/overwatch", requireLogin, async (req, res) => {
     }
 });
 
-app.post("/overwatch/create", requireLogin, requireAusbilderOrAdmin, async (req, res) => {
+app.post("/overwatch/create", requireLogin, requireOverwatchOrAdmin, async (req, res) => {
     try {
         const { dn, name, licenseType, issuedAt, examiner, notes } = req.body;
 
@@ -5753,7 +5811,7 @@ app.post("/overwatch/create", requireLogin, requireAusbilderOrAdmin, async (req,
     }
 });
 
-app.post("/overwatch/:id/update", requireLogin, requireAusbilderOrAdmin, async (req, res) => {
+app.post("/overwatch/:id/update", requireLogin, requireOverwatchOrAdmin, async (req, res) => {
     try {
         const licenseId = req.params.id;
         const { dn, name, licenseType, issuedAt, examiner, notes } = req.body;
@@ -5891,7 +5949,7 @@ app.post("/overwatch/:id/update", requireLogin, requireAusbilderOrAdmin, async (
     }
 });
 
-app.post("/overwatch/:id/refresh", requireLogin, requireAusbilderOrAdmin, async (req, res) => {
+app.post("/overwatch/:id/refresh", requireLogin, requireOverwatchOrAdmin, async (req, res) => {
     try {
         const licenseId = req.params.id;
 
