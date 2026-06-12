@@ -3472,6 +3472,142 @@ if (interaction.isUserSelectMenu() && interaction.customId === "overwatch_examin
             selectedMember.id
     });
 
+    const now = new Date();
+const currentYear = now.getFullYear();
+
+const yearRow = new ActionRowBuilder().addComponents(
+    new StringSelectMenuBuilder()
+        .setCustomId("overwatch_date_year")
+        .setPlaceholder("Jahr auswählen")
+        .setMinValues(1)
+        .setMaxValues(1)
+        .addOptions(
+            { label: String(currentYear - 2), value: String(currentYear - 2), emoji: "📅" },
+            { label: String(currentYear - 1), value: String(currentYear - 1), emoji: "📅" },
+            { label: String(currentYear), value: String(currentYear), emoji: "📅" },
+            { label: String(currentYear + 1), value: String(currentYear + 1), emoji: "📅" }
+        )
+);
+
+const monthRow = new ActionRowBuilder().addComponents(
+    new StringSelectMenuBuilder()
+        .setCustomId("overwatch_date_month")
+        .setPlaceholder("Monat auswählen")
+        .setMinValues(1)
+        .setMaxValues(1)
+        .addOptions(
+            { label: "Januar", value: "01", emoji: "1️⃣" },
+            { label: "Februar", value: "02", emoji: "2️⃣" },
+            { label: "März", value: "03", emoji: "3️⃣" },
+            { label: "April", value: "04", emoji: "4️⃣" },
+            { label: "Mai", value: "05", emoji: "5️⃣" },
+            { label: "Juni", value: "06", emoji: "6️⃣" },
+            { label: "Juli", value: "07", emoji: "7️⃣" },
+            { label: "August", value: "08", emoji: "8️⃣" },
+            { label: "September", value: "09", emoji: "9️⃣" },
+            { label: "Oktober", value: "10", emoji: "🔟" },
+            { label: "November", value: "11", emoji: "📅" },
+            { label: "Dezember", value: "12", emoji: "📅" }
+        )
+);
+
+const dayOptions = Array.from({ length: 31 }, (_, i) => {
+    const day = String(i + 1).padStart(2, "0");
+
+    return {
+        label: day,
+        value: day,
+        emoji: "📆"
+    };
+});
+
+const dayRow = new ActionRowBuilder().addComponents(
+    new StringSelectMenuBuilder()
+        .setCustomId("overwatch_date_day")
+        .setPlaceholder("Tag auswählen")
+        .setMinValues(1)
+        .setMaxValues(1)
+        .addOptions(dayOptions)
+);
+
+const continueRow = new ActionRowBuilder().addComponents(
+    new ButtonBuilder()
+        .setCustomId("overwatch_date_continue")
+        .setLabel("Weiter zum Formular")
+        .setEmoji("➡️")
+        .setStyle(ButtonStyle.Primary)
+);
+
+return interaction.update({
+    content:
+        `✅ Prüfer ausgewählt: **${selectedMember.displayName || selectedMember.user.username}**\n\n` +
+        "Wähle jetzt das Datum aus, seit wann die Lizenz gültig ist:",
+    components: [yearRow, monthRow, dayRow, continueRow]
+});
+}
+
+if (
+    interaction.isStringSelectMenu() &&
+    [
+        "overwatch_date_year",
+        "overwatch_date_month",
+        "overwatch_date_day"
+    ].includes(interaction.customId)
+) {
+    const oldData = overwatchTempData.get(interaction.user.id) || {};
+
+    if (interaction.customId === "overwatch_date_year") {
+        oldData.year = interaction.values[0];
+    }
+
+    if (interaction.customId === "overwatch_date_month") {
+        oldData.month = interaction.values[0];
+    }
+
+    if (interaction.customId === "overwatch_date_day") {
+        oldData.day = interaction.values[0];
+    }
+
+    overwatchTempData.set(interaction.user.id, oldData);
+
+    return interaction.reply({
+        content: `✅ Gespeichert: ${oldData.day || "TT"}.${oldData.month || "MM"}.${oldData.year || "JJJJ"}`,
+        flags: MessageFlags.Ephemeral
+    });
+}
+
+if (interaction.isButton() && interaction.customId === "overwatch_date_continue") {
+    const temp = overwatchTempData.get(interaction.user.id);
+
+    if (!temp || !temp.licenseType || !temp.examinerName) {
+        return interaction.reply({
+            content: "❌ Auswahl wurde nicht gefunden. Bitte neu starten.",
+            flags: MessageFlags.Ephemeral
+        });
+    }
+
+    if (!temp.year || !temp.month || !temp.day) {
+        return interaction.reply({
+            content: "❌ Bitte zuerst Jahr, Monat und Tag auswählen.",
+            flags: MessageFlags.Ephemeral
+        });
+    }
+
+    const dateString = `${temp.year}-${temp.month}-${temp.day}`;
+    const testDate = new Date(dateString);
+
+    if (isNaN(testDate)) {
+        return interaction.reply({
+            content: "❌ Das ausgewählte Datum ist ungültig.",
+            flags: MessageFlags.Ephemeral
+        });
+    }
+
+    overwatchTempData.set(interaction.user.id, {
+        ...temp,
+        issuedAt: dateString
+    });
+
     const modal = new ModalBuilder()
         .setCustomId("overwatch_license_modal")
         .setTitle("Overwatch Lizenz eintragen");
@@ -3490,13 +3626,6 @@ if (interaction.isUserSelectMenu() && interaction.customId === "overwatch_examin
         .setStyle(TextInputStyle.Short)
         .setRequired(true);
 
-    const issuedAtInput = new TextInputBuilder()
-        .setCustomId("overwatch_issued_at")
-        .setLabel("Lizenz seit wann?")
-        .setPlaceholder("Format: 2026-06-12")
-        .setStyle(TextInputStyle.Short)
-        .setRequired(true);
-
     const notesInput = new TextInputBuilder()
         .setCustomId("overwatch_notes")
         .setLabel("Notiz optional")
@@ -3507,7 +3636,6 @@ if (interaction.isUserSelectMenu() && interaction.customId === "overwatch_examin
     modal.addComponents(
         new ActionRowBuilder().addComponents(dnInput),
         new ActionRowBuilder().addComponents(nameInput),
-        new ActionRowBuilder().addComponents(issuedAtInput),
         new ActionRowBuilder().addComponents(notesInput)
     );
 
@@ -3526,7 +3654,7 @@ if (interaction.isModalSubmit() && interaction.customId === "overwatch_license_m
 
     const dn = interaction.fields.getTextInputValue("overwatch_dn").trim();
     const name = interaction.fields.getTextInputValue("overwatch_name").trim();
-    const issuedAt = interaction.fields.getTextInputValue("overwatch_issued_at").trim();
+    const issuedAt = temp.issuedAt;
 
     let notes = "";
     try {
@@ -5576,12 +5704,13 @@ try {
         components: []
     });
 
-    return interaction.reply({
+            return interaction.reply({
         content: "❌ Antrag wurde abgelehnt.",
         flags: MessageFlags.Ephemeral
     });
 }
-    } catch (err) {
+
+} catch (err) {
         console.error("Fehler bei Spontane-Prüfungen Interaction:", err);
 
         if (!interaction.replied && !interaction.deferred) {
