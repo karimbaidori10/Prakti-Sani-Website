@@ -1005,9 +1005,9 @@ async function sendRegelwerkWebhook() {
             "• Dienstkleidung\n\n" +
             "Bitte lest euch das Regelwerk sorgfältig durch und haltet euch an die Vorgaben.\n\n" +
             "🔗 **Regelwerk öffnen:**\n" +
-            "https://sani-website-punktesystem-lsmd.up.railway.app/regelwerk",
+            "https://prakti-sani-website-punktesystem-lsmd.up.railway.app/regelwerk",
         footer: {
-            text: "LSMD Prakti/Sani Leitung"
+            text: "Made by Prof. Dr. Karim Tranquile"
         },
         timestamp: new Date().toISOString()
     };
