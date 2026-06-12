@@ -252,6 +252,7 @@ app.use(session({
 
 app.use(passport.initialize());
 app.use(passport.session());
+app.use(blockOverwatchOnlyOutsideOverwatch);
 
 passport.serializeUser((user, done) => {
     done(null, user);
@@ -401,12 +402,42 @@ function requireOverwatchOrAdmin(req, res, next) {
     return res.status(403).send("Kein Zugriff auf das Overwatch-System.");
 }
 
+function isOverwatchOnlyUser(req) {
+    if (!req.session.loggedIn) {
+        return false;
+    }
+
+    if (req.session.isAdmin) {
+        return false;
+    }
+
+    const role = req.session.user?.role || "";
+
+    return role === "Overwatch Leitung" || role === "Lizenz bearbeiten Overwatch";
+}
+
+function blockOverwatchOnlyOutsideOverwatch(req, res, next) {
+    if (!isOverwatchOnlyUser(req)) {
+        return next();
+    }
+
+    if (
+        req.path.startsWith("/overwatch") ||
+        req.path === "/logout"
+    ) {
+        return next();
+    }
+
+    return res.redirect("/overwatch");
+}
+
 function viewData(req, extra = {}) {
     return {
         user: req.session.user || null,
         isAdmin: req.session.isAdmin || false,
         isViewOnly: req.session.user?.isViewOnly || false,
         canEditOverwatch: canUseOverwatchWebsite(req),
+        isOverwatchOnly: isOverwatchOnlyUser(req),
         active: "",
         ...extra
     };

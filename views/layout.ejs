@@ -25,6 +25,16 @@
         </div>
 
         <nav class="nav">
+
+<% if (isOverwatchOnly) { %>
+
+    <a class="<%= (typeof active !== 'undefined' && active === 'overwatch') ? 'active' : '' %>" href="/overwatch">
+        <span>👁️</span>
+        <strong>Overwatch</strong>
+    </a>
+
+<% } else { %>
+
             <a class="<%= (typeof active !== 'undefined' && active === 'dashboard') ? 'active' : '' %>" href="/dashboard">
                 <span>🏠</span>
                 <strong>Dashboard</strong>
@@ -57,12 +67,15 @@
                 <strong>Regelwerk</strong>
             </a>
           
-            <% if (typeof isAdmin !== 'undefined' && isAdmin) { %>
+                        <% if (typeof isAdmin !== 'undefined' && isAdmin) { %>
                 <a class="<%= (typeof active !== 'undefined' && active === 'admin') ? 'active' : '' %>" href="/admin">
                     <span>🛡️</span>
                     <strong>Admin</strong>
                 </a>
             <% } %>
+
+<% } %>
+
         </nav>
 
         <div class="sidebar-bottom">
