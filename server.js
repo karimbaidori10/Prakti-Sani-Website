@@ -986,6 +986,58 @@ function startJobAnnounceReminderWatcher() {
     }, 60 * 60 * 1000);
 }
 
+async function sendRegelwerkWebhook() {
+    if (!process.env.REGELWERK_WEBHOOK_URL) {
+        console.log("REGELWERK_WEBHOOK_URL fehlt");
+        return false;
+    }
+
+    const embed = {
+        color: 0xef233c,
+        title: "📘 LSMD Regelwerk ist online",
+        description:
+            "Das interne **Prakti/Sani Regelwerk** befindet sich ab sofort direkt auf unserer Website.\n\n" +
+            "**Dort findet ihr alle wichtigen Regeln zu:**\n" +
+            "• Allgemeinem Verhalten\n" +
+            "• Ausbildungen & Prüfungen\n" +
+            "• Eintragungen & Bestätigungen\n" +
+            "• Wochenziel & Punkte\n" +
+            "• Dienstkleidung\n\n" +
+            "Bitte lest euch das Regelwerk sorgfältig durch und haltet euch an die Vorgaben.\n\n" +
+            "🔗 **Regelwerk öffnen:**\n" +
+            "https://sani-website-punktesystem-lsmd.up.railway.app/regelwerk",
+        footer: {
+            text: "LSMD Prakti/Sani Leitung"
+        },
+        timestamp: new Date().toISOString()
+    };
+
+    const response = await fetch(process.env.REGELWERK_WEBHOOK_URL, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            username: "LSMD Regelwerk",
+            avatar_url: "https://cdn.discordapp.com/embed/avatars/0.png",
+            content: "",
+            embeds: [embed],
+            allowed_mentions: {
+                parse: []
+            }
+        })
+    });
+
+    if (!response.ok) {
+        const errorText = await response.text();
+        console.error("Regelwerk Webhook Fehler:", response.status, errorText);
+        return false;
+    }
+
+    console.log("Regelwerk Embed gesendet");
+    return true;
+}
+
 async function sendDokumenteWebhook() {
     if (!DOKUMENTE_WEBHOOK_URL) {
         console.log("DOKUMENTE_WEBHOOK_URL fehlt");
@@ -4448,6 +4500,25 @@ app.post("/admin/spontane-panel", requireLogin, requireAdmin, async (req, res) =
     }, req.session.user);
 
     res.redirect("/admin");
+});
+
+app.post("/admin/regelwerk-embed", requireLogin, requireAdmin, async (req, res) => {
+    try {
+        const ok = await sendRegelwerkWebhook();
+
+        if (!ok) {
+            return res.status(500).send("Regelwerk Embed konnte nicht gesendet werden.");
+        }
+
+        await addLog("Regelwerk Embed gesendet", {
+            channel: "regelwerk"
+        }, req.session.user);
+
+        return res.redirect("/admin");
+    } catch (err) {
+        console.error("Regelwerk Embed Fehler:", err);
+        return res.status(500).send("Regelwerk Embed Fehler.");
+    }
 });
 
 app.post("/admin/attest-panel", requireLogin, requireAdmin, async (req, res) => {
