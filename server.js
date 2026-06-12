@@ -5546,6 +5546,122 @@ app.post("/overwatch/:id/refresh", requireLogin, requireAusbilderOrAdmin, async 
             licenseType: license.licenseType
         }, req.session.user);
 
+        if (OVERWATCH_REMINDER_CHANNEL_ID) {
+    const reminderChannel = await botClient.channels.fetch(OVERWATCH_REMINDER_CHANNEL_ID).catch(() => null);
+
+    if (reminderChannel) {
+        const status = getOverwatchStatus(today);
+
+        const embed = new EmbedBuilder()
+            .setColor(0x22c55e)
+            .setTitle("✅ Overwatch Auffrischung abgeschlossen")
+            .setDescription(
+                `**${license.dn} | ${license.name}** wurde über die Website als aufgefrischt markiert.\n\n` +
+                "Die Lizenz ist jetzt wieder gültig und wird auf der Website wieder grün angezeigt."
+            )
+            .addFields(
+                {
+                    name: "👤 Mitglied",
+                    value: `**${license.dn} | ${license.name}**`,
+                    inline: false
+                },
+                {
+                    name: "👁️ Lizenz",
+                    value: `**${license.licenseType}**`,
+                    inline: true
+                },
+                {
+                    name: "📅 Neues Datum",
+                    value: `**${formatOverwatchDate(today)}**`,
+                    inline: true
+                },
+                {
+                    name: "⏰ Nächste Auffrischung",
+                    value: `**${formatOverwatchDate(newDueDate)}**`,
+                    inline: true
+                },
+                {
+                    name: "📌 Status",
+                    value: `${status.emoji} **${status.label}**`,
+                    inline: true
+                },
+                {
+                    name: "✅ Aufgefrischt von",
+                    value: req.session.user?.discordId
+                        ? `<@${req.session.user.discordId}>`
+                        : `**${req.session.user?.username || "Unbekannt"}**`,
+                    inline: true
+                }
+            )
+            .setFooter({
+                text: "LSMD Overwatch-System • Website Auffrischung",
+                iconURL: LSMD_LOGO_URL
+            })
+            .setTimestamp();
+
+        await reminderChannel.send({
+            embeds: [embed],
+            allowedMentions: {
+                parse: []
+            }
+        });
+    }
+}
+
+if (OVERWATCH_LOG_CHANNEL_ID) {
+    const logChannel = await botClient.channels.fetch(OVERWATCH_LOG_CHANNEL_ID).catch(() => null);
+
+    if (logChannel) {
+        const status = getOverwatchStatus(today);
+
+        const logEmbed = new EmbedBuilder()
+            .setColor(0x22c55e)
+            .setTitle("✅ Overwatch Auffrischung über Website")
+            .setDescription("Eine Lizenz wurde über die Website aufgefrischt.")
+            .addFields(
+                {
+                    name: "👤 Mitglied",
+                    value: `**${license.dn} | ${license.name}**`,
+                    inline: false
+                },
+                {
+                    name: "👁️ Lizenz",
+                    value: `**${license.licenseType}**`,
+                    inline: true
+                },
+                {
+                    name: "📅 Neues Datum",
+                    value: `**${formatOverwatchDate(today)}**`,
+                    inline: true
+                },
+                {
+                    name: "📌 Status",
+                    value: `${status.emoji} **${status.label}**`,
+                    inline: true
+                },
+                {
+                    name: "✅ Aufgefrischt von",
+                    value: req.session.user?.discordId
+                        ? `<@${req.session.user.discordId}>`
+                        : `**${req.session.user?.username || "Unbekannt"}**`,
+                    inline: true
+                }
+            )
+            .setFooter({
+                text: "LSMD Overwatch-System • Logs",
+                iconURL: LSMD_LOGO_URL
+            })
+            .setTimestamp();
+
+        await logChannel.send({
+            embeds: [logEmbed],
+            allowedMentions: {
+                parse: []
+            }
+        });
+    }
+}      
+
         return res.redirect("/overwatch");
     } catch (err) {
         console.error("Overwatch Website Auffrischung Fehler:", err);
