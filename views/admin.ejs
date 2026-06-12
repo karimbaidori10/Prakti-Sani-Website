@@ -1,33 +1,33 @@
 <div class="page-header">
     <h1>Admin</h1>
-    <p>Leitungsbereich f&uuml;r Punkte, Mitglieder, Discord, Spontane Pr&uuml;fungen, Abmeldungen und Systemstatus.</p>
+    <p>Leitungsbereich f&uuml;r Discord-Panels, interne Tools, Regelwerk und Systemstatus.</p>
 </div>
 
 <section class="stats-grid">
-    <div class="stat-card stat-blue">
-        <div class="stat-icon">👥</div>
-        <div>
-            <h2><%= users ? users.length : 0 %></h2>
-            <strong>Mitglieder</strong>
-            <p>Mit Punkte-Eintrag</p>
-        </div>
-    </div>
-
-    <div class="stat-card stat-green">
-        <div class="stat-icon">🎯</div>
-        <div>
-            <h2><%= users ? users.filter(u => Number(u.points || 0) >= 10).length : 0 %></h2>
-            <strong>Wochenziel</strong>
-            <p>Mitglieder mit 10+ Punkten</p>
-        </div>
-    </div>
-
     <div class="stat-card stat-yellow">
         <div class="stat-icon">🤖</div>
         <div>
             <h2>Online</h2>
             <strong>Discord Bot</strong>
-            <p>Panel & Logs bereit</p>
+            <p>Panels & Systeme bereit</p>
+        </div>
+    </div>
+
+    <div class="stat-card stat-blue">
+        <div class="stat-icon">📨</div>
+        <div>
+            <h2>Tools</h2>
+            <strong>Discord Panels</strong>
+            <p>Nachrichten & Embeds senden</p>
+        </div>
+    </div>
+
+    <div class="stat-card stat-green">
+        <div class="stat-icon">✅</div>
+        <div>
+            <h2>Aktiv</h2>
+            <strong>Systemstatus</strong>
+            <p>Website l&auml;uft</p>
         </div>
     </div>
 
@@ -45,48 +45,6 @@
     <div class="card admin-glow">
         <div class="card-header">
             <div>
-                <h2>Punkte verwalten</h2>
-                <p class="card-subtitle">Punkte setzen, hinzuf&uuml;gen oder entfernen.</p>
-            </div>
-            <span class="chip red">Admin Tool</span>
-        </div>
-
-        <div class="points-admin-grid">
-            <form action="/points/set" method="POST" class="points-box">
-                <h3>Wert setzen</h3>
-                <p>Punkte eines Mitglieds direkt auf einen festen Wert setzen.</p>
-
-                <input type="text" name="userId" placeholder="Discord User ID" required>
-                <input type="number" name="points" placeholder="Punkte" required>
-
-                <button type="submit">Punkte setzen</button>
-            </form>
-
-            <form action="/points/add" method="POST" class="points-box">
-                <h3>Punkte hinzuf&uuml;gen</h3>
-                <p>Zus&auml;tzliche Punkte auf den aktuellen Stand addieren.</p>
-
-                <input type="text" name="userId" placeholder="Discord User ID" required>
-                <input type="number" name="points" placeholder="Punkte hinzuf&uuml;gen" required>
-
-                <button type="submit">Hinzuf&uuml;gen</button>
-            </form>
-
-            <form action="/points/remove" method="POST" class="points-box danger-box">
-                <h3>Punkte entfernen</h3>
-                <p>Punkte abziehen, ohne unter 0 zu fallen.</p>
-
-                <input type="text" name="userId" placeholder="Discord User ID" required>
-                <input type="number" name="points" placeholder="Punkte entfernen" required>
-
-                <button type="submit" class="danger-btn">Entfernen</button>
-            </form>
-        </div>
-    </div>
-
-    <div class="card">
-        <div class="card-header">
-            <div>
                 <h2>Schnellzugriff</h2>
                 <p class="card-subtitle">Direkt zu den wichtigsten Bereichen.</p>
             </div>
@@ -94,259 +52,26 @@
         </div>
 
         <div class="quick-grid">
-            <a href="/users" class="quick-card red">
-                <h3>Mitglieder</h3>
-                <p>Mitglieder&uuml;bersicht &ouml;ffnen</p>
+            <a href="/dashboard" class="quick-card green">
+                <h3>Dashboard</h3>
+                <p>Zentrale &Uuml;bersicht &ouml;ffnen</p>
             </a>
 
             <a href="/termine" class="quick-card blue">
                 <h3>Termine</h3>
-                <p>Ausbildungen und Pr&uuml;fungen verwalten</p>
+                <p>Ausbildungen & Pr&uuml;fungen verwalten</p>
             </a>
 
             <a href="/dokumente" class="quick-card yellow">
                 <h3>Dokumente</h3>
-                <p>Unterlagen verwalten</p>
+                <p>Unterlagen und Links verwalten</p>
             </a>
 
-            <a href="/dashboard" class="quick-card green">
-                <h3>Dashboard</h3>
-                <p>Zentrale &ouml;ffnen</p>
+            <a href="/regelwerk" class="quick-card red">
+                <h3>Regelwerk</h3>
+                <p>Interne Regeln &ouml;ffnen</p>
             </a>
         </div>
-    </div>
-</section>
-
-<section class="dashboard-grid">
-    <div class="card">
-        <div class="card-header">
-            <div>
-                <h2>Spontane Pr&uuml;fungen</h2>
-                <p class="card-subtitle">Discord-Panel f&uuml;r spontane Sanit&auml;ter-Pr&uuml;fungen senden.</p>
-            </div>
-            <span class="chip green">Bereit</span>
-        </div>
-
-        <div class="clean-status-list">
-            <div>
-                <span>Pr&uuml;fungsart</span>
-                <strong>Sanit&auml;ter Pr&uuml;fung</strong>
-            </div>
-
-            <div>
-                <span>Eingabe</span>
-                <strong>DN + Name per Fenster</strong>
-            </div>
-
-            <div>
-                <span>Entscheidung</span>
-                <strong>Leitung genehmigt / lehnt ab</strong>
-            </div>
-
-            <div>
-                <span>Ablehnung</span>
-                <strong>Mit Grund</strong>
-            </div>
-        </div>
-
-        <form action="/admin/spontane-panel" method="POST" style="margin-top: 16px;">
-            <button type="submit">
-                🚑 Spontane-Pr&uuml;fungen Panel senden
-            </button>
-        </form>
-
-        <form action="/admin/attest-panel" method="POST" style="margin-top: 12px;">
-            <button type="submit" class="admin-btn">
-                 📄 Attest-Panel senden
-             </button>
-        </form>
-
-        <form action="/admin/regelwerk-embed" method="POST" style="margin-top: 12px;">
-             <button type="submit" class="admin-btn">
-            📘 Regelwerk-Embed senden
-            </button>
-         </form>
-
-        <p class="card-subtitle" style="margin-top: 12px;">
-            Tipp: Altes Discord-Panel vorher l&ouml;schen, danach hier ein neues senden.
-        </p>
-    </div>
-
-    <div class="card">
-        <div class="card-header">
-            <div>
-                <h2>Discord</h2>
-                <p class="card-subtitle">Discord-Anbindung und Loginstatus.</p>
-            </div>
-            <span class="chip green">Verbunden</span>
-        </div>
-
-        <div class="clean-status-list">
-            <div>
-                <span>Discord Login</span>
-                <strong>Aktiv</strong>
-            </div>
-
-            <div>
-                <span>Rollenpr&uuml;fung</span>
-                <strong>Aktiv</strong>
-            </div>
-
-            <div>
-                <span>Admin-Erkennung</span>
-                <strong>Aktiv</strong>
-            </div>
-
-            <div>
-                <span>Discord Bot</span>
-                <strong>Online bei Token</strong>
-            </div>
-
-            <div>
-                <span>Webhook Logs</span>
-                <strong>Aktiv</strong>
-            </div>
-        </div>
-
-<form action="/admin/teamliste" method="POST" style="margin-top: 16px;">
-    <button type="submit">
-        👥 Teamliste senden / aktualisieren
-    </button>
-</form>
-
-<form action="/admin/therapeuten-teamliste" method="POST" style="margin-top: 16px;">
-    <button type="submit">
-        🧠 Therapeuten-Teamliste senden / aktualisieren
-    </button>
-</form>
-
-<form action="/admin/professoren-teamliste" method="POST" style="margin-top: 16px;">
-    <button type="submit">
-        🎓 Professoren-Teamliste senden / aktualisieren
-    </button>
-</form>
-
-<p class="card-subtitle" style="margin-top: 12px;">
-    Aktualisiert die Discord-Teamliste im Mitglieder-Channel.
-</p>
-
-<div class="clean-divider"></div>
-
-<form action="/admin/abmeldung-panel" method="POST" style="margin-top: 16px;">
-    <button type="submit">
-        📨 Abmeldungs-Panel senden
-    </button>
-</form>
-
-<form action="/admin/einstellungsbonus-panel" method="POST" style="margin-top: 16px;">
-    <button type="submit">
-        💸 Einstellungsbonus-Panel senden
-    </button>
-</form>
-
-<form action="/admin/email-panel" method="POST" style="margin-top: 16px;">
-    <button type="submit">
-        📨 E-Mail-Erfassungs-Panel senden
-    </button>
-</form>
-
-<form action="/admin/dokumente-webhook" method="POST" style="margin-top: 16px;">
-    <button type="submit">
-        📚 Dokumente-Webhook senden
-    </button>
-</form>
-
-<form method="POST" action="/admin/professoren-dokumente-webhook">
-    <button type="submit" class="btn btn-primary">
-        🎓 Professoren-Dokumente senden
-    </button>
-</form>
-
-<div class="clean-divider"></div>
-
-<form action="/admin/wochen-reset" method="POST" style="margin-top: 16px;"
-      onsubmit="return confirm('Wirklich Wochenreset durchführen? Alle Punkte werden auf 0 gesetzt und der Einstellungsbonus-Stand wird zurückgesetzt.');">
-    <button type="submit" class="danger-btn">
-        🔄 Wochenreset: Punkte & Bonus zurücksetzen
-    </button>
-</form>
-
-<p class="card-subtitle" style="margin-top: 12px;">
-    Setzt alle Mitgliederpunkte auf <strong>0</strong> und startet den Einstellungsbonus neu.
-</p>
-
-<form action="/admin/bewerbungs-panel" method="POST" style="margin-top: 16px;">
-    <button type="submit">
-        🚑 Bewerbungs-Panel senden
-    </button>
-</form>
-
-<p class="card-subtitle" style="margin-top: 12px;">
-    Sendet Panels und Webhooks in die jeweiligen Discord-Channels.
-</p>
-
-    </div>
-</section>
-
-<section class="dashboard-grid">
-    <div class="card">
-        <div class="card-header">
-            <div>
-                <h2>Mitglieder / Punkte</h2>
-                <p class="card-subtitle">Alle Mitglieder mit schneller Punkteverwaltung.</p>
-            </div>
-            <span class="chip blue"><%= users ? users.length : 0 %> Mitglieder</span>
-        </div>
-
-        <% if (!users || users.length === 0) { %>
-            <div class="empty-state">
-                <div>Keine Daten</div>
-                <h3>Keine Mitglieder vorhanden</h3>
-                <p>Sobald Punkte vergeben werden, erscheinen Mitglieder hier.</p>
-            </div>
-        <% } else { %>
-            <div class="admin-member-list">
-                <% users.forEach((member, index) => { %>
-                    <div class="admin-member-row">
-                        <div class="rank-number">
-                            #<%= index + 1 %>
-                        </div>
-
-                        <div class="leader-avatar">
-                            <% if (member.avatarUrl) { %>
-                                <img src="<%= member.avatarUrl %>" alt="Avatar">
-                            <% } else { %>
-                                <%= (member.displayName || member.username || member.userId || "?").toString().charAt(0).toUpperCase() %>
-                            <% } %>
-                        </div>
-
-                        <div>
-                            <h3><%= member.displayName || member.username || member.userId || "Unbekannt" %></h3>
-                            <p><%= member.rank || "Kein Rang" %></p>
-                        </div>
-
-                        <div class="leader-points">
-                            <strong><%= member.points || 0 %></strong>
-                            <span>Punkte</span>
-                        </div>
-
-                        <div class="points-actions">
-                            <form action="/points/add" method="POST">
-                                <input type="hidden" name="userId" value="<%= member.userId %>">
-                                <input type="hidden" name="points" value="10">
-                                <button type="submit">+10</button>
-                            </form>
-
-                            <form action="/points/remove" method="POST">
-                                <input type="hidden" name="userId" value="<%= member.userId %>">
-                                <input type="hidden" name="points" value="10">
-                                <button type="submit" class="danger-btn">-10</button>
-                            </form>
-                        </div>
-                    </div>
-                <% }) %>
-            </div>
-        <% } %>
     </div>
 
     <div class="card clean-panel">
@@ -355,7 +80,6 @@
                 <h2>System Status</h2>
                 <p class="card-subtitle">Aktueller Zustand der Webseite.</p>
             </div>
-
             <span class="chip green">Online</span>
         </div>
 
@@ -381,7 +105,7 @@
             </div>
 
             <div>
-                <span>Admin</span>
+                <span>Regelwerk</span>
                 <strong>Online</strong>
             </div>
 
@@ -390,5 +114,198 @@
                 <strong>Verbunden</strong>
             </div>
         </div>
+    </div>
+</section>
+
+<section class="dashboard-grid">
+    <div class="card">
+        <div class="card-header">
+            <div>
+                <h2>Pr&uuml;fungen & Atteste</h2>
+                <p class="card-subtitle">Panels f&uuml;r Pr&uuml;fungen, Atteste und Regelwerk senden.</p>
+            </div>
+            <span class="chip green">Bereit</span>
+        </div>
+
+        <div class="clean-status-list">
+            <div>
+                <span>Spontane Pr&uuml;fung</span>
+                <strong>Sanit&auml;ter Pr&uuml;fung</strong>
+            </div>
+
+            <div>
+                <span>Attest-System</span>
+                <strong>Panel & Ausgabe getrennt</strong>
+            </div>
+
+            <div>
+                <span>Regelwerk</span>
+                <strong>Embed in Discord senden</strong>
+            </div>
+        </div>
+
+        <form action="/admin/spontane-panel" method="POST" style="margin-top: 16px;">
+            <button type="submit">
+                🚑 Spontane-Pr&uuml;fungen Panel senden
+            </button>
+        </form>
+
+        <form action="/admin/attest-panel" method="POST" style="margin-top: 12px;">
+            <button type="submit" class="admin-btn">
+                📄 Attest-Panel senden
+            </button>
+        </form>
+
+        <form action="/admin/regelwerk-embed" method="POST" style="margin-top: 12px;">
+            <button type="submit" class="admin-btn">
+                📘 Regelwerk-Embed senden
+            </button>
+        </form>
+
+        <p class="card-subtitle" style="margin-top: 12px;">
+            Tipp: Alte Discord-Panels vorher l&ouml;schen und danach neu senden.
+        </p>
+    </div>
+
+    <div class="card">
+        <div class="card-header">
+            <div>
+                <h2>Discord Systeme</h2>
+                <p class="card-subtitle">Teamlisten, Abmeldungen, E-Mail und Bonus-Systeme.</p>
+            </div>
+            <span class="chip green">Verbunden</span>
+        </div>
+
+        <div class="clean-status-list">
+            <div>
+                <span>Discord Login</span>
+                <strong>Aktiv</strong>
+            </div>
+
+            <div>
+                <span>Rollenpr&uuml;fung</span>
+                <strong>Aktiv</strong>
+            </div>
+
+            <div>
+                <span>Webhook Logs</span>
+                <strong>Aktiv</strong>
+            </div>
+
+            <div>
+                <span>Discord Bot</span>
+                <strong>Online bei Token</strong>
+            </div>
+        </div>
+
+        <form action="/admin/teamliste" method="POST" style="margin-top: 16px;">
+            <button type="submit">
+                👥 Teamliste senden / aktualisieren
+            </button>
+        </form>
+
+        <form action="/admin/therapeuten-teamliste" method="POST" style="margin-top: 12px;">
+            <button type="submit">
+                🧠 Therapeuten-Teamliste senden / aktualisieren
+            </button>
+        </form>
+
+        <form action="/admin/professoren-teamliste" method="POST" style="margin-top: 12px;">
+            <button type="submit">
+                🎓 Professoren-Teamliste senden / aktualisieren
+            </button>
+        </form>
+
+        <div class="clean-divider"></div>
+
+        <form action="/admin/abmeldung-panel" method="POST" style="margin-top: 16px;">
+            <button type="submit">
+                📨 Abmeldungs-Panel senden
+            </button>
+        </form>
+
+        <form action="/admin/einstellungsbonus-panel" method="POST" style="margin-top: 12px;">
+            <button type="submit">
+                💸 Einstellungsbonus-Panel senden
+            </button>
+        </form>
+
+        <form action="/admin/email-panel" method="POST" style="margin-top: 12px;">
+            <button type="submit">
+                📨 E-Mail-Erfassungs-Panel senden
+            </button>
+        </form>
+    </div>
+</section>
+
+<section class="dashboard-grid">
+    <div class="card">
+        <div class="card-header">
+            <div>
+                <h2>Dokumente & Webhooks</h2>
+                <p class="card-subtitle">Dokumenten-&Uuml;bersichten in Discord senden.</p>
+            </div>
+            <span class="chip blue">Webhooks</span>
+        </div>
+
+        <form action="/admin/dokumente-webhook" method="POST" style="margin-top: 16px;">
+            <button type="submit">
+                📚 Dokumente-Webhook senden
+            </button>
+        </form>
+
+        <form method="POST" action="/admin/professoren-dokumente-webhook" style="margin-top: 12px;">
+            <button type="submit" class="btn btn-primary">
+                🎓 Professoren-Dokumente senden
+            </button>
+        </form>
+
+        <form action="/admin/bewerbungs-panel" method="POST" style="margin-top: 12px;">
+            <button type="submit">
+                🚑 Bewerbungs-Panel senden
+            </button>
+        </form>
+
+        <p class="card-subtitle" style="margin-top: 12px;">
+            Sendet offizielle Panels und Dokumenten-Nachrichten in die jeweiligen Discord-Channels.
+        </p>
+    </div>
+
+    <div class="card admin-glow">
+        <div class="card-header">
+            <div>
+                <h2>Wochenreset</h2>
+                <p class="card-subtitle">Punkte und Bonus-System zur&uuml;cksetzen.</p>
+            </div>
+            <span class="chip red">Gefahr</span>
+        </div>
+
+        <div class="clean-status-list">
+            <div>
+                <span>Mitgliederpunkte</span>
+                <strong>Werden auf 0 gesetzt</strong>
+            </div>
+
+            <div>
+                <span>Einstellungsbonus</span>
+                <strong>Wird neu gestartet</strong>
+            </div>
+
+            <div>
+                <span>Best&auml;tigung</span>
+                <strong>Vor Ausf&uuml;hrung erforderlich</strong>
+            </div>
+        </div>
+
+        <form action="/admin/wochen-reset" method="POST" style="margin-top: 16px;"
+              onsubmit="return confirm('Wirklich Wochenreset durchführen? Alle Punkte werden auf 0 gesetzt und der Einstellungsbonus-Stand wird zurückgesetzt.');">
+            <button type="submit" class="danger-btn">
+                🔄 Wochenreset: Punkte & Bonus zur&uuml;cksetzen
+            </button>
+        </form>
+
+        <p class="card-subtitle" style="margin-top: 12px;">
+            Nur ausf&uuml;hren, wenn die neue Woche wirklich starten soll.
+        </p>
     </div>
 </section>
