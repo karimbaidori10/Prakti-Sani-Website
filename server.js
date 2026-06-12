@@ -3460,23 +3460,6 @@ if (interaction.isUserSelectMenu() && interaction.customId === "overwatch_examin
         });
     }
 
-    const allowedExaminerRoles = [
-        ADMIN_ROLE_ID,
-        ROLE_OVERWATCH_LEITUNG,
-        ROLE_OVERWATCH_LICENSE_EDIT
-    ].filter(Boolean);
-
-    const canBeExaminer = allowedExaminerRoles.some(roleId =>
-        selectedMember.roles.cache.has(roleId)
-    );
-
-    if (!canBeExaminer) {
-        return interaction.update({
-            content: "❌ Diese Person darf nicht als Overwatch-Prüfer / Ausbilder ausgewählt werden.",
-            components: []
-        });
-    }
-
     const oldData = overwatchTempData.get(interaction.user.id) || {};
 
     overwatchTempData.set(interaction.user.id, {
@@ -3534,18 +3517,26 @@ if (interaction.isUserSelectMenu() && interaction.customId === "overwatch_examin
 if (interaction.isModalSubmit() && interaction.customId === "overwatch_license_modal") {
     const temp = overwatchTempData.get(interaction.user.id);
 
-    if (!temp) {
+    if (!temp || !temp.licenseType || !temp.examinerName) {
         return interaction.reply({
-            content: "❌ Bitte starte den Vorgang erneut über das Overwatch-Panel.",
+            content: "❌ Auswahl wurde nicht gefunden. Bitte Lizenz erneut eintragen.",
             flags: MessageFlags.Ephemeral
         });
     }
 
-    const dn = interaction.fields.getTextInputValue("dn");
-    const name = interaction.fields.getTextInputValue("name");
-    const issuedAt = interaction.fields.getTextInputValue("issuedAt");
-    const examiner = tempData.examinerName || "Nicht ausgewählt";
-    const examinerId = tempData.examinerId || null;
+    const dn = interaction.fields.getTextInputValue("overwatch_dn").trim();
+    const name = interaction.fields.getTextInputValue("overwatch_name").trim();
+    const issuedAt = interaction.fields.getTextInputValue("overwatch_issued_at").trim();
+
+    let notes = "";
+    try {
+        notes = interaction.fields.getTextInputValue("overwatch_notes").trim();
+    } catch (err) {
+        notes = "";
+    }
+
+    const examiner = temp.examinerName;
+    const examinerId = temp.examinerId || null;
 
     const issuedDate = normalizeOverwatchDate(issuedAt);
 
