@@ -3271,6 +3271,130 @@ if (interaction.isModalSubmit() && interaction.customId === "overwatch_license_m
     });
 }
 
+if (interaction.isButton() && interaction.customId.startsWith("overwatch_refresh_done_")) {
+    const licenseId = interaction.customId.replace("overwatch_refresh_done_", "");
+
+    let license;
+
+    try {
+        license = await overwatchLicensesCollection.findOne({
+            _id: new ObjectId(licenseId)
+        });
+    } catch (err) {
+        return interaction.reply({
+            content: "❌ Ungültige Lizenz-ID.",
+            flags: MessageFlags.Ephemeral
+        });
+    }
+
+    if (!license) {
+        return interaction.reply({
+            content: "❌ Lizenz wurde nicht gefunden.",
+            flags: MessageFlags.Ephemeral
+        });
+    }
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const newDueDate = getOverwatchDueDate(today);
+    const status = getOverwatchStatus(today);
+
+    await overwatchLicensesCollection.updateOne(
+        { _id: license._id },
+        {
+            $set: {
+                issuedAt: today,
+                dueDate: newDueDate,
+                refreshedAt: new Date(),
+                refreshedBy: interaction.user.id,
+                refreshedByName: interaction.user.tag,
+                lastReminderAt: null,
+                lastReminderDayKey: null,
+                lastReminderLevel: null,
+                updatedAt: new Date()
+            }
+        }
+    );
+
+    const embed = new EmbedBuilder()
+        .setColor(0x22c55e)
+        .setTitle("✅ Overwatch Auffrischung abgeschlossen")
+        .setDescription(
+            `**${license.dn} | ${license.name}** wurde erfolgreich aufgefrischt.\n\n` +
+            "Die Lizenz ist jetzt wieder gültig und wird auf der Website wieder grün angezeigt."
+        )
+        .addFields(
+            {
+                name: "👤 Mitglied",
+                value: `**${license.dn} | ${license.name}**`,
+                inline: false
+            },
+            {
+                name: "👁️ Lizenz",
+                value: `**${license.licenseType}**`,
+                inline: true
+            },
+            {
+                name: "📅 Neues Datum",
+                value: `**${formatOverwatchDate(today)}**`,
+                inline: true
+            },
+            {
+                name: "⏰ Nächste Auffrischung",
+                value: `**${formatOverwatchDate(newDueDate)}**`,
+                inline: true
+            },
+            {
+                name: "📌 Status",
+                value: `${status.emoji} **${status.label}**`,
+                inline: true
+            },
+            {
+                name: "✅ Aufgefrischt von",
+                value: `<@${interaction.user.id}>`,
+                inline: true
+            }
+        )
+        .setFooter({
+            text: "LSMD Overwatch-System • Auffrischung abgeschlossen",
+            iconURL: LSMD_LOGO_URL
+        })
+        .setTimestamp();
+
+    await interaction.update({
+        embeds: [embed],
+        components: []
+    });
+
+    if (OVERWATCH_LOG_CHANNEL_ID) {
+        const logChannel = await botClient.channels.fetch(OVERWATCH_LOG_CHANNEL_ID).catch(() => null);
+
+        if (logChannel) {
+            await logChannel.send({
+                embeds: [embed],
+                allowedMentions: {
+                    parse: []
+                }
+            });
+        }
+    }
+
+    await addLog("Overwatch Auffrischung abgeschlossen", {
+        id: license._id.toString(),
+        dn: license.dn,
+        name: license.name,
+        licenseType: license.licenseType,
+        refreshedBy: interaction.user.id
+    }, {
+        id: interaction.user.id,
+        discordId: interaction.user.id,
+        username: interaction.user.tag
+    });
+
+    return;
+}
+
 if (interaction.isButton() && interaction.customId === "attest_open_modal") {
     const modal = new ModalBuilder()
         .setCustomId("attest_patient_modal")
