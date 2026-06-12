@@ -172,6 +172,24 @@
                 </div>
             <% } %>
 
+<% if (isAdmin || (user && user.role === "Prakti-Sani")) { %>
+    <div class="ow-actions">
+        <form method="POST" action="/overwatch/<%= license._id %>/refresh">
+            <button type="submit" class="ow-action-btn success">
+                ✅ Auffrischung gemacht
+            </button>
+        </form>
+
+        <% if (isAdmin) { %>
+            <form method="POST" action="/overwatch/<%= license._id %>/delete" onsubmit="return confirm('Diese Overwatch-Lizenz wirklich löschen?');">
+                <button type="submit" class="ow-action-btn danger">
+                    🗑️ Löschen
+                </button>
+            </form>
+        <% } %>
+    </div>
+<% } %>
+
             <div class="ow-card-footer">
                 <span>
                     Quelle:

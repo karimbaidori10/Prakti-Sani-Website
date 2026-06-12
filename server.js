@@ -5505,6 +5505,84 @@ app.post("/overwatch/create", requireLogin, requireAusbilderOrAdmin, async (req,
     }
 });
 
+app.post("/overwatch/:id/refresh", requireLogin, requireAusbilderOrAdmin, async (req, res) => {
+    try {
+        const licenseId = req.params.id;
+
+        const license = await overwatchLicensesCollection.findOne({
+            _id: new ObjectId(licenseId)
+        });
+
+        if (!license) {
+            return res.status(404).send("Lizenz nicht gefunden.");
+        }
+
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+
+        const newDueDate = getOverwatchDueDate(today);
+
+        await overwatchLicensesCollection.updateOne(
+            { _id: license._id },
+            {
+                $set: {
+                    issuedAt: today,
+                    dueDate: newDueDate,
+                    refreshedAt: new Date(),
+                    refreshedBy: req.session.user?.discordId || null,
+                    refreshedByName: req.session.user?.username || "Unbekannt",
+                    lastReminderAt: null,
+                    lastReminderDayKey: null,
+                    lastReminderLevel: null,
+                    updatedAt: new Date()
+                }
+            }
+        );
+
+        await addLog("Overwatch Auffrischung über Website abgeschlossen", {
+            id: license._id.toString(),
+            dn: license.dn,
+            name: license.name,
+            licenseType: license.licenseType
+        }, req.session.user);
+
+        return res.redirect("/overwatch");
+    } catch (err) {
+        console.error("Overwatch Website Auffrischung Fehler:", err);
+        return res.status(500).send("Auffrischung konnte nicht gespeichert werden.");
+    }
+});
+
+app.post("/overwatch/:id/delete", requireLogin, requireAdmin, async (req, res) => {
+    try {
+        const licenseId = req.params.id;
+
+        const license = await overwatchLicensesCollection.findOne({
+            _id: new ObjectId(licenseId)
+        });
+
+        if (!license) {
+            return res.status(404).send("Lizenz nicht gefunden.");
+        }
+
+        await overwatchLicensesCollection.deleteOne({
+            _id: license._id
+        });
+
+        await addLog("Overwatch Lizenz gelöscht", {
+            id: license._id.toString(),
+            dn: license.dn,
+            name: license.name,
+            licenseType: license.licenseType
+        }, req.session.user);
+
+        return res.redirect("/overwatch");
+    } catch (err) {
+        console.error("Overwatch Lizenz löschen Fehler:", err);
+        return res.status(500).send("Lizenz konnte nicht gelöscht werden.");
+    }
+});
+
 app.get("/dokumente", requireLogin, async (req, res) => {
     const docs = await docsCollection.find({}).sort({ createdAt: -1 }).toArray();
 

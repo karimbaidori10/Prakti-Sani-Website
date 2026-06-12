@@ -729,3 +729,44 @@ strong{color:#fff}
         grid-template-columns: 1fr;
     }
 }
+
+/* =========================================================
+   OVERWATCH ACTION BUTTONS
+========================================================= */
+
+.ow-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 16px;
+}
+
+.ow-actions form {
+    width: auto;
+}
+
+.ow-action-btn {
+    min-height: 42px;
+    padding: 10px 14px;
+    border-radius: 14px;
+    font-weight: 1000;
+    border: 1px solid rgba(255,255,255,0.12);
+    color: white;
+    cursor: pointer;
+    transition: 0.18s ease;
+}
+
+.ow-action-btn:hover {
+    transform: translateY(-2px);
+    filter: brightness(1.08);
+}
+
+.ow-action-btn.success {
+    background: linear-gradient(135deg, #22c55e, #16a34a);
+    box-shadow: 0 14px 30px rgba(34,197,94,0.22);
+}
+
+.ow-action-btn.danger {
+    background: linear-gradient(135deg, #ef233c, #991b1b);
+    box-shadow: 0 14px 30px rgba(239,35,60,0.22);
+}
