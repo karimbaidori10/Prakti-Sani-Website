@@ -67,6 +67,8 @@ const PROFESSOREN_SHEET_SECRET = "LSMD_PROFESSOREN_SECRET_123";
 const PROFESSOREN_SCHUELER_LOG_CHANNEL_ID = process.env.PROFESSOREN_SCHUELER_LOG_CHANNEL_ID;
 const PROFESSOREN_LEITUNG_LOG_CHANNEL_ID = process.env.PROFESSOREN_LEITUNG_LOG_CHANNEL_ID;
 const LSMD_LOGO_URL = "https://cdn.discordapp.com/attachments/1461110262395310160/1514333137487003790/p7NyS81.png?ex=6a2afc22&is=6a29aaa2&hm=b4ff181b7f8052507370699cf1024fc42b20330a20d09ed785366da8d1bfb8e1&";
+const AUSBILDUNG_LOGO_URL = process.env.AUSBILDUNG_LOGO_URL || "https://cdn.discordapp.com/attachments/1461110262395310160/1514910893488734309/image-removebg-preview.png?ex=6a2d1636&is=6a2bc4b6&hm=06d8d018bd420b5428dda8375ee88bde7d19eccf6ade38ad95106c0388ceacb7&";
+const AUSBILDUNG_FOOTER_LOGO_URL = process.env.AUSBILDUNG_FOOTER_LOGO_URL || "https://cdn.discordapp.com/attachments/1461110262395310160/1514906419336314992/md_logo.png?ex=6a2d120b&is=6a2bc08b&hm=97e63207a01832553278f6d09952fc3b0ca488efc3ba2c4bdba787655633a293&";
 
 async function updateProfessorPointsInSheet(professorDn, points) {
   try {
@@ -1884,6 +1886,117 @@ async function sendAttestPanel() {
 
     console.log("Attest-Panel gesendet");
     return true;
+}
+
+function formatTerminDateForDiscord(date, time) {
+    if (!date) {
+        return null;
+    }
+
+    const safeTime = time && time.trim() !== "" ? time : "00:00";
+    const parsed = new Date(`${date}T${safeTime}:00`);
+
+    if (isNaN(parsed)) {
+        return null;
+    }
+
+    return Math.floor(parsed.getTime() / 1000);
+}
+
+async function sendAusbildungsterminDiscordEmbed(data) {
+    try {
+        if (!process.env.AUSBILDUNG_TERMINE_CHANNEL_ID) {
+            console.log("AUSBILDUNG_TERMINE_CHANNEL_ID fehlt");
+            return false;
+        }
+
+        const channel = await botClient.channels.fetch(process.env.AUSBILDUNG_TERMINE_CHANNEL_ID).catch(() => null);
+
+        if (!channel) {
+            console.log("Ausbildungstermine Channel nicht gefunden");
+            return false;
+        }
+
+        const isSani = data.examType === "Sanitaeter-Pruefung";
+        const typeLabel = isSani ? "Sanitäter-Prüfung" : "Darf alleine fahren";
+        const typeEmoji = isSani ? "🚑" : "🚗";
+        const embedColor = isSani ? 0x22c55e : 0x2563eb;
+
+        const timestamp = formatTerminDateForDiscord(data.date, data.time);
+
+        const embed = new EmbedBuilder()
+    .setColor(embedColor)
+    .setAuthor({
+        name: "LSMD Ausbildungssystem",
+        iconURL: AUSBILDUNG_LOGO_URL
+    })
+    .setTitle(`${typeEmoji} Neuer Ausbildungstermin`)
+    .setThumbnail(AUSBILDUNG_LOGO_URL)
+    .setDescription(
+        "Ein neuer Ausbildungstermin wurde auf der **LSMD Website** eingetragen.\n\n" +
+        "Dieser Eintrag dient nur zur Übersicht, damit das Team und die Leitung direkt Bescheid wissen."
+    )
+            .addFields(
+                {
+                    name: "👤 Teilnehmer",
+                    value: `**${data.name || "Unbekannt"}**`,
+                    inline: true
+                },
+                {
+                    name: "📚 Art",
+                    value: `**${typeLabel}**`,
+                    inline: true
+                },
+                {
+                    name: "📅 Termin",
+                    value: timestamp
+                        ? `<t:${timestamp}:F>\n<t:${timestamp}:R>`
+                        : `**${data.date || "-"}** um **${data.time || "--:--"}**`,
+                    inline: false
+                },
+                {
+                    name: "👨‍🏫 Ausbilder / Prüfer",
+                    value: `**${data.examiner || "Nicht eingetragen"}**`,
+                    inline: true
+                },
+                {
+                    name: "✍️ Eingetragen von",
+                    value: data.createdById ? `<@${data.createdById}>` : `**${data.createdByName || "Unbekannt"}**`,
+                    inline: true
+                },
+                {
+                    name: "📌 Status",
+                    value: "**Eingetragen**",
+                    inline: true
+                }
+            )
+            .setFooter({
+                text: "LSMD Prakti-Sani • Ausbildungstermine",
+                iconURL: LSMD_LOGO_URL
+            })
+            .setTimestamp();
+
+        if (data.notes && data.notes.trim() !== "") {
+            embed.addFields({
+                name: "📝 Notiz",
+                value: data.notes.slice(0, 1000),
+                inline: false
+            });
+        }
+
+        await channel.send({
+            embeds: [embed],
+            allowedMentions: {
+                parse: []
+            }
+        });
+
+        console.log("Ausbildungstermin Übersicht gesendet");
+        return true;
+    } catch (err) {
+        console.error("Fehler beim Senden vom Ausbildungstermin Embed:", err);
+        return false;
+    }
 }
 
 async function sendSpontanePruefungenPanel() {
@@ -4877,18 +4990,34 @@ app.post("/termine/create", requireLogin, requireAusbilderOrAdmin, async (req, r
             return res.redirect("/termine");
         }
 
-        await termineCollection.insertOne({
-            name,
-            discordId: "",
-            examType,
-            date,
-            time,
-            examiner,
-            status: "Offen",
-            notes,
-            source: "termine",
-            createdAt: new Date()
-        });
+        const insertResult = await termineCollection.insertOne({
+    name,
+    discordId: "",
+    examType,
+    date,
+    time,
+    examiner,
+    status: "Offen",
+    notes,
+    source: "termine",
+    createdBy: req.session.user?.discordId || null,
+    createdByName: req.session.user?.username || "Unbekannt",
+    createdAt: new Date()
+});
+
+const discordOk = await sendAusbildungsterminDiscordEmbed({
+    id: insertResult.insertedId.toString(),
+    name,
+    examType,
+    date,
+    time,
+    examiner,
+    notes,
+    createdById: req.session.user?.discordId || null,
+    createdByName: req.session.user?.username || "Unbekannt"
+});
+
+console.log("Ausbildung Discord gesendet:", discordOk);
 
         await addLog("Ausbildungstermin erstellt", {
             name,
