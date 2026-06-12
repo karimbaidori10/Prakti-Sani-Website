@@ -846,3 +846,221 @@ strong{color:#fff}
         grid-column: 1 / -1;
     }
 }
+
+/* ===============================
+   OVERWATCH COMPACT CLEAN DESIGN
+   =============================== */
+
+.ow-page {
+    max-width: 1280px;
+    margin: 0 auto;
+}
+
+.ow-hero {
+    padding: 22px 26px !important;
+    border-radius: 24px !important;
+    margin-bottom: 22px !important;
+}
+
+.ow-hero h1 {
+    font-size: 34px !important;
+    margin-bottom: 8px !important;
+}
+
+.ow-hero p {
+    font-size: 14px !important;
+    max-width: 760px !important;
+}
+
+.ow-filters {
+    gap: 10px !important;
+    margin-top: 18px !important;
+}
+
+.ow-filter-btn {
+    min-height: 42px !important;
+    padding: 10px 16px !important;
+    border-radius: 14px !important;
+    font-size: 13px !important;
+}
+
+.ow-stats {
+    grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+    gap: 16px !important;
+    margin-bottom: 22px !important;
+}
+
+.ow-stat-card {
+    min-height: 88px !important;
+    padding: 18px 22px !important;
+    border-radius: 20px !important;
+}
+
+.ow-stat-icon {
+    width: 46px !important;
+    height: 46px !important;
+    border-radius: 16px !important;
+    font-size: 21px !important;
+}
+
+.ow-stat-value {
+    font-size: 34px !important;
+    line-height: 1 !important;
+}
+
+.ow-stat-label {
+    font-size: 14px !important;
+}
+
+.ow-alert {
+    padding: 20px 26px !important;
+    border-radius: 22px !important;
+    margin-bottom: 24px !important;
+}
+
+.ow-alert h2 {
+    font-size: 22px !important;
+}
+
+.ow-alert p {
+    font-size: 14px !important;
+}
+
+.ow-alert button,
+.ow-alert a {
+    padding: 10px 18px !important;
+    border-radius: 14px !important;
+    font-size: 13px !important;
+}
+
+.ow-license-grid {
+    grid-template-columns: repeat(auto-fit, minmax(380px, 1fr)) !important;
+    gap: 20px !important;
+}
+
+.ow-license-card {
+    padding: 22px 24px !important;
+    border-radius: 22px !important;
+    min-height: unset !important;
+}
+
+.ow-license-card::before {
+    width: 5px !important;
+}
+
+.ow-license-head {
+    margin-bottom: 18px !important;
+}
+
+.ow-license-badge {
+    padding: 7px 11px !important;
+    border-radius: 999px !important;
+    font-size: 12px !important;
+}
+
+.ow-license-name {
+    font-size: 22px !important;
+    margin-top: 8px !important;
+}
+
+.ow-status-pill {
+    padding: 8px 12px !important;
+    font-size: 12px !important;
+    border-radius: 999px !important;
+}
+
+.ow-license-type {
+    padding: 18px !important;
+    border-radius: 18px !important;
+    margin-bottom: 16px !important;
+}
+
+.ow-license-type-icon {
+    width: 42px !important;
+    height: 42px !important;
+    border-radius: 15px !important;
+    font-size: 20px !important;
+}
+
+.ow-license-type small,
+.ow-detail small {
+    font-size: 11px !important;
+    letter-spacing: .05em !important;
+}
+
+.ow-license-type strong {
+    font-size: 16px !important;
+}
+
+.ow-details {
+    gap: 12px !important;
+    margin-bottom: 16px !important;
+}
+
+.ow-detail {
+    padding: 14px 16px !important;
+    border-radius: 16px !important;
+    min-height: 72px !important;
+}
+
+.ow-detail strong {
+    font-size: 17px !important;
+}
+
+.ow-note {
+    padding: 14px 16px !important;
+    border-radius: 16px !important;
+    font-size: 14px !important;
+    margin-bottom: 16px !important;
+}
+
+.ow-license-meta {
+    padding-top: 14px !important;
+    font-size: 12px !important;
+}
+
+.ow-actions {
+    gap: 10px !important;
+    margin-top: 16px !important;
+}
+
+.ow-action-btn {
+    min-height: 40px !important;
+    padding: 10px 14px !important;
+    border-radius: 14px !important;
+    font-size: 13px !important;
+}
+
+.ow-edit-box {
+    margin-top: 16px !important;
+    border-radius: 16px !important;
+}
+
+.ow-edit-box summary {
+    padding: 12px 14px !important;
+    font-size: 13px !important;
+}
+
+.ow-edit-form {
+    padding: 14px !important;
+    gap: 12px !important;
+}
+
+.ow-edit-form input,
+.ow-edit-form select,
+.ow-edit-form textarea {
+    min-height: 40px !important;
+    padding: 10px 12px !important;
+    border-radius: 12px !important;
+    font-size: 13px !important;
+}
+
+@media (max-width: 1100px) {
+    .ow-stats {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    }
+
+    .ow-license-grid {
+        grid-template-columns: 1fr !important;
+    }
+}
