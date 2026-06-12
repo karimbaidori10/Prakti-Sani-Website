@@ -3511,7 +3511,7 @@ const monthRow = new ActionRowBuilder().addComponents(
         )
 );
 
-const dayOptions = Array.from({ length: 31 }, (_, i) => {
+const dayOptionsOne = Array.from({ length: 16 }, (_, i) => {
     const day = String(i + 1).padStart(2, "0");
 
     return {
@@ -3521,13 +3521,32 @@ const dayOptions = Array.from({ length: 31 }, (_, i) => {
     };
 });
 
-const dayRow = new ActionRowBuilder().addComponents(
+const dayOptionsTwo = Array.from({ length: 15 }, (_, i) => {
+    const day = String(i + 17).padStart(2, "0");
+
+    return {
+        label: day,
+        value: day,
+        emoji: "📆"
+    };
+});
+
+const dayRowOne = new ActionRowBuilder().addComponents(
     new StringSelectMenuBuilder()
-        .setCustomId("overwatch_date_day")
-        .setPlaceholder("Tag auswählen")
+        .setCustomId("overwatch_date_day_1")
+        .setPlaceholder("Tag auswählen 1–16")
         .setMinValues(1)
         .setMaxValues(1)
-        .addOptions(dayOptions)
+        .addOptions(dayOptionsOne)
+);
+
+const dayRowTwo = new ActionRowBuilder().addComponents(
+    new StringSelectMenuBuilder()
+        .setCustomId("overwatch_date_day_2")
+        .setPlaceholder("Tag auswählen 17–31")
+        .setMinValues(1)
+        .setMaxValues(1)
+        .addOptions(dayOptionsTwo)
 );
 
 const continueRow = new ActionRowBuilder().addComponents(
@@ -3542,7 +3561,7 @@ return interaction.update({
     content:
         `✅ Prüfer ausgewählt: **${selectedMember.displayName || selectedMember.user.username}**\n\n` +
         "Wähle jetzt das Datum aus, seit wann die Lizenz gültig ist:",
-    components: [yearRow, monthRow, dayRow, continueRow]
+    components: [yearRow, monthRow, dayRowOne, dayRowTwo, continueRow]
 });
 }
 
@@ -3551,7 +3570,8 @@ if (
     [
         "overwatch_date_year",
         "overwatch_date_month",
-        "overwatch_date_day"
+        "overwatch_date_day_1",
+        "overwatch_date_day_2"
     ].includes(interaction.customId)
 ) {
     const oldData = overwatchTempData.get(interaction.user.id) || {};
@@ -3564,7 +3584,10 @@ if (
         oldData.month = interaction.values[0];
     }
 
-    if (interaction.customId === "overwatch_date_day") {
+    if (
+        interaction.customId === "overwatch_date_day_1" ||
+        interaction.customId === "overwatch_date_day_2"
+    ) {
         oldData.day = interaction.values[0];
     }
 
