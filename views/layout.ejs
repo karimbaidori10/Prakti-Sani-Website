@@ -39,6 +39,10 @@
                 <span>📄</span>
                 <strong>Dokumente</strong>
             </a>
+            
+            <a href="/regelwerk" class="<%= active === 'regelwerk' ? 'active' : '' %>">
+                RE Regelwerk
+            </a>
 
             <% if (typeof isAdmin !== 'undefined' && isAdmin) { %>
                 <a class="<%= (typeof active !== 'undefined' && active === 'admin') ? 'active' : '' %>" href="/admin">

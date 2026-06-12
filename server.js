@@ -4421,6 +4421,12 @@ app.get("/dokumente", requireLogin, async (req, res) => {
     }));
 });
 
+app.get("/regelwerk", requireLogin, async (req, res) => {
+    res.render("regelwerk", viewData(req, {
+        active: "regelwerk"
+    }));
+});
+
 app.get("/admin", requireLogin, requireAdmin, async (req, res) => {
     const [users, logs] = await Promise.all([
         getAllPoints(),
