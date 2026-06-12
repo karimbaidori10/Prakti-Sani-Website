@@ -1,127 +1,501 @@
-<div class="page-header">
-    <h1>Regelwerk</h1>
-    <p>Interne Regeln und Abläufe der LSMD Ausbildung.</p>
+<style>
+    .rule-hero {
+        position: relative;
+        overflow: hidden;
+        border-radius: 28px;
+        padding: 34px;
+        margin-bottom: 26px;
+        background:
+            radial-gradient(circle at top right, rgba(37, 99, 235, .42), transparent 34%),
+            radial-gradient(circle at bottom left, rgba(239, 35, 60, .36), transparent 30%),
+            linear-gradient(135deg, rgba(15, 23, 42, .98), rgba(23, 17, 44, .96));
+        border: 1px solid rgba(96, 165, 250, .26);
+        box-shadow: 0 24px 70px rgba(0, 0, 0, .34);
+    }
+
+    .rule-hero::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background:
+            linear-gradient(90deg, rgba(255,255,255,.05) 1px, transparent 1px),
+            linear-gradient(rgba(255,255,255,.04) 1px, transparent 1px);
+        background-size: 34px 34px;
+        mask-image: linear-gradient(to bottom, black, transparent);
+        pointer-events: none;
+    }
+
+    .rule-hero-content {
+        position: relative;
+        z-index: 1;
+        display: grid;
+        grid-template-columns: 1.2fr .8fr;
+        gap: 24px;
+        align-items: center;
+    }
+
+    .rule-kicker {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        padding: 8px 13px;
+        border-radius: 999px;
+        color: #dbeafe;
+        background: rgba(37, 99, 235, .18);
+        border: 1px solid rgba(96, 165, 250, .28);
+        font-weight: 800;
+        font-size: 13px;
+        letter-spacing: .04em;
+        text-transform: uppercase;
+    }
+
+    .rule-hero h1 {
+        margin: 16px 0 10px;
+        font-size: clamp(34px, 4vw, 60px);
+        line-height: .95;
+        letter-spacing: -1.8px;
+    }
+
+    .rule-hero p {
+        max-width: 900px;
+        color: #cbd5e1;
+        font-size: 16px;
+        line-height: 1.65;
+    }
+
+    .rule-hero-stats {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 12px;
+        margin-top: 22px;
+    }
+
+    .rule-stat {
+        padding: 15px;
+        border-radius: 18px;
+        background: rgba(2, 6, 23, .45);
+        border: 1px solid rgba(148, 163, 184, .16);
+    }
+
+    .rule-stat span {
+        display: block;
+        color: #94a3b8;
+        font-size: 12px;
+        margin-bottom: 6px;
+    }
+
+    .rule-stat strong {
+        display: block;
+        color: #f8fafc;
+        font-size: 18px;
+    }
+
+    .rule-badge {
+        justify-self: end;
+        width: min(310px, 100%);
+        aspect-ratio: 1;
+        border-radius: 36px;
+        display: grid;
+        place-items: center;
+        background:
+            linear-gradient(145deg, rgba(239, 35, 60, .20), rgba(37, 99, 235, .24)),
+            rgba(15, 23, 42, .66);
+        border: 1px solid rgba(148, 163, 184, .18);
+        box-shadow: inset 0 0 60px rgba(37,99,235,.18);
+    }
+
+    .rule-badge-inner {
+        text-align: center;
+        padding: 25px;
+    }
+
+    .rule-badge-icon {
+        width: 82px;
+        height: 82px;
+        margin: 0 auto 14px;
+        border-radius: 24px;
+        display: grid;
+        place-items: center;
+        font-size: 42px;
+        background: linear-gradient(135deg, #ef233c, #2563eb);
+        box-shadow: 0 18px 45px rgba(37, 99, 235, .32);
+    }
+
+    .rule-badge-inner strong {
+        display: block;
+        font-size: 28px;
+        letter-spacing: .12em;
+        color: #fff;
+    }
+
+    .rule-badge-inner span {
+        display: block;
+        margin-top: 6px;
+        color: #bfdbfe;
+        font-weight: 700;
+    }
+
+    .rule-grid {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+        gap: 20px;
+    }
+
+    .rule-section {
+        position: relative;
+        overflow: hidden;
+        border-radius: 24px;
+        padding: 24px;
+        background: rgba(15, 23, 42, .82);
+        border: 1px solid rgba(148, 163, 184, .14);
+        box-shadow: 0 18px 60px rgba(0, 0, 0, .22);
+    }
+
+    .rule-section::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 24px;
+        right: 24px;
+        height: 3px;
+        background: linear-gradient(90deg, #ef233c, #60a5fa, transparent);
+        border-radius: 999px;
+    }
+
+    .rule-section.big {
+        grid-column: 1 / -1;
+    }
+
+    .rule-title {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        margin-bottom: 18px;
+        padding-bottom: 16px;
+        border-bottom: 1px solid rgba(148, 163, 184, .14);
+    }
+
+    .rule-title h2 {
+        margin: 0;
+        font-size: 24px;
+        color: #f8fafc;
+    }
+
+    .rule-title p {
+        margin: 6px 0 0;
+        color: #94a3b8;
+        font-size: 13px;
+    }
+
+    .rule-chip {
+        flex: 0 0 auto;
+        padding: 7px 12px;
+        border-radius: 999px;
+        color: #fecaca;
+        background: rgba(239, 35, 60, .14);
+        border: 1px solid rgba(248, 113, 113, .24);
+        font-size: 12px;
+        font-weight: 800;
+    }
+
+    .rule-list {
+        display: grid;
+        gap: 12px;
+    }
+
+    .rule-item {
+        padding: 15px;
+        border-radius: 18px;
+        background: rgba(2, 6, 23, .35);
+        border: 1px solid rgba(148, 163, 184, .10);
+    }
+
+    .rule-item h3 {
+        margin: 0 0 7px;
+        color: #ffffff;
+        font-size: 16px;
+    }
+
+    .rule-item p {
+        margin: 0;
+        color: #cbd5e1;
+        line-height: 1.55;
+    }
+
+    .rule-alert {
+        margin-top: 10px;
+        padding: 12px 14px;
+        border-radius: 16px;
+        color: #fecaca;
+        background: rgba(239, 35, 60, .10);
+        border: 1px solid rgba(248, 113, 113, .18);
+        font-weight: 700;
+    }
+
+    .rule-note {
+        margin-top: 10px;
+        padding: 12px 14px;
+        border-radius: 16px;
+        color: #bbf7d0;
+        background: rgba(34, 197, 94, .10);
+        border: 1px solid rgba(74, 222, 128, .18);
+        font-weight: 700;
+    }
+
+    .clothing-card {
+        margin-top: 20px;
+        border-radius: 28px;
+        overflow: hidden;
+        background: rgba(15, 23, 42, .86);
+        border: 1px solid rgba(96, 165, 250, .18);
+        box-shadow: 0 24px 70px rgba(0, 0, 0, .30);
+    }
+
+    .clothing-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 14px;
+        padding: 22px 24px;
+        background:
+            radial-gradient(circle at top right, rgba(37,99,235,.30), transparent 35%),
+            linear-gradient(90deg, rgba(239,35,60,.12), rgba(37,99,235,.12));
+        border-bottom: 1px solid rgba(148, 163, 184, .14);
+    }
+
+    .clothing-header h2 {
+        margin: 0;
+        font-size: 26px;
+    }
+
+    .clothing-header p {
+        margin: 6px 0 0;
+        color: #94a3b8;
+    }
+
+    .clothing-img {
+        width: 100%;
+        display: block;
+        background: #020617;
+    }
+
+    .made-by {
+        padding: 16px 24px 22px;
+        text-align: center;
+        color: #cbd5e1;
+        font-weight: 800;
+        letter-spacing: .03em;
+    }
+
+    @media (max-width: 1000px) {
+        .rule-hero-content,
+        .rule-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .rule-badge {
+            justify-self: stretch;
+            aspect-ratio: auto;
+        }
+
+        .rule-hero-stats {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+
+<div class="rule-hero">
+    <div class="rule-hero-content">
+        <div>
+            <span class="rule-kicker">📘 LSMD • Prakti/Sani Regelwerk</span>
+            <h1>Regelwerk</h1>
+            <p>
+                Dieses Regelwerk dient der Sicherstellung von Qualität, Struktur und Professionalität innerhalb der
+                Prakti/Sani-Abteilung. Änderungen und Hinweise werden dokumentiert und konsequent umgesetzt.
+            </p>
+
+            <div class="rule-hero-stats">
+                <div class="rule-stat">
+                    <span>Wochenziel</span>
+                    <strong>10 Punkte</strong>
+                </div>
+                <div class="rule-stat">
+                    <span>Fokus</span>
+                    <strong>Ausbildung</strong>
+                </div>
+                <div class="rule-stat">
+                    <span>Status</span>
+                    <strong>Intern</strong>
+                </div>
+            </div>
+        </div>
+
+        <div class="rule-badge">
+            <div class="rule-badge-inner">
+                <div class="rule-badge-icon">🚑</div>
+                <strong>LSMD</strong>
+                <span>Prakti/Sani System</span>
+            </div>
+        </div>
+    </div>
 </div>
 
-<section class="dashboard-grid">
-    <div class="card admin-glow">
-        <div class="card-header">
+<section class="rule-grid">
+    <div class="rule-section">
+        <div class="rule-title">
             <div>
-                <h2>Ausbildungen & Prüfungen</h2>
-                <p class="card-subtitle">Faire Verteilung unter allen Ausbildern</p>
+                <h2>🛡 Allgemeine Regeln</h2>
+                <p>§1 bis §6</p>
             </div>
-            <span class="chip red">Wichtig</span>
+            <span class="rule-chip">Pflicht</span>
         </div>
 
-        <p>
-            Ausbildungen, Prüfungen und Weiterbildungen müssen vorher im Team abgesprochen werden.
-            Achtet darauf, dass diese fair und abwechselnd verteilt werden, damit jeder Ausbilder regelmäßig
-            die Chance bekommt, eine Prüfung oder Ausbildung durchzuführen.
-        </p>
-
-        <div class="info-list">
-            <div>
-                <span>Absprache</span>
-                <strong>Vor jeder Prüfung kurz mit dem Team abklären</strong>
+        <div class="rule-list">
+            <div class="rule-item">
+                <h3>§1 – Vorbildfunktion</h3>
+                <p>Alle Ausbilder repräsentieren das LSMD und tragen eine Vorbildfunktion. Ein respektvoller und professioneller Umgang mit Mitmenschen ist zwingend erforderlich.</p>
+                <div class="rule-alert">Bei negativem Verhalten oder Respektlosigkeit kann ein Ausschluss aus der Abteilung erfolgen.</div>
             </div>
 
-            <div>
-                <span>Fairness</span>
-                <strong>Nicht immer dieselben Personen übernehmen lassen</strong>
+            <div class="rule-item">
+                <h3>§2 – Fachliche Kompetenz</h3>
+                <p>Ausbilder handeln stets nach bestem Wissen und Gewissen. Dienstvorschriften und relevante Dokumente müssen bekannt sein.</p>
             </div>
 
-            <div>
-                <span>Chance für alle</span>
-                <strong>Jeder Ausbilder soll regelmäßig Prüfungen durchführen können</strong>
+            <div class="rule-item">
+                <h3>§3 – Teamarbeit</h3>
+                <p>Teamwork ist essenziell. Ausbilder arbeiten nicht als Einzelkämpfer, sondern unterstützen sich gegenseitig. Fehler werden freundlich und konstruktiv angesprochen.</p>
             </div>
 
-            <div>
-                <span>Nachweis</span>
-                <strong>Nach der Prüfung alles sauber im passenden Channel eintragen und bestätigen</strong>
-            </div>
-        </div>
-    </div>
-
-    <div class="card">
-        <div class="card-header">
-            <div>
-                <h2>Allgemeines Verhalten</h2>
-                <p class="card-subtitle">Respektvoller Umgang und klare Kommunikation</p>
-            </div>
-        </div>
-
-        <div class="info-list">
-            <div>
-                <span>Umgang</span>
-                <strong>Jeder wird respektvoll und sachlich behandelt</strong>
+            <div class="rule-item">
+                <h3>§4 – Mindestaktivität</h3>
+                <p>Jeder Ausbilder muss wöchentlich mindestens <strong>10 Punkte</strong> sammeln, zum Beispiel durch Einstellungen, Prüfungen oder Nachweise.</p>
+                <div class="rule-note">Sobald das Wochenziel erreicht ist, gilt die Woche als grün.</div>
             </div>
 
-            <div>
-                <span>Kommunikation</span>
-                <strong>Unklarheiten werden intern und ruhig geklärt</strong>
+            <div class="rule-item">
+                <h3>§5 – Dienstkleidung</h3>
+                <p>Die Kleiderordnung ist verpflichtend. Wer sich nicht daran hält, muss mit Sanktionen rechnen.</p>
             </div>
 
-            <div>
-                <span>Vorbildfunktion</span>
-                <strong>Ausbilder achten auf ein professionelles Auftreten</strong>
+            <div class="rule-item">
+                <h3>§6 – Werbung</h3>
+                <p>Täglich sollten ausreichend Jobannounces für die Abteilung geschaltet werden, damit die Bewerbungsphase aktiv bleibt.</p>
             </div>
         </div>
     </div>
 
-    <div class="card">
-        <div class="card-header">
+    <div class="rule-section">
+        <div class="rule-title">
             <div>
-                <h2>Eintragungen & Bestätigungen</h2>
-                <p class="card-subtitle">Rang- und Weiterbildungs-Channel sauber nutzen</p>
+                <h2>📋 Prüfungen & Einstellungen</h2>
+                <p>§7 bis §11</p>
             </div>
+            <span class="rule-chip">Ablauf</span>
         </div>
 
-        <p>
-            Nach abgeschlossenen Prüfungen, Weiterbildungen oder Einstellungen müssen die Eintragungen
-            im richtigen Channel nachvollziehbar bestätigt werden.
-        </p>
-
-        <div class="info-list">
-            <div>
-                <span>Einstellung</span>
-                <strong>Die einstellende Person bestätigt die Eintragung mit einem Haken</strong>
+        <div class="rule-list">
+            <div class="rule-item">
+                <h3>§7 – Durchführung</h3>
+                <p>Prüfungen und Einstellungen finden ingame im Prakti/Sani-Raum im Staff Room statt. Einstellungen werden im Discord in den Prakti 1–2 Talks durchgeführt. Prüfungen finden in den Prakti/Sani Ausbildung Talks 1 & 2 statt.</p>
+                <div class="rule-note">Sanitäterprüfungen müssen mindestens einen Tag im Voraus angekündigt und frühzeitig eingetragen werden.</div>
             </div>
 
-            <div>
-                <span>Prüfung</span>
-                <strong>Der zuständige Ausbilder bestätigt die Nachricht des Prüflings</strong>
+            <div class="rule-item">
+                <h3>§8 – Vorerfahrung abfragen</h3>
+                <p>Bei jeder Einstellung ist im Gespräch zu Beginn zu erfragen, wie lange die Person bereits aktiv ist.</p>
             </div>
 
-            <div>
-                <span>Weiterbildung</span>
-                <strong>Nach Vergabe der Rolle wird die Eintragung im passenden Channel bestätigt</strong>
+            <div class="rule-item">
+                <h3>§9 – Ausbilderverteilung</h3>
+                <p>Maximal 2 Ausbilder pro Einsatz. Ab mehr als 4 Prüflingen sind 3 Ausbilder erlaubt. Ab mehr als 7 Prüflingen sind 4 Ausbilder erlaubt.</p>
+            </div>
+
+            <div class="rule-item">
+                <h3>§9a – Zeitangaben</h3>
+                <p>Bewerber und Prüflinge müssen vorher über die ungefähre Dauer informiert werden.</p>
+            </div>
+
+            <div class="rule-item">
+                <h3>§10 – Blaues Blatt</h3>
+                <p>Komplexe Inhalte müssen vom Bewerber selbst erklärt werden. Es soll nicht nur abgelesen werden.</p>
+            </div>
+
+            <div class="rule-item">
+                <h3>§11 – Prüfung: Praktikant darf alleine fahren</h3>
+                <p>Diese Prüfung kann spontan stattfinden und soll regelmäßig durchgeführt werden.</p>
             </div>
         </div>
     </div>
 
-    <div class="card">
-        <div class="card-header">
+    <div class="rule-section">
+        <div class="rule-title">
             <div>
-                <h2>Punkte & Wochenziel</h2>
-                <p class="card-subtitle">Aktivität und Nachweise</p>
+                <h2>🗂 Dokumentation</h2>
+                <p>§12</p>
             </div>
+            <span class="rule-chip">Sauberkeit</span>
         </div>
 
-        <div class="info-list">
-            <div>
-                <span>Wochenziel</span>
-                <strong>Mindestens 10 Punkte pro Woche</strong>
+        <div class="rule-list">
+            <div class="rule-item">
+                <h3>§12 – Dokumente</h3>
+                <p>Vertrauliche Dokumente dürfen nicht weitergegeben werden. Ordnungsgemäße Führung ist Pflicht. Bei Fragen ist die Leitung zu kontaktieren.</p>
             </div>
 
-            <div>
-                <span>Nachweise</span>
-                <strong>Punkte werden nur bei nachvollziehbaren Eintragungen gewertet</strong>
+            <div class="rule-item">
+                <h3>Eintragungen & Bestätigungen</h3>
+                <p>Nach abgeschlossenen Prüfungen, Weiterbildungen oder Einstellungen müssen Eintragungen im passenden Channel sauber bestätigt werden.</p>
             </div>
 
+            <div class="rule-item">
+                <h3>Rang- und Weiterbildungs-Channel</h3>
+                <p>Die zuständige Person bestätigt die Nachricht mit einem Haken, damit nachvollziehbar bleibt, wer die Prüfung oder Weiterbildung durchgeführt hat.</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="rule-section">
+        <div class="rule-title">
             <div>
-                <span>Fairness</span>
-                <strong>Punkte und Aufgaben sollen ehrlich und sauber dokumentiert werden</strong>
+                <h2>💬 Motivation & Disziplin</h2>
+                <p>§13 bis §14</p>
+            </div>
+            <span class="rule-chip">Team</span>
+        </div>
+
+        <div class="rule-list">
+            <div class="rule-item">
+                <h3>§13 – Engagement fördern</h3>
+                <p>Neue Praktikanten sollen motiviert und aktiv an die Abteilung gebunden werden. Ziel ist ein professioneller und strukturierter Einstieg.</p>
+            </div>
+
+            <div class="rule-item">
+                <h3>§14 – Disziplin</h3>
+                <p>Keine Streitigkeiten um Punkte. Keine „Kein-Bock“-Einstellungen. Alles muss professionell, fair und sauber ablaufen.</p>
+            </div>
+
+            <div class="rule-item">
+                <h3>Faire Verteilung</h3>
+                <p>Ausbildungen, Prüfungen und Weiterbildungen müssen im Team abgesprochen und abwechselnd verteilt werden. Jeder Ausbilder soll regelmäßig die Chance bekommen, eine Prüfung oder Ausbildung durchzuführen.</p>
             </div>
         </div>
     </div>
 </section>
+
+<div class="clothing-card">
+    <div class="clothing-header">
+        <div>
+            <h2>👕 Dienstkleidung</h2>
+            <p>Pflicht im Dienst. Die aktuelle Dienstkleidung ist einzuhalten.</p>
+        </div>
+        <span class="rule-chip">LSMD Outfit</span>
+    </div>
+
+    <img class="clothing-img" src="/img/dienstkleidung-prakti-sani.png" alt="LSMD Prakti/Sani Dienstkleidung">
+
+    <div class="made-by">
+        Made by Prof. Dr. Karim Tranquile
+    </div>
+</div>
