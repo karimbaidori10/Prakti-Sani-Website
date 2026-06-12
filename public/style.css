@@ -8717,3 +8717,397 @@ table tr th:last-child {
         grid-template-columns: 1fr !important;
     }
 }
+
+/* =========================================================
+   FINAL LSMD PREMIUM DESIGN OVERRIDE
+   Made by Prof. Dr. Karim Tranquile
+========================================================= */
+
+:root {
+    --premium-bg: #030712;
+    --premium-card: rgba(10, 17, 34, 0.88);
+    --premium-card-2: rgba(15, 23, 42, 0.92);
+    --premium-border: rgba(255, 255, 255, 0.09);
+    --premium-blue: #2f80ff;
+    --premium-cyan: #06b6d4;
+    --premium-red: #ef233c;
+    --premium-gold: #facc15;
+    --premium-text: #f8fafc;
+    --premium-muted: #a8b3c7;
+}
+
+/* GLOBAL LOOK */
+body {
+    background:
+        radial-gradient(circle at 80% 0%, rgba(47, 128, 255, 0.20), transparent 34%),
+        radial-gradient(circle at 12% 18%, rgba(239, 35, 60, 0.18), transparent 34%),
+        radial-gradient(circle at 50% 100%, rgba(6, 182, 212, 0.08), transparent 35%),
+        linear-gradient(135deg, #030712 0%, #07101f 48%, #020617 100%) !important;
+    color: var(--premium-text) !important;
+}
+
+body::before {
+    opacity: 0.35 !important;
+}
+
+/* SIDEBAR PREMIUM */
+.sidebar {
+    background:
+        linear-gradient(180deg, rgba(4, 9, 22, 0.98), rgba(2, 6, 23, 0.98)) !important;
+    border-right: 1px solid rgba(255,255,255,0.08) !important;
+    box-shadow: 20px 0 70px rgba(0,0,0,0.38) !important;
+}
+
+.brand {
+    padding: 14px 12px 18px !important;
+    border-radius: 22px !important;
+    background: linear-gradient(135deg, rgba(239,35,60,0.11), rgba(47,128,255,0.08)) !important;
+    border: 1px solid rgba(255,255,255,0.08) !important;
+    margin-bottom: 32px !important;
+}
+
+.brand-icon {
+    border-radius: 18px !important;
+    background: linear-gradient(135deg, #ef233c, #1d4ed8) !important;
+    box-shadow:
+        0 0 28px rgba(239,35,60,0.35),
+        0 0 45px rgba(37,99,235,0.18) !important;
+}
+
+.brand h2 {
+    background: linear-gradient(90deg, #ff3048, #ffffff);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.nav {
+    gap: 14px !important;
+}
+
+.nav a {
+    min-height: 58px !important;
+    border-radius: 18px !important;
+    background: rgba(8, 14, 30, 0.52) !important;
+    border: 1px solid rgba(255,255,255,0.055) !important;
+    box-shadow: inset 0 0 18px rgba(255,255,255,0.015) !important;
+}
+
+.nav a:hover {
+    background: linear-gradient(90deg, rgba(47,128,255,0.14), rgba(239,35,60,0.08)) !important;
+    border-color: rgba(47,128,255,0.32) !important;
+    transform: translateX(5px) !important;
+}
+
+.nav a.active {
+    background:
+        linear-gradient(90deg, rgba(239,35,60,0.34), rgba(47,128,255,0.18)) !important;
+    border-color: rgba(47,128,255,0.58) !important;
+    box-shadow:
+        0 0 28px rgba(47,128,255,0.22),
+        inset 4px 0 0 rgba(239,35,60,0.95) !important;
+}
+
+/* TOPBAR */
+.topbar {
+    background: rgba(8, 14, 30, 0.38) !important;
+    border: 1px solid rgba(255,255,255,0.06) !important;
+    border-radius: 22px !important;
+    padding: 10px 16px !important;
+    height: auto !important;
+    backdrop-filter: blur(20px) !important;
+}
+
+.menu-btn,
+.profile-circle,
+.role-pill {
+    border-radius: 16px !important;
+    border-color: rgba(47,128,255,0.32) !important;
+    box-shadow: 0 0 24px rgba(47,128,255,0.14) !important;
+}
+
+/* PAGE HEADER */
+.page-header,
+.hero {
+    position: relative !important;
+    overflow: hidden !important;
+    border-radius: 28px !important;
+    border: 1px solid rgba(255,255,255,0.10) !important;
+    background:
+        linear-gradient(135deg, rgba(239,35,60,0.20), rgba(47,128,255,0.18)),
+        rgba(10,17,34,0.90) !important;
+    box-shadow:
+        0 24px 70px rgba(0,0,0,0.36),
+        0 0 50px rgba(47,128,255,0.10) !important;
+}
+
+.page-header::after,
+.hero::after {
+    content: "" !important;
+    position: absolute !important;
+    right: -90px !important;
+    top: -90px !important;
+    width: 260px !important;
+    height: 260px !important;
+    border-radius: 50% !important;
+    background: rgba(47,128,255,0.24) !important;
+    filter: blur(4px) !important;
+}
+
+.page-header h1,
+.hero h1 {
+    font-size: clamp(34px, 4vw, 52px) !important;
+    letter-spacing: -1.2px !important;
+    line-height: 1.05 !important;
+}
+
+.page-header p,
+.hero p {
+    color: #cbd5e1 !important;
+    font-size: 15px !important;
+}
+
+/* CARDS */
+.card,
+.stat-card,
+.clean-panel,
+.admin-glow,
+.doc-card,
+.training-entry,
+.training-card,
+.termin-card,
+.exam-card,
+.podium-card,
+.leaderboard-row,
+.member-table-row,
+.sheet-week-card {
+    background:
+        linear-gradient(180deg, rgba(15,23,42,0.92), rgba(7,12,27,0.94)) !important;
+    border: 1px solid rgba(255,255,255,0.08) !important;
+    border-radius: 24px !important;
+    box-shadow:
+        0 18px 50px rgba(0,0,0,0.30),
+        inset 0 1px 0 rgba(255,255,255,0.035) !important;
+    backdrop-filter: blur(20px) !important;
+}
+
+.card:hover,
+.stat-card:hover,
+.doc-card:hover,
+.training-entry:hover,
+.training-card:hover,
+.termin-card:hover,
+.exam-card:hover,
+.leaderboard-row:hover,
+.member-table-row:hover {
+    transform: translateY(-4px) !important;
+    border-color: rgba(47,128,255,0.35) !important;
+    box-shadow:
+        0 22px 60px rgba(0,0,0,0.38),
+        0 0 35px rgba(47,128,255,0.11) !important;
+}
+
+/* CARD HEADERS */
+.card-header {
+    padding-bottom: 16px !important;
+    margin-bottom: 18px !important;
+    border-bottom: 1px solid rgba(255,255,255,0.075) !important;
+}
+
+.card-header h2,
+.card h2 {
+    font-size: 23px !important;
+    letter-spacing: -0.4px !important;
+}
+
+.card-subtitle {
+    color: var(--premium-muted) !important;
+}
+
+/* STATS */
+.stats-grid {
+    gap: 20px !important;
+}
+
+.stat-card {
+    min-height: 126px !important;
+}
+
+.stat-icon {
+    width: 62px !important;
+    height: 62px !important;
+    border-radius: 20px !important;
+    font-size: 28px !important;
+    background: rgba(255,255,255,0.055) !important;
+    box-shadow: inset 0 0 24px rgba(255,255,255,0.03) !important;
+}
+
+.stat-card h2 {
+    font-size: 35px !important;
+    letter-spacing: -0.8px !important;
+}
+
+.stat-card p {
+    color: var(--premium-muted) !important;
+}
+
+/* BUTTONS */
+button,
+.btn,
+.admin-btn,
+.open-doc-btn,
+.discord-login,
+.logout,
+.mini-btn {
+    border-radius: 16px !important;
+    font-weight: 900 !important;
+    letter-spacing: 0.1px !important;
+    border: 1px solid rgba(255,255,255,0.08) !important;
+    background:
+        linear-gradient(135deg, #2563eb, #06b6d4) !important;
+    box-shadow:
+        0 14px 32px rgba(37,99,235,0.26),
+        inset 0 1px 0 rgba(255,255,255,0.12) !important;
+    transition: 0.18s ease !important;
+}
+
+button:hover,
+.btn:hover,
+.admin-btn:hover,
+.open-doc-btn:hover,
+.discord-login:hover,
+.logout:hover,
+.mini-btn:hover {
+    transform: translateY(-2px) !important;
+    filter: brightness(1.08) !important;
+    opacity: 1 !important;
+}
+
+.danger-btn,
+.danger,
+.logout {
+    background:
+        linear-gradient(135deg, #ef233c, #991b1b) !important;
+    box-shadow:
+        0 14px 32px rgba(239,35,60,0.25),
+        inset 0 1px 0 rgba(255,255,255,0.12) !important;
+}
+
+/* INPUTS */
+input,
+select,
+textarea {
+    background: rgba(2, 6, 23, 0.72) !important;
+    border: 1px solid rgba(255,255,255,0.10) !important;
+    border-radius: 16px !important;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+    border-color: rgba(47,128,255,0.80) !important;
+    box-shadow: 0 0 0 4px rgba(47,128,255,0.14) !important;
+}
+
+/* QUICK CARDS */
+.quick-card,
+.admin-box {
+    border-radius: 22px !important;
+    padding: 24px !important;
+    background:
+        linear-gradient(135deg, rgba(47,128,255,0.10), rgba(2,6,23,0.38)) !important;
+    border: 1px solid rgba(255,255,255,0.08) !important;
+}
+
+.quick-card h3,
+.admin-box h3 {
+    font-size: 20px !important;
+}
+
+.quick-card p,
+.admin-box p {
+    color: var(--premium-muted) !important;
+}
+
+/* LIST BOXES */
+.clean-status-list > div,
+.info-list > div,
+.doc-info-list div,
+.training-info-grid div,
+.points-box,
+.mini-stat {
+    border-radius: 18px !important;
+    background: rgba(255,255,255,0.035) !important;
+    border: 1px solid rgba(255,255,255,0.075) !important;
+}
+
+/* CHIPS / BADGES */
+.chip,
+.badge,
+.role-pill,
+.status-pill,
+.champion-badge {
+    border-radius: 999px !important;
+    border: 1px solid rgba(255,255,255,0.11) !important;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.06) !important;
+}
+
+/* CALENDAR */
+.lsmd-calendar-day,
+.calendar-day {
+    border-radius: 20px !important;
+    background: rgba(8,14,32,0.72) !important;
+}
+
+.lsmd-calendar-day.is-today,
+.calendar-day.today {
+    border-color: rgba(239,35,60,0.78) !important;
+    box-shadow: 0 0 32px rgba(239,35,60,0.18) !important;
+}
+
+/* LOGIN */
+.login-card,
+.login-box {
+    border-radius: 30px !important;
+    background:
+        linear-gradient(180deg, rgba(15,23,42,0.88), rgba(7,12,27,0.92)) !important;
+    border: 1px solid rgba(255,255,255,0.10) !important;
+    box-shadow:
+        0 35px 110px rgba(0,0,0,0.58),
+        0 0 70px rgba(47,128,255,0.15) !important;
+}
+
+.login-logo {
+    border-radius: 24px !important;
+    background: linear-gradient(135deg, #ef233c, #2563eb) !important;
+}
+
+/* SCROLLBAR */
+::-webkit-scrollbar-thumb {
+    background: linear-gradient(180deg, #ef233c, #2563eb) !important;
+}
+
+/* TEXT POLISH */
+p {
+    line-height: 1.55;
+}
+
+strong {
+    color: #ffffff;
+}
+
+/* MOBILE */
+@media (max-width: 780px) {
+    .sidebar {
+        border-right: 0 !important;
+        border-bottom: 1px solid rgba(255,255,255,0.08) !important;
+    }
+
+    .page-header,
+    .hero {
+        padding: 24px !important;
+    }
+
+    .card {
+        padding: 20px !important;
+    }
+}
