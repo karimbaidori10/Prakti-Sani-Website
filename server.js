@@ -5564,6 +5564,78 @@ app.post("/overwatch/:id/update", requireLogin, requireAusbilderOrAdmin, async (
             examiner: examiner.trim()
         }, req.session.user);
 
+        if (OVERWATCH_LOG_CHANNEL_ID) {
+    const logChannel = await botClient.channels.fetch(OVERWATCH_LOG_CHANNEL_ID).catch(() => null);
+
+    if (logChannel) {
+        const status = getOverwatchStatus(issuedDate);
+
+        const embed = new EmbedBuilder()
+            .setColor(0x2563eb)
+            .setTitle("✏️ Overwatch Lizenz bearbeitet")
+            .setDescription("Eine Overwatch-Lizenz wurde über die Website aktualisiert.")
+            .addFields(
+                {
+                    name: "👤 Mitglied",
+                    value: `**${dn.trim()} | ${name.trim()}**`,
+                    inline: false
+                },
+                {
+                    name: "👁️ Lizenz",
+                    value: `**${licenseType}**`,
+                    inline: true
+                },
+                {
+                    name: "📅 Seit",
+                    value: `**${formatOverwatchDate(issuedDate)}**`,
+                    inline: true
+                },
+                {
+                    name: "⏰ Fällig ab",
+                    value: `**${formatOverwatchDate(dueDate)}**`,
+                    inline: true
+                },
+                {
+                    name: "📌 Status",
+                    value: `${status.emoji} **${status.label}**`,
+                    inline: true
+                },
+                {
+                    name: "👨‍🏫 Prüfer",
+                    value: `**${examiner.trim()}**`,
+                    inline: true
+                },
+                {
+                    name: "✍️ Bearbeitet von",
+                    value: req.session.user?.discordId
+                        ? `<@${req.session.user.discordId}>`
+                        : `**${req.session.user?.username || "Unbekannt"}**`,
+                    inline: true
+                }
+            )
+            .setFooter({
+                text: "LSMD Overwatch-System • Bearbeitung",
+                iconURL: LSMD_LOGO_URL
+            })
+            .setTimestamp();
+
+        if (notes && notes.trim() !== "") {
+            embed.addFields({
+                name: "📝 Notiz",
+                value: notes.trim().slice(0, 1000),
+                inline: false
+            });
+        }
+
+        await logChannel.send({
+            embeds: [embed],
+            allowedMentions: {
+                parse: []
+            }
+        });
+    }
+}
+
         return res.redirect("/overwatch");
     } catch (err) {
         console.error("Overwatch Lizenz bearbeiten Fehler:", err);
