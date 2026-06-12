@@ -3568,11 +3568,12 @@ return interaction.update({
 if (
     interaction.isStringSelectMenu() &&
     [
-        "overwatch_date_year",
-        "overwatch_date_month",
-        "overwatch_date_day_1",
-        "overwatch_date_day_2"
-    ].includes(interaction.customId)
+        [
+    "overwatch_date_year",
+    "overwatch_date_month",
+    "overwatch_date_day_1",
+    "overwatch_date_day_2"
+].includes(interaction.customId)
 ) {
     const oldData = overwatchTempData.get(interaction.user.id) || {};
 
@@ -3584,10 +3585,7 @@ if (
         oldData.month = interaction.values[0];
     }
 
-    if (
-        interaction.customId === "overwatch_date_day_1" ||
-        interaction.customId === "overwatch_date_day_2"
-    ) {
+    if (interaction.customId === "overwatch_date_day") {
         oldData.day = interaction.values[0];
     }
 
@@ -3758,7 +3756,7 @@ if (interaction.isModalSubmit() && interaction.customId === "overwatch_license_m
             },
             {
                 name: "👨‍🏫 Prüfer",
-                value: `**${examiner}**`,
+                value: examinerId ? `<@${examinerId}>` : `**${examiner}**`,
                 inline: true
             },
             {
@@ -3786,11 +3784,11 @@ if (interaction.isModalSubmit() && interaction.customId === "overwatch_license_m
 
         if (logChannel) {
             await logChannel.send({
-                embeds: [embed],
-                allowedMentions: {
-                    parse: []
-                }
-            });
+    embeds: [embed],
+    allowedMentions: {
+        users: examinerId ? [examinerId] : []
+    }
+});
         }
     }
 
