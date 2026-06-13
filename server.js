@@ -2,6 +2,8 @@
 require("dotenv").config();
 
 const express = require("express");
+const multer = require("multer");
+const XLSX = require("xlsx");
 const expressLayouts = require("express-ejs-layouts");
 const session = require("express-session");
 const { MongoClient, ObjectId } = require("mongodb");
@@ -37,6 +39,7 @@ let docsCollection;
 let logsCollection;
 let einstellungsBonusCollection;
 let overwatchLicensesCollection;
+let overwatchMembersCollection;
 
 const discordMemberCache = new Map();
 const DISCORD_CACHE_TIME = 1000 * 60 * 10;
@@ -75,6 +78,14 @@ const PROFESSOREN_LEITUNG_LOG_CHANNEL_ID = process.env.PROFESSOREN_LEITUNG_LOG_C
 const LSMD_LOGO_URL = "https://cdn.discordapp.com/attachments/1461110262395310160/1514333137487003790/p7NyS81.png?ex=6a2afc22&is=6a29aaa2&hm=b4ff181b7f8052507370699cf1024fc42b20330a20d09ed785366da8d1bfb8e1&";
 const AUSBILDUNG_LOGO_URL = process.env.AUSBILDUNG_LOGO_URL || "https://cdn.discordapp.com/attachments/1461110262395310160/1514910893488734309/image-removebg-preview.png?ex=6a2d1636&is=6a2bc4b6&hm=06d8d018bd420b5428dda8375ee88bde7d19eccf6ade38ad95106c0388ceacb7&";
 const AUSBILDUNG_FOOTER_LOGO_URL = process.env.AUSBILDUNG_FOOTER_LOGO_URL || "https://cdn.discordapp.com/attachments/1461110262395310160/1514906419336314992/md_logo.png?ex=6a2d120b&is=6a2bc08b&hm=97e63207a01832553278f6d09952fc3b0ca488efc3ba2c4bdba787655633a293&";
+const OVERWATCH_IMPORT_START_DATE = new Date("2026-06-14T00:00:00.000+02:00");
+
+const uploadDienstblatt = multer({
+    storage: multer.memoryStorage(),
+    limits: {
+        fileSize: 10 * 1024 * 1024
+    }
+});
 
 async function updateProfessorPointsInSheet(professorDn, points) {
   try {
@@ -2141,6 +2152,88 @@ function getOverwatchStatus(dateValue) {
         color: 0x22c55e,
         days
     };
+}
+
+function excelBool(value) {
+    const clean = String(value || "").trim().toLowerCase();
+
+    return clean === "true" ||
+        clean === "ja" ||
+        clean === "yes" ||
+        clean === "1" ||
+        clean === "x";
+}
+
+function getBestOverwatchLicense(hasOverwatch, hasOverwatchPlus, hasOsprey) {
+    if (hasOsprey) return "Osprey";
+    if (hasOverwatchPlus) return "Overwatch+";
+    if (hasOverwatch) return "Overwatch";
+    return "Keine Lizenz";
+}
+
+function parseDienstblattXlsx(buffer) {
+    const workbook = XLSX.read(buffer, {
+        type: "buffer",
+        cellDates: false
+    });
+
+    const sheetName = workbook.SheetNames.find(name =>
+        name.toLowerCase().includes("dienstblatt")
+    ) || workbook.SheetNames[0];
+
+    const sheet = workbook.Sheets[sheetName];
+
+    const rows = XLSX.utils.sheet_to_json(sheet, {
+        header: 1,
+        defval: ""
+    });
+
+    const members = [];
+
+    for (const row of rows) {
+        const dn = String(row[2] || "").trim();
+        const rank = String(row[3] || "").trim();
+        const name = String(row[4] || "").trim();
+        const discordId = String(row[6] || "").trim();
+        const steamId = String(row[7] || "").trim();
+
+        // Excel-Spalten:
+        // V = OW      => row[21]
+        // W = OW+     => row[22]
+        // X = OSPREY  => row[23]
+        const hasOverwatch = excelBool(row[21]);
+        const hasOverwatchPlus = excelBool(row[22]);
+        const hasOsprey = excelBool(row[23]);
+
+        if (!/^\d+$/.test(dn)) continue;
+        if (!name) continue;
+        if (name.toUpperCase().includes("WIRD NICHT VERGEBEN")) continue;
+
+        const hasAnyLicense = hasOverwatch || hasOverwatchPlus || hasOsprey;
+        const licenseType = getBestOverwatchLicense(hasOverwatch, hasOverwatchPlus, hasOsprey);
+
+        members.push({
+            dn,
+            rank,
+            name,
+            discordId,
+            steamId,
+
+            hasOverwatch,
+            hasOverwatchPlus,
+            hasOsprey,
+            hasAnyLicense,
+            licenseType,
+
+            importedStartDate: hasAnyLicense ? OVERWATCH_IMPORT_START_DATE : null,
+
+            source: "dienstblatt-import",
+            importedAt: new Date(),
+            updatedAt: new Date()
+        });
+    }
+
+    return members;
 }
 
 function formatOverwatchDate(dateValue) {
@@ -5953,6 +6046,94 @@ app.get("/overwatch", requireLogin, requireOverwatchOrAdmin, async (req, res) =>
     }
 });
 
+app.post("/overwatch/import-dienstblatt-xlsx", requireLogin, requireOverwatchOrAdmin, uploadDienstblatt.single("dienstblattFile"), async (req, res) => {
+    try {
+        if (!req.file || !req.file.buffer) {
+            return res.status(400).send("Keine Excel-Datei hochgeladen.");
+        }
+
+        const members = parseDienstblattXlsx(req.file.buffer);
+
+        if (!members.length) {
+            return res.status(400).send("Keine gültigen Mitglieder im Dienstblatt gefunden.");
+        }
+
+        let imported = 0;
+        let withLicense = 0;
+        let withoutLicense = 0;
+
+        for (const member of members) {
+            if (member.hasAnyLicense) {
+                withLicense++;
+            } else {
+                withoutLicense++;
+            }
+
+            await overwatchMembersCollection.updateOne(
+                { dn: member.dn },
+                {
+                    $set: {
+                        ...member,
+                        updatedAt: new Date()
+                    },
+                    $setOnInsert: {
+                        createdAt: new Date()
+                    }
+                },
+                { upsert: true }
+            );
+
+            if (member.hasAnyLicense) {
+                await overwatchLicensesCollection.updateOne(
+                    { dn: member.dn, source: "dienstblatt-import" },
+                    {
+                        $set: {
+                            dn: member.dn,
+                            name: member.name,
+                            rank: member.rank,
+                            discordId: member.discordId,
+                            steamId: member.steamId,
+
+                            licenseType: member.licenseType,
+
+                            hasOverwatch: member.hasOverwatch,
+                            hasOverwatchPlus: member.hasOverwatchPlus,
+                            hasOsprey: member.hasOsprey,
+
+                            issuedAt: OVERWATCH_IMPORT_START_DATE,
+                            lastRefreshAt: OVERWATCH_IMPORT_START_DATE,
+
+                            examiner: "Dienstblatt Import",
+                            notes: "Automatisch aus Dienstblatt importiert. Startdatum: 14.06.2026",
+
+                            source: "dienstblatt-import",
+                            updatedAt: new Date()
+                        },
+                        $setOnInsert: {
+                            createdAt: new Date()
+                        }
+                    },
+                    { upsert: true }
+                );
+            } else {
+                await overwatchLicensesCollection.deleteOne({
+                    dn: member.dn,
+                    source: "dienstblatt-import"
+                });
+            }
+
+            imported++;
+        }
+
+        console.log(`Overwatch Dienstblatt XLSX Import: ${imported} Mitglieder, ${withLicense} mit Lizenz, ${withoutLicense} ohne Lizenz`);
+
+        res.redirect(`/overwatch?import=success&count=${imported}&withLicense=${withLicense}&withoutLicense=${withoutLicense}`);
+    } catch (err) {
+        console.error("Fehler beim Overwatch XLSX Import:", err);
+        res.status(500).send("Fehler beim Dienstblatt-Import.");
+    }
+});
+
 app.post("/overwatch/create", requireLogin, requireOverwatchOrAdmin, async (req, res) => {
     try {
         const { dn, name, licenseType, issuedAt, examiner, notes } = req.body;
@@ -7114,6 +7295,7 @@ async function start() {
     logsCollection = db.collection("dashboardLogs");
     einstellungsBonusCollection = db.collection("einstellungsBonus");
     overwatchLicensesCollection = db.collection("overwatchLicenses");
+    overwatchMembersCollection = db.collection("overwatchMembers");
 
     await pointsCollection.createIndex({ points: -1 });
     await pointsCollection.createIndex({ userId: 1 });
