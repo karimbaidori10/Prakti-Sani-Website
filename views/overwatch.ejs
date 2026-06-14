@@ -14,9 +14,10 @@
     <% if (typeof query !== "undefined" && query.import === "success") { %>
         <div class="ow-import-success">
             Import erfolgreich:
-            <strong><%= query.count || 0 %></strong> Mitglieder übernommen,
-            <strong><%= query.withLicense || 0 %></strong> mit Lizenz,
-            <strong><%= query.withoutLicense || 0 %></strong> ohne Lizenz.
+<strong><%= query.count || 0 %></strong> Mitglieder übernommen,
+<strong><%= query.withLicense || 0 %></strong> Personen mit Lizenz,
+<strong><%= query.withoutLicense || 0 %></strong> Personen ohne Lizenz,
+<strong><%= query.licenses || 0 %></strong> einzelne Lizenzen importiert.
         </div>
     <% } %>
 

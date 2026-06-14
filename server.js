@@ -6061,6 +6061,7 @@ app.post("/overwatch/import-dienstblatt-xlsx", requireLogin, requireOverwatchOrA
         let imported = 0;
         let withLicense = 0;
         let withoutLicense = 0;
+        let importedLicenses = 0;
 
         for (const member of members) {
             if (member.hasAnyLicense) {
@@ -6083,51 +6084,78 @@ app.post("/overwatch/import-dienstblatt-xlsx", requireLogin, requireOverwatchOrA
                 { upsert: true }
             );
 
-            if (member.hasAnyLicense) {
-                await overwatchLicensesCollection.updateOne(
-                    { dn: member.dn, source: "dienstblatt-import" },
-                    {
-                        $set: {
-                            dn: member.dn,
-                            name: member.name,
-                            rank: member.rank,
-                            discordId: member.discordId,
-                            steamId: member.steamId,
+            // Alte importierte Lizenzen dieser Person löschen,
+// damit danach jede Lizenz einzeln neu angelegt wird.
+await overwatchLicensesCollection.deleteMany({
+    dn: member.dn,
+    source: "dienstblatt-import"
+});
 
-                            licenseType: member.licenseType,
+const licenseDocs = [];
 
-                            hasOverwatch: member.hasOverwatch,
-                            hasOverwatchPlus: member.hasOverwatchPlus,
-                            hasOsprey: member.hasOsprey,
+if (member.hasOverwatch) {
+    licenseDocs.push({
+        licenseType: "Overwatch",
+        licenseKey: "overwatch"
+    });
+}
 
-                            issuedAt: OVERWATCH_IMPORT_START_DATE,
-                            lastRefreshAt: OVERWATCH_IMPORT_START_DATE,
+if (member.hasOverwatchPlus) {
+    licenseDocs.push({
+        licenseType: "Overwatch+",
+        licenseKey: "overwatchPlus"
+    });
+}
 
-                            examiner: "Dienstblatt Import",
-                            notes: "Automatisch aus Dienstblatt importiert. Startdatum: 14.06.2026",
+if (member.hasOsprey) {
+    licenseDocs.push({
+        licenseType: "Osprey",
+        licenseKey: "osprey"
+    });
+}
 
-                            source: "dienstblatt-import",
-                            updatedAt: new Date()
-                        },
-                        $setOnInsert: {
-                            createdAt: new Date()
-                        }
-                    },
-                    { upsert: true }
-                );
-            } else {
-                await overwatchLicensesCollection.deleteOne({
-                    dn: member.dn,
-                    source: "dienstblatt-import"
-                });
+for (const license of licenseDocs) {
+    await overwatchLicensesCollection.updateOne(
+        {
+            dn: member.dn,
+            licenseKey: license.licenseKey,
+            source: "dienstblatt-import"
+        },
+        {
+            $set: {
+                dn: member.dn,
+                name: member.name,
+                rank: member.rank,
+                discordId: member.discordId,
+                steamId: member.steamId,
+
+                licenseType: license.licenseType,
+                licenseKey: license.licenseKey,
+
+                issuedAt: OVERWATCH_IMPORT_START_DATE,
+                lastRefreshAt: OVERWATCH_IMPORT_START_DATE,
+
+                examiner: "Dienstblatt Import",
+                notes: "Automatisch aus Dienstblatt importiert. Startdatum: 14.06.2026",
+
+                source: "dienstblatt-import",
+                updatedAt: new Date()
+            },
+            $setOnInsert: {
+                createdAt: new Date()
             }
+        },
+        { upsert: true }
+    );
+}
 
+            importedLicenses += licenseDocs.length;
             imported++;
         }
 
         console.log(`Overwatch Dienstblatt XLSX Import: ${imported} Mitglieder, ${withLicense} mit Lizenz, ${withoutLicense} ohne Lizenz`);
 
-        res.redirect(`/overwatch?import=success&count=${imported}&withLicense=${withLicense}&withoutLicense=${withoutLicense}`);
+        res.redirect(`/overwatch?import=success&count=${imported}&withLicense=${withLicense}&withoutLicense=${withoutLicense}&licenses=${importedLicenses}`);
     } catch (err) {
         console.error("Fehler beim Overwatch XLSX Import:", err);
         res.status(500).send("Fehler beim Dienstblatt-Import.");
