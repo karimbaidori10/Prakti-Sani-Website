@@ -150,144 +150,131 @@
     </section>
 <% } %>
 
-<section class="ow-license-grid" id="owLicenseGrid">
-    <% if (licenses.length === 0) { %>
+<section class="ow-license-grid ow-member-grid" id="owLicenseGrid">
+    <% if (!licenseGroups || licenseGroups.length === 0) { %>
         <div class="ow-empty">
             <h2>Keine Lizenzen vorhanden</h2>
-            <p>Trage die erste Lizenz über das Discord-Panel ein.</p>
+            <p>Importiere zuerst das Dienstblatt oder trage eine Lizenz ein.</p>
         </div>
     <% } %>
 
-    <% licenses.forEach((license) => { %>
-        <article 
-            class="ow-license-card ow-status-<%= license.status.key %>"
-            data-license="<%= license.licenseType %>"
-            data-status="<%= license.status.key %>"
+    <% (licenseGroups || []).forEach((member) => { %>
+        <article
+            class="ow-member-card ow-status-<%= member.statusKey %>"
+            data-search="<%= `${member.dn || ''} ${member.name || ''} ${member.rank || ''} ${member.licenses.map(l => l.licenseType).join(' ')}`.toLowerCase() %>"
+            data-status="<%= member.statusKey %>"
+            data-license="<%= member.licenses.map(l => l.licenseType).join('|') %>"
         >
-            <div class="ow-card-top">
+            <div class="ow-member-head">
                 <div>
-                    <span class="ow-dn"><%= license.dn || "Keine DN" %></span>
-                    <h2><%= license.name || "Unbekannt" %></h2>
-                </div>
-
-                <div class="ow-status-pill <%= license.status.key %>">
-                    <%= license.status.emoji %> <%= license.status.label %>
-                </div>
-            </div>
-
-            <div class="ow-license-main">
-                <div class="ow-license-icon">
-                    <% if (license.licenseType === "Osprey") { %>
-                        🦅
-                    <% } else { %>
-                        👁️
+                    <span class="ow-dn"><%= member.dn || "Keine DN" %></span>
+                    <h2><%= member.name || "Unbekannt" %></h2>
+                    <% if (member.rank) { %>
+                        <p><%= member.rank %></p>
                     <% } %>
                 </div>
 
-                <div>
-                    <small>Lizenz</small>
-                    <strong><%= license.licenseType %></strong>
+                <div class="ow-member-count">
+                    <strong><%= member.licenses.length %></strong>
+                    <span>Lizenz(en)</span>
                 </div>
             </div>
 
-            <div class="ow-info-grid">
-                <div>
-                    <small>Seit</small>
-                    <strong><%= license.issuedAtFormatted %></strong>
-                </div>
+            <div class="ow-mini-license-list">
+                <% member.licenses.forEach((license) => { %>
+                    <div class="ow-mini-license ow-mini-<%= license.status.key %>">
+                        <div class="ow-mini-main">
+                            <div class="ow-mini-icon">
+                                <%= license.licenseType === "Osprey" ? "🦅" : "👁️" %>
+                            </div>
 
-                <div>
-                    <small>Fällig ab</small>
-                    <strong><%= license.dueDateFormatted %></strong>
-                </div>
+                            <div>
+                                <strong><%= license.licenseType %></strong>
+                                <span>
+                                    Seit <%= license.issuedAtFormatted %> · Fällig ab <%= license.dueDateFormatted %>
+                                </span>
+                            </div>
+                        </div>
 
-                <div>
-                    <small>Alter</small>
-                    <strong><%= license.status.days %> Tag(e)</strong>
-                </div>
+                        <div class="ow-mini-status <%= license.status.key %>">
+                            <%= license.status.emoji %> <%= license.status.label %>
+                        </div>
 
-                <div>
-                    <small>Prüfer</small>
-                    <strong><%= license.examiner || "-" %></strong>
-                </div>
+                        <div class="ow-mini-meta">
+                            <span>Alter: <strong><%= license.status.days %> Tag(e)</strong></span>
+                            <span>Prüfer: <strong><%= license.examiner || "-" %></strong></span>
+                        </div>
+
+                        <% if (license.notes) { %>
+                            <div class="ow-mini-note">
+                                <%= license.notes %>
+                            </div>
+                        <% } %>
+
+                        <% if (canEditOverwatch) { %>
+                            <details class="ow-edit-box ow-mini-edit">
+                                <summary>✏️ Bearbeiten</summary>
+
+                                <form method="POST" action="/overwatch/<%= license._id %>/update" class="ow-edit-form">
+                                    <input name="dn" value="<%= license.dn || '' %>" placeholder="Dienstnummer" required>
+                                    <input name="name" value="<%= license.name || '' %>" placeholder="Name" required>
+
+                                    <select name="licenseType" required>
+                                        <option value="Overwatch" <%= license.licenseType === "Overwatch" ? "selected" : "" %>>👁️ Overwatch</option>
+                                        <option value="Overwatch+" <%= license.licenseType === "Overwatch+" ? "selected" : "" %>>👁️ Overwatch+</option>
+                                        <option value="Osprey" <%= license.licenseType === "Osprey" ? "selected" : "" %>>🦅 Osprey</option>
+                                    </select>
+
+                                    <input type="date" name="issuedAt" value="<%= license.issuedAt ? new Date(license.issuedAt).toISOString().slice(0, 10) : '' %>" required>
+
+                                    <select name="examiner" required>
+                                        <option value="">Prüfer / Ausbilder auswählen</option>
+
+                                        <% (overwatchExaminerOptions || []).forEach(person => { %>
+                                            <option value="<%= person.name %>" <%= license.examiner === person.name ? "selected" : "" %>>
+                                                <%= person.name %>
+                                            </option>
+                                        <% }) %>
+                                    </select>
+
+                                    <textarea name="notes" placeholder="Notiz optional"><%= license.notes || '' %></textarea>
+
+                                    <button type="submit">Änderung speichern</button>
+                                </form>
+                            </details>
+
+                            <div class="ow-mini-actions">
+                                <form method="POST" action="/overwatch/<%= license._id %>/refresh">
+                                    <button type="submit" class="ow-action-btn success">
+                                        ✅ Diese Lizenz auffrischen
+                                    </button>
+                                </form>
+
+                                <% if (isAdmin) { %>
+                                    <form method="POST" action="/overwatch/<%= license._id %>/delete" onsubmit="return confirm('Diese einzelne Lizenz wirklich löschen?');">
+                                        <button type="submit" class="ow-action-btn danger">
+                                            🗑️ Löschen
+                                        </button>
+                                    </form>
+                                <% } %>
+                            </div>
+                        <% } %>
+                    </div>
+                <% }) %>
             </div>
-
-            <% if (license.notes) { %>
-                <div class="ow-card-note">
-                    <small>Notiz</small>
-                    <p><%= license.notes %></p>
-                </div>
-            <% } %>
-
-<% if (canEditOverwatch) { %>
-    <details class="ow-edit-box">
-        <summary>✏️ Lizenz bearbeiten</summary>
-
-        <form method="POST" action="/overwatch/<%= license._id %>/update" class="ow-edit-form">
-            <input name="dn" value="<%= license.dn || '' %>" placeholder="Dienstnummer" required>
-
-            <input name="name" value="<%= license.name || '' %>" placeholder="Name" required>
-
-            <select name="licenseType" required>
-                <option value="Overwatch" <%= license.licenseType === "Overwatch" ? "selected" : "" %>>👁️ Overwatch</option>
-                <option value="Overwatch+" <%= license.licenseType === "Overwatch+" ? "selected" : "" %>>👁️ Overwatch+</option>
-                <option value="Osprey" <%= license.licenseType === "Osprey" ? "selected" : "" %>>🦅 Osprey</option>
-            </select>
-
-            <input type="date" name="issuedAt" value="<%= license.issuedAt ? new Date(license.issuedAt).toISOString().slice(0, 10) : '' %>" required>
-
-            <select name="examiner" required>
-    <option value="">Prüfer / Ausbilder auswählen</option>
-
-    <% (overwatchExaminerOptions || []).forEach(member => { %>
-        <option value="<%= member.name %>" <%= license.examiner === member.name ? "selected" : "" %>>
-            <%= member.name %>
-        </option>
-    <% }) %>
-</select>
-
-            <textarea name="notes" placeholder="Notiz optional"><%= license.notes || '' %></textarea>
-
-            <button type="submit">Änderung speichern</button>
-        </form>
-    </details>
-
-    <div class="ow-actions">
-        <form method="POST" action="/overwatch/<%= license._id %>/refresh">
-            <button type="submit" class="ow-action-btn success">
-                ✅ Auffrischung gemacht
-            </button>
-        </form>
-
-        <% if (isAdmin) { %>
-            <form method="POST" action="/overwatch/<%= license._id %>/delete" onsubmit="return confirm('Diese Overwatch-Lizenz wirklich löschen?');">
-                <button type="submit" class="ow-action-btn danger">
-                    🗑️ Löschen
-                </button>
-            </form>
-        <% } %>
-    </div>
-<% } %>
 
             <div class="ow-card-footer">
                 <span>
                     Quelle:
                     <strong>
-    <%= license.source === "discord-panel"
-        ? "Discord Panel"
-        : license.source === "dienstblatt-import"
-            ? "Dienstblatt Import"
-            : "Website"
-    %>
-</strong>
+                        <%= member.source === "discord-panel"
+                            ? "Discord Panel"
+                            : member.source === "dienstblatt-import"
+                                ? "Dienstblatt Import"
+                                : "Website"
+                        %>
+                    </strong>
                 </span>
-
-                <% if (license.createdByName) { %>
-                    <span>
-                        Eingetragen von:
-                        <strong><%= license.createdByName %></strong>
-                    </span>
-                <% } %>
             </div>
         </article>
     <% }) %>
@@ -296,7 +283,7 @@
 <script>
     const owFilter = document.getElementById("owFilter");
     const owSearch = document.getElementById("owSearch");
-    const owCards = document.querySelectorAll(".ow-license-card");
+    const owCards = document.querySelectorAll(".ow-member-card");
 
     function applyOverwatchFilters() {
         const filter = owFilter ? owFilter.value : "all";
@@ -308,9 +295,9 @@
             const text = card.innerText.toLowerCase();
 
             const matchesFilter =
-                filter === "all" ||
-                license === filter ||
-                status === filter;
+    filter === "all" ||
+    license.includes(filter) ||
+    status === filter;
 
             const matchesSearch =
                 search === "" ||

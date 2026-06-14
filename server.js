@@ -6026,6 +6026,51 @@ app.get("/overwatch", requireLogin, requireOverwatchOrAdmin, async (req, res) =>
             };
         });
 
+const licenseGroupsMap = new Map();
+
+for (const license of licenses) {
+    const groupKey = license.dn || license.name || String(license._id);
+
+    if (!licenseGroupsMap.has(groupKey)) {
+        licenseGroupsMap.set(groupKey, {
+            dn: license.dn,
+            name: license.name,
+            rank: license.rank,
+            discordId: license.discordId,
+            steamId: license.steamId,
+            source: license.source,
+            createdByName: license.createdByName,
+            licenses: []
+        });
+    }
+
+    licenseGroupsMap.get(groupKey).licenses.push(license);
+}
+
+const licenseGroups = Array.from(licenseGroupsMap.values())
+    .map(group => {
+        const worstStatus = group.licenses.some(l => l.status.key === "red")
+            ? "red"
+            : group.licenses.some(l => l.status.key === "yellow")
+                ? "yellow"
+                : "green";
+
+        return {
+            ...group,
+            statusKey: worstStatus
+        };
+    })
+    .sort((a, b) => {
+        const dnA = Number(String(a.dn || "").replace(/\D/g, ""));
+        const dnB = Number(String(b.dn || "").replace(/\D/g, ""));
+
+        if (!Number.isNaN(dnA) && !Number.isNaN(dnB)) {
+            return dnA - dnB;
+        }
+
+        return String(a.name || "").localeCompare(String(b.name || ""), "de");
+    });
+
         const stats = {
             total: licenses.length,
             green: licenses.filter(l => l.status.key === "green").length,
@@ -6037,8 +6082,10 @@ app.get("/overwatch", requireLogin, requireOverwatchOrAdmin, async (req, res) =>
     res.render("overwatch", viewData(req, {
     active: "overwatch",
     licenses,
+    licenseGroups,
     stats,
-    overwatchExaminerOptions
+    overwatchExaminerOptions,
+    query: req.query
 }));
     } catch (err) {
         console.error("Overwatch Seite Fehler:", err);
