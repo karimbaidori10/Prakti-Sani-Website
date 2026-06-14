@@ -78,7 +78,7 @@ const PROFESSOREN_LEITUNG_LOG_CHANNEL_ID = process.env.PROFESSOREN_LEITUNG_LOG_C
 const LSMD_LOGO_URL = "https://cdn.discordapp.com/attachments/1461110262395310160/1514333137487003790/p7NyS81.png?ex=6a2afc22&is=6a29aaa2&hm=b4ff181b7f8052507370699cf1024fc42b20330a20d09ed785366da8d1bfb8e1&";
 const AUSBILDUNG_LOGO_URL = process.env.AUSBILDUNG_LOGO_URL || "https://cdn.discordapp.com/attachments/1461110262395310160/1514910893488734309/image-removebg-preview.png?ex=6a2d1636&is=6a2bc4b6&hm=06d8d018bd420b5428dda8375ee88bde7d19eccf6ade38ad95106c0388ceacb7&";
 const AUSBILDUNG_FOOTER_LOGO_URL = process.env.AUSBILDUNG_FOOTER_LOGO_URL || "https://cdn.discordapp.com/attachments/1461110262395310160/1514906419336314992/md_logo.png?ex=6a2d120b&is=6a2bc08b&hm=97e63207a01832553278f6d09952fc3b0ca488efc3ba2c4bdba787655633a293&";
-const OVERWATCH_IMPORT_START_DATE = new Date("2026-06-14T00:00:00.000+02:00");
+const OVERWATCH_IMPORT_START_DATE = new Date("2026-06-14T12:00:00.000+02:00");
 
 const uploadDienstblatt = multer({
     storage: multer.memoryStorage(),
@@ -6088,7 +6088,9 @@ app.post("/overwatch/import-dienstblatt-xlsx", requireLogin, requireOverwatchOrA
 // damit danach jede Lizenz einzeln neu angelegt wird.
 await overwatchLicensesCollection.deleteMany({
     dn: member.dn,
-    source: "dienstblatt-import"
+    licenseType: {
+        $in: ["Overwatch", "Overwatch+", "Osprey"]
+    }
 });
 
 const licenseDocs = [];
