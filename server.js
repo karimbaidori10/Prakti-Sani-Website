@@ -6058,6 +6058,17 @@ app.post("/overwatch/import-dienstblatt-xlsx", requireLogin, requireOverwatchOrA
             return res.status(400).send("Keine gültigen Mitglieder im Dienstblatt gefunden.");
         }
 
+// WICHTIG:
+// Vor jedem Dienstblatt-Import alle alten Overwatch-Lizenzen löschen.
+// Danach wird alles sauber neu aus der Excel aufgebaut.
+await overwatchLicensesCollection.deleteMany({
+    licenseType: {
+        $in: ["Overwatch", "Overwatch+", "Osprey"]
+    }
+});
+
+console.log("Alle alten Overwatch-Lizenzen vor Import gelöscht.");        
+
         let imported = 0;
         let withLicense = 0;
         let withoutLicense = 0;
@@ -6086,12 +6097,6 @@ app.post("/overwatch/import-dienstblatt-xlsx", requireLogin, requireOverwatchOrA
 
             // Alte importierte Lizenzen dieser Person löschen,
 // damit danach jede Lizenz einzeln neu angelegt wird.
-await overwatchLicensesCollection.deleteMany({
-    dn: member.dn,
-    licenseType: {
-        $in: ["Overwatch", "Overwatch+", "Osprey"]
-    }
-});
 
 const licenseDocs = [];
 
