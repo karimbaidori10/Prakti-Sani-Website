@@ -272,7 +272,14 @@
             <div class="ow-card-footer">
                 <span>
                     Quelle:
-                    <strong><%= license.source === "discord-panel" ? "Discord Panel" : "Website" %></strong>
+                    <strong>
+    <%= license.source === "discord-panel"
+        ? "Discord Panel"
+        : license.source === "dienstblatt-import"
+            ? "Dienstblatt Import"
+            : "Website"
+    %>
+</strong>
                 </span>
 
                 <% if (license.createdByName) { %>

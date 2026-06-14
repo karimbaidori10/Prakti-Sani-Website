@@ -2197,13 +2197,13 @@ function parseDienstblattXlsx(buffer) {
         const discordId = String(row[6] || "").trim();
         const steamId = String(row[7] || "").trim();
 
-        // Excel-Spalten:
-        // V = OW      => row[21]
-        // W = OW+     => row[22]
-        // X = OSPREY  => row[23]
-        const hasOverwatch = excelBool(row[21]);
-        const hasOverwatchPlus = excelBool(row[22]);
-        const hasOsprey = excelBool(row[23]);
+        // Dienstblatt Lizenz-Spalten:
+// OW      = row[20]
+// OW+     = row[21]
+// OSPREY  = row[22]
+const hasOverwatch = excelBool(row[20]);
+const hasOverwatchPlus = excelBool(row[21]);
+const hasOsprey = excelBool(row[22]);
 
         if (!/^\d+$/.test(dn)) continue;
         if (!name) continue;
