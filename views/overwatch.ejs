@@ -568,7 +568,9 @@
 
             <div class="ow-mini-license-list">
                 <% member.licenses.forEach((license) => { %>
-                    <div class="ow-mini-license ow-mini-<%= license.status.key %>">
+                    <div class="ow-mini-license ow-mini-<%= license.status.key %>"
+     data-mini-license="<%= license.licenseType %>"
+     data-mini-status="<%= license.status.key %>">
                         <div class="ow-mini-main">
                             <div class="ow-mini-icon">
                                 <%= license.licenseType === "Osprey" ? "🦅" : "👁️" %>
@@ -676,20 +678,36 @@
         const search = owSearch ? owSearch.value.toLowerCase().trim() : "";
 
         owCards.forEach(card => {
-            const license = card.dataset.license || "";
-            const status = card.dataset.status || "";
             const text = card.innerText.toLowerCase();
+            const memberMatchesSearch = search === "" || text.includes(search);
 
-            const matchesFilter =
-    filter === "all" ||
-    license.includes(filter) ||
-    status === filter;
+            const miniLicenses = card.querySelectorAll(".ow-mini-license");
+            let visibleMiniCount = 0;
 
-            const matchesSearch =
-                search === "" ||
-                text.includes(search);
+            miniLicenses.forEach(mini => {
+                const miniLicense = mini.dataset.miniLicense || "";
+                const miniStatus = mini.dataset.miniStatus || "";
 
-            card.style.display = matchesFilter && matchesSearch ? "" : "none";
+                let matchesFilter = true;
+
+                if (filter !== "all") {
+                    if (filter === "red") {
+                        matchesFilter = miniStatus === "red";
+                    } else {
+                        matchesFilter = miniLicense === filter;
+                    }
+                }
+
+                const shouldShow = memberMatchesSearch && matchesFilter;
+
+                mini.style.setProperty("display", shouldShow ? "block" : "none", "important");
+
+                if (shouldShow) {
+                    visibleMiniCount++;
+                }
+            });
+
+            card.style.setProperty("display", visibleMiniCount > 0 ? "block" : "none", "important");
         });
     }
 
@@ -700,4 +718,6 @@
     if (owSearch) {
         owSearch.addEventListener("input", applyOverwatchFilters);
     }
+
+    applyOverwatchFilters();
 </script>
