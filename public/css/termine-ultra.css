@@ -504,3 +504,251 @@ button:hover,
         width: 100% !important;
     }
 }
+
+/* ================================
+   AUSBILDUNGSTERMINE PREMIUM FIX
+================================ */
+
+:root {
+    --lsmd-bg: #020617;
+    --lsmd-card: rgba(15, 23, 42, 0.88);
+    --lsmd-card-2: rgba(2, 6, 23, 0.62);
+    --lsmd-border: rgba(148, 163, 184, 0.16);
+    --lsmd-blue: #2563eb;
+    --lsmd-cyan: #06b6d4;
+    --lsmd-red: #ef233c;
+    --lsmd-text: #f8fafc;
+    --lsmd-muted: rgba(226, 232, 240, 0.68);
+}
+
+/* Seite kompakter */
+body {
+    background:
+        radial-gradient(circle at 12% 10%, rgba(239, 35, 60, 0.16), transparent 28%),
+        radial-gradient(circle at 88% 8%, rgba(37, 99, 235, 0.22), transparent 34%),
+        linear-gradient(135deg, #020617, #050816 55%, #020617) !important;
+}
+
+/* Hauptcontainer enger */
+.main-content,
+.page-content,
+.dashboard-content,
+.ausbildung-page {
+    max-width: 1280px !important;
+    margin: 0 auto !important;
+}
+
+/* Hero schöner und kleiner */
+.ausbildung-hero,
+.termine-hero,
+.hero-card {
+    min-height: unset !important;
+    padding: 34px 36px !important;
+    border-radius: 26px !important;
+    background:
+        radial-gradient(circle at right, rgba(37, 99, 235, 0.30), transparent 36%),
+        linear-gradient(135deg, rgba(239, 35, 60, 0.14), rgba(15, 23, 42, 0.92)) !important;
+    border: 1px solid rgba(96, 165, 250, 0.22) !important;
+    box-shadow: 0 22px 60px rgba(0, 0, 0, 0.35) !important;
+}
+
+.ausbildung-hero h1,
+.termine-hero h1,
+.hero-card h1 {
+    font-size: clamp(38px, 4.8vw, 58px) !important;
+    line-height: 1 !important;
+    margin: 0 0 10px !important;
+    letter-spacing: -0.055em !important;
+}
+
+.ausbildung-hero p,
+.termine-hero p,
+.hero-card p {
+    font-size: 15px !important;
+    color: var(--lsmd-muted) !important;
+}
+
+/* Formular-Panel modern */
+.termine-create-card,
+.create-card,
+.form-card,
+section:has(form[action="/termine/create"]) {
+    padding: 26px !important;
+    border-radius: 24px !important;
+    background:
+        radial-gradient(circle at top right, rgba(37, 99, 235, 0.12), transparent 35%),
+        rgba(15, 23, 42, 0.82) !important;
+    border: 1px solid rgba(96, 165, 250, 0.20) !important;
+    box-shadow: 0 20px 55px rgba(0, 0, 0, 0.32) !important;
+}
+
+/* Formular-Titel */
+.termine-create-card h2,
+.create-card h2,
+.form-card h2,
+section:has(form[action="/termine/create"]) h2 {
+    font-size: 24px !important;
+    margin-bottom: 4px !important;
+}
+
+/* Formular Grid */
+form[action="/termine/create"] {
+    display: grid !important;
+    grid-template-columns: 1.2fr 1fr 0.8fr 0.7fr 0.65fr !important;
+    gap: 12px !important;
+    align-items: center !important;
+}
+
+form[action="/termine/create"] input,
+form[action="/termine/create"] select,
+form[action="/termine/create"] textarea {
+    height: 48px !important;
+    border-radius: 15px !important;
+    border: 1px solid rgba(148, 163, 184, 0.16) !important;
+    background: rgba(2, 6, 23, 0.72) !important;
+    color: #f8fafc !important;
+    padding: 0 16px !important;
+    font-size: 14px !important;
+    font-weight: 800 !important;
+    outline: none !important;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.03) !important;
+}
+
+form[action="/termine/create"] input::placeholder,
+form[action="/termine/create"] textarea::placeholder {
+    color: rgba(226, 232, 240, 0.46) !important;
+}
+
+form[action="/termine/create"] input:focus,
+form[action="/termine/create"] select:focus,
+form[action="/termine/create"] textarea:focus {
+    border-color: rgba(59, 130, 246, 0.72) !important;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.18) !important;
+}
+
+/* Prüfer breiter */
+form[action="/termine/create"] select[name="examiner"] {
+    grid-column: span 2 !important;
+}
+
+/* Notiz über mehrere Spalten */
+form[action="/termine/create"] textarea {
+    grid-column: span 4 !important;
+    height: 72px !important;
+    min-height: 72px !important;
+    padding: 16px !important;
+    resize: vertical !important;
+}
+
+/* Button schöner */
+form[action="/termine/create"] button {
+    height: 72px !important;
+    border: none !important;
+    border-radius: 18px !important;
+    cursor: pointer !important;
+    color: white !important;
+    font-size: 17px !important;
+    font-weight: 950 !important;
+    background: linear-gradient(135deg, #2563eb, #06b6d4) !important;
+    box-shadow: 0 18px 40px rgba(37, 99, 235, 0.34) !important;
+    transition: transform 0.16s ease, filter 0.16s ease !important;
+}
+
+form[action="/termine/create"] button:hover {
+    transform: translateY(-2px) !important;
+    filter: brightness(1.08) !important;
+}
+
+/* Stats-Karten kleiner und edler */
+.stats-grid,
+.termine-stats,
+.ausbildung-stats {
+    display: grid !important;
+    grid-template-columns: repeat(4, 1fr) !important;
+    gap: 16px !important;
+    margin-top: 22px !important;
+}
+
+.stat-card,
+.termine-stat-card,
+.ausbildung-stat-card {
+    min-height: 118px !important;
+    padding: 20px !important;
+    border-radius: 22px !important;
+    background:
+        radial-gradient(circle at top left, rgba(37, 99, 235, 0.10), transparent 38%),
+        rgba(15, 23, 42, 0.78) !important;
+    border: 1px solid rgba(148, 163, 184, 0.14) !important;
+    box-shadow: 0 14px 35px rgba(0, 0, 0, 0.24) !important;
+}
+
+.stat-card h2,
+.termine-stat-card h2,
+.ausbildung-stat-card h2 {
+    font-size: 34px !important;
+    line-height: 1 !important;
+    margin: 0 !important;
+}
+
+.stat-card p,
+.termine-stat-card p,
+.ausbildung-stat-card p {
+    margin: 4px 0 0 !important;
+    color: var(--lsmd-muted) !important;
+}
+
+/* Untere Bereiche */
+.wochen-doku,
+.week-card,
+.ausbilder-card,
+.termine-list-card {
+    border-radius: 24px !important;
+    background: rgba(15, 23, 42, 0.78) !important;
+    border: 1px solid rgba(148, 163, 184, 0.15) !important;
+    box-shadow: 0 18px 45px rgba(0, 0, 0, 0.26) !important;
+}
+
+/* Mobile */
+@media (max-width: 1100px) {
+    form[action="/termine/create"] {
+        grid-template-columns: 1fr 1fr !important;
+    }
+
+    form[action="/termine/create"] textarea {
+        grid-column: span 2 !important;
+    }
+
+    form[action="/termine/create"] button {
+        grid-column: span 2 !important;
+    }
+
+    .stats-grid,
+    .termine-stats,
+    .ausbildung-stats {
+        grid-template-columns: repeat(2, 1fr) !important;
+    }
+}
+
+@media (max-width: 650px) {
+    form[action="/termine/create"] {
+        grid-template-columns: 1fr !important;
+    }
+
+    form[action="/termine/create"] textarea,
+    form[action="/termine/create"] button,
+    form[action="/termine/create"] select[name="examiner"] {
+        grid-column: span 1 !important;
+    }
+
+    .stats-grid,
+    .termine-stats,
+    .ausbildung-stats {
+        grid-template-columns: 1fr !important;
+    }
+
+    .ausbildung-hero h1,
+    .termine-hero h1,
+    .hero-card h1 {
+        font-size: 38px !important;
+    }
+}
