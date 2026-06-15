@@ -1,398 +1,476 @@
-<style>
-    body {
-        margin: 0 !important;
-        min-height: 100vh !important;
-        overflow-x: hidden !important;
-        background:
-            radial-gradient(circle at 12% 18%, rgba(239, 68, 68, 0.22), transparent 28%),
-            radial-gradient(circle at 82% 14%, rgba(37, 99, 235, 0.30), transparent 34%),
-            linear-gradient(135deg, #020617 0%, #070b1d 45%, #020617 100%) !important;
-        font-family: Inter, Arial, sans-serif !important;
-    }
-
-    body::before {
-        content: "";
-        position: fixed;
-        inset: 0;
-        background-image:
-            linear-gradient(rgba(255,255,255,0.035) 1px, transparent 1px),
-            linear-gradient(90deg, rgba(255,255,255,0.035) 1px, transparent 1px);
-        background-size: 42px 42px;
-        pointer-events: none;
-        animation: gridMove 18s linear infinite;
-    }
-
-    .login-page {
-        min-height: 100vh;
-        position: relative;
-        z-index: 1;
-        overflow: hidden;
-    }
-
-    .login-shell {
-        position: relative;
-        z-index: 2;
-        min-height: 100vh;
-        display: grid;
-        grid-template-columns: 0.95fr 1.25fr;
-        gap: 46px;
-        align-items: center;
-        max-width: 1340px;
-        margin: 0 auto;
-        padding: 54px;
-        box-sizing: border-box;
-    }
-
-    .login-card,
-    .login-info-card {
-        position: relative;
-        overflow: hidden;
-        border-radius: 34px;
-        background: rgba(15, 23, 42, 0.78) !important;
-        border: 1px solid rgba(148, 163, 184, 0.20) !important;
-        box-shadow:
-            0 30px 90px rgba(0, 0, 0, 0.58),
-            inset 0 1px 0 rgba(255, 255, 255, 0.06) !important;
-        backdrop-filter: blur(18px);
-    }
-
-    .login-card {
-        padding: 44px;
-        animation: loginFloat 6s ease-in-out infinite;
-    }
-
-    .login-info-card {
-        padding: 46px;
-        animation: loginFloat 7s ease-in-out infinite reverse;
-    }
-
-    .login-logo {
-        width: 84px;
-        height: 84px;
-        border-radius: 28px;
-        display: grid;
-        place-items: center;
-        font-size: 36px;
-        background: linear-gradient(135deg, #ef233c, #b91c1c);
-        box-shadow: 0 18px 45px rgba(239, 35, 60, 0.42);
-        margin-bottom: 22px;
-        animation: logoPulse 3s ease-in-out infinite;
-    }
-
-    .login-kicker {
-        display: inline-flex;
-        align-items: center;
-        padding: 9px 16px;
-        border-radius: 999px;
-        background: rgba(239, 68, 68, 0.12);
-        border: 1px solid rgba(248, 113, 113, 0.32);
-        color: #fecaca;
-        font-size: 12px;
-        font-weight: 900;
-        letter-spacing: 0.16em;
-        text-transform: uppercase;
-    }
-
-    .login-card h1,
-    .login-info-card h1 {
-        margin: 18px 0 18px;
-        color: #ffffff;
-        font-size: clamp(42px, 5vw, 68px);
-        line-height: 0.96;
-        font-weight: 950;
-        letter-spacing: -0.06em;
-        text-shadow: 0 14px 40px rgba(0,0,0,0.35);
-    }
-
-    .login-card p,
-    .login-info-card p {
-        color: rgba(226, 232, 240, 0.78);
-        font-size: 16px;
-        line-height: 1.65;
-    }
-
-    .login-discord-btn {
-        margin-top: 28px;
-        height: 64px;
-        border-radius: 20px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 12px;
-        text-decoration: none;
-        color: white;
-        font-size: 20px;
-        font-weight: 950;
-        background: linear-gradient(135deg, #6366f1, #2563eb, #06b6d4);
-        box-shadow: 0 20px 45px rgba(37, 99, 235, 0.38);
-        transition: transform 0.2s ease, box-shadow 0.2s ease, filter 0.2s ease;
-    }
-
-    .login-discord-btn:hover {
-        transform: translateY(-3px) scale(1.01);
-        box-shadow: 0 26px 60px rgba(37, 99, 235, 0.52);
-        filter: brightness(1.08);
-    }
-
-    .login-role-grid,
-    .login-feature-grid,
-    .login-status-grid {
-        display: grid;
-        grid-template-columns: repeat(2, 1fr);
-        gap: 14px;
-        margin-top: 22px;
-    }
-
-    .login-role-card,
-    .login-feature-card,
-    .login-status-card {
-        border-radius: 20px;
-        padding: 18px;
-        background: rgba(2, 6, 23, 0.48) !important;
-        border: 1px solid rgba(148, 163, 184, 0.14) !important;
-        transition: transform 0.22s ease, border-color 0.22s ease, background 0.22s ease;
-    }
-
-    .login-role-card:hover,
-    .login-feature-card:hover,
-    .login-status-card:hover {
-        transform: translateY(-4px);
-        border-color: rgba(96, 165, 250, 0.42) !important;
-        background: rgba(15, 23, 42, 0.78) !important;
-    }
-
-    .login-feature-card {
-        display: flex;
-        gap: 14px;
-        align-items: flex-start;
-    }
-
-    .login-feature-card span {
-        width: 46px;
-        height: 46px;
-        flex: 0 0 46px;
-        border-radius: 15px;
-        display: grid;
-        place-items: center;
-        background: rgba(37, 99, 235, 0.18);
-        border: 1px solid rgba(96, 165, 250, 0.25);
-        font-size: 22px;
-    }
-
-    .login-feature-card h3,
-    .login-role-card h3,
-    .login-status-card h3 {
-        margin: 0 0 6px;
-        color: white;
-        font-size: 17px;
-        font-weight: 950;
-    }
-
-    .login-feature-card p,
-    .login-role-card p,
-    .login-status-card p {
-        margin: 0;
-        font-size: 13px;
-        line-height: 1.45;
-        color: rgba(226, 232, 240, 0.74);
-    }
-
-    .login-online {
-        position: absolute;
-        right: 46px;
-        top: 42px;
-        display: inline-flex;
-        align-items: center;
-        gap: 8px;
-        color: #86efac;
-        font-weight: 900;
-        font-size: 13px;
-    }
-
-    .login-online::before {
-        content: "";
-        width: 10px;
-        height: 10px;
-        border-radius: 999px;
-        background: #22c55e;
-        box-shadow: 0 0 18px #22c55e;
-    }
-
-    @keyframes loginFloat {
-        0%, 100% { transform: translateY(0); }
-        50% { transform: translateY(-8px); }
-    }
-
-    @keyframes logoPulse {
-        0%, 100% { box-shadow: 0 18px 45px rgba(239, 35, 60, 0.42); }
-        50% { box-shadow: 0 26px 70px rgba(239, 35, 60, 0.62); }
-    }
-
-    @keyframes gridMove {
-        from { background-position: 0 0; }
-        to { background-position: 42px 42px; }
-    }
-
-    @media (max-width: 1050px) {
-        .login-shell {
-            grid-template-columns: 1fr;
-            padding: 28px;
-        }
-
-        .login-card h1,
-        .login-info-card h1 {
-            font-size: 46px;
-        }
-    }
-
-    @media (max-width: 650px) {
-        .login-shell {
-            padding: 16px;
-        }
-
-        .login-card,
-        .login-info-card {
-            padding: 26px;
-            border-radius: 26px;
-        }
-
-        .login-role-grid,
-        .login-feature-grid,
-        .login-status-grid {
-            grid-template-columns: 1fr;
-        }
-    }
-</style>
-
-<style>
-body {
-    background: red !important;
-}
-</style>
-
 <!DOCTYPE html>
 <html lang="de">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>LSMD Abteilungszentrale Login</title>
-    <link rel="stylesheet" href="/style.css">
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            font-family: Inter, Arial, sans-serif;
+            color: #fff;
+            overflow-x: hidden;
+            background:
+                radial-gradient(circle at 12% 18%, rgba(239, 35, 60, 0.28), transparent 30%),
+                radial-gradient(circle at 88% 12%, rgba(37, 99, 235, 0.35), transparent 34%),
+                radial-gradient(circle at 50% 95%, rgba(6, 182, 212, 0.14), transparent 30%),
+                linear-gradient(135deg, #020617 0%, #070b1d 48%, #020617 100%);
+        }
+
+        body::before {
+            content: "";
+            position: fixed;
+            inset: 0;
+            background-image:
+                linear-gradient(rgba(255,255,255,0.035) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255,255,255,0.035) 1px, transparent 1px);
+            background-size: 44px 44px;
+            animation: gridMove 18s linear infinite;
+            pointer-events: none;
+            opacity: 0.75;
+        }
+
+        .orb {
+            position: fixed;
+            border-radius: 999px;
+            filter: blur(70px);
+            opacity: 0.55;
+            pointer-events: none;
+            animation: orbFloat 8s ease-in-out infinite;
+        }
+
+        .orb.red {
+            width: 420px;
+            height: 420px;
+            left: -120px;
+            bottom: -140px;
+            background: rgba(239, 35, 60, 0.38);
+        }
+
+        .orb.blue {
+            width: 520px;
+            height: 520px;
+            right: -160px;
+            top: -150px;
+            background: rgba(37, 99, 235, 0.38);
+            animation-delay: -3s;
+        }
+
+        .page {
+            position: relative;
+            z-index: 2;
+            min-height: 100vh;
+            display: grid;
+            place-items: center;
+            padding: 46px;
+        }
+
+        .command-shell {
+            width: min(1320px, 100%);
+            display: grid;
+            grid-template-columns: 0.9fr 1.1fr;
+            gap: 24px;
+            align-items: stretch;
+        }
+
+        .panel {
+            position: relative;
+            overflow: hidden;
+            border-radius: 34px;
+            background: rgba(15, 23, 42, 0.76);
+            border: 1px solid rgba(148, 163, 184, 0.18);
+            box-shadow:
+                0 30px 90px rgba(0, 0, 0, 0.56),
+                inset 0 1px 0 rgba(255, 255, 255, 0.06);
+            backdrop-filter: blur(18px);
+        }
+
+        .panel::before {
+            content: "";
+            position: absolute;
+            inset: -2px;
+            background:
+                linear-gradient(120deg, transparent, rgba(59,130,246,0.30), transparent),
+                linear-gradient(300deg, transparent, rgba(239,68,68,0.18), transparent);
+            opacity: 0.45;
+            pointer-events: none;
+        }
+
+        .login-panel {
+            padding: 42px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            min-height: 680px;
+        }
+
+        .brand-icon {
+            width: 86px;
+            height: 86px;
+            border-radius: 28px;
+            display: grid;
+            place-items: center;
+            font-size: 38px;
+            background: linear-gradient(135deg, #ef233c, #991b1b);
+            box-shadow: 0 22px 60px rgba(239, 35, 60, 0.45);
+            animation: pulse 3s ease-in-out infinite;
+            margin-bottom: 24px;
+        }
+
+        .kicker {
+            display: inline-flex;
+            width: fit-content;
+            padding: 9px 16px;
+            border-radius: 999px;
+            background: rgba(239, 68, 68, 0.12);
+            border: 1px solid rgba(248, 113, 113, 0.32);
+            color: #fecaca;
+            font-size: 12px;
+            font-weight: 950;
+            letter-spacing: 0.16em;
+            text-transform: uppercase;
+        }
+
+        h1 {
+            margin: 20px 0 16px;
+            font-size: clamp(48px, 6vw, 82px);
+            line-height: 0.88;
+            letter-spacing: -0.075em;
+            font-weight: 1000;
+        }
+
+        .login-panel p,
+        .hero-panel p {
+            color: rgba(226, 232, 240, 0.78);
+            line-height: 1.65;
+            font-size: 16px;
+        }
+
+        .login-btn {
+            margin-top: 30px;
+            height: 66px;
+            border-radius: 22px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            text-decoration: none;
+            color: #fff;
+            font-size: 20px;
+            font-weight: 950;
+            background: linear-gradient(135deg, #6366f1, #2563eb, #06b6d4);
+            box-shadow: 0 22px 55px rgba(37, 99, 235, 0.42);
+            transition: 0.22s ease;
+        }
+
+        .login-btn:hover {
+            transform: translateY(-4px) scale(1.01);
+            box-shadow: 0 30px 70px rgba(37, 99, 235, 0.58);
+            filter: brightness(1.08);
+        }
+
+        .access-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 14px;
+            margin-top: 28px;
+        }
+
+        .access-card,
+        .feature-card,
+        .status-card {
+            border-radius: 22px;
+            padding: 18px;
+            background: rgba(2, 6, 23, 0.48);
+            border: 1px solid rgba(148, 163, 184, 0.14);
+            transition: 0.22s ease;
+        }
+
+        .access-card:hover,
+        .feature-card:hover,
+        .status-card:hover {
+            transform: translateY(-4px);
+            border-color: rgba(96, 165, 250, 0.40);
+            background: rgba(15, 23, 42, 0.78);
+        }
+
+        .access-card h3,
+        .feature-card h3,
+        .status-card h3 {
+            margin: 0 0 6px;
+            font-size: 18px;
+            font-weight: 950;
+        }
+
+        .access-card span,
+        .feature-card p,
+        .status-card span {
+            color: rgba(226, 232, 240, 0.72);
+            font-size: 13px;
+            line-height: 1.45;
+        }
+
+        .small-note {
+            margin-top: 22px;
+            text-align: center;
+            color: rgba(226, 232, 240, 0.55);
+            font-size: 12px;
+        }
+
+        .hero-panel {
+            padding: 44px;
+            min-height: 680px;
+        }
+
+        .online {
+            position: absolute;
+            right: 44px;
+            top: 42px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: #86efac;
+            font-size: 13px;
+            font-weight: 900;
+        }
+
+        .online::before {
+            content: "";
+            width: 10px;
+            height: 10px;
+            border-radius: 999px;
+            background: #22c55e;
+            box-shadow: 0 0 18px #22c55e;
+        }
+
+        .hero-title {
+            margin-top: 28px;
+            max-width: 680px;
+        }
+
+        .feature-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 14px;
+            margin-top: 32px;
+        }
+
+        .feature-card {
+            display: flex;
+            align-items: flex-start;
+            gap: 14px;
+            min-height: 112px;
+        }
+
+        .feature-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 16px;
+            display: grid;
+            place-items: center;
+            background: rgba(37, 99, 235, 0.18);
+            border: 1px solid rgba(96, 165, 250, 0.25);
+            font-size: 22px;
+            flex: 0 0 48px;
+        }
+
+        .status-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 14px;
+            margin-top: 28px;
+        }
+
+        .status-card strong {
+            color: #86efac;
+            font-size: 13px;
+        }
+
+        .scanline {
+            position: absolute;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(96,165,250,0.75), transparent);
+            top: 0;
+            animation: scan 5s linear infinite;
+            opacity: 0.65;
+        }
+
+        @keyframes scan {
+            from { top: 0; }
+            to { top: 100%; }
+        }
+
+        @keyframes pulse {
+            0%, 100% { box-shadow: 0 22px 60px rgba(239, 35, 60, 0.45); }
+            50% { box-shadow: 0 30px 85px rgba(239, 35, 60, 0.68); }
+        }
+
+        @keyframes gridMove {
+            from { background-position: 0 0; }
+            to { background-position: 44px 44px; }
+        }
+
+        @keyframes orbFloat {
+            0%, 100% { transform: translate(0,0); }
+            50% { transform: translate(35px,-30px); }
+        }
+
+        @media (max-width: 1050px) {
+            .command-shell {
+                grid-template-columns: 1fr;
+            }
+
+            .login-panel,
+            .hero-panel {
+                min-height: auto;
+            }
+        }
+
+        @media (max-width: 650px) {
+            .page {
+                padding: 16px;
+            }
+
+            .login-panel,
+            .hero-panel {
+                padding: 26px;
+                border-radius: 26px;
+            }
+
+            .access-grid,
+            .feature-grid,
+            .status-grid {
+                grid-template-columns: 1fr;
+            }
+
+            h1 {
+                font-size: 48px;
+            }
+        }
+    </style>
 </head>
-<body class="ultra-login-body">
 
-    <div class="ultra-grid"></div>
-    <div class="ultra-orb ultra-orb-red"></div>
-    <div class="ultra-orb ultra-orb-blue"></div>
-    <div class="ultra-orb ultra-orb-green"></div>
+<body>
+    <div class="orb red"></div>
+    <div class="orb blue"></div>
 
-    <main class="ultra-login-wrapper">
-        <section class="ultra-login-card">
-            <div class="ultra-logo">
-                <span>🚑</span>
-            </div>
-
-            <div class="ultra-access-badge">
-                LSMD ACCESS SYSTEM
-            </div>
-
-            <h1>
-                LSMD Abteilungs<br>
-                Dashboard
-            </h1>
-
-            <p class="ultra-login-text">
-                Melde dich mit Discord an und verwalte Ausbildungstermine,
-                Mitglieder, Dokumente und Overwatch zentral im LSMD-System.
-            </p>
-
-            <a href="/auth/discord" class="ultra-discord-btn">
-                <span>💬</span>
-                Mit Discord einloggen
-            </a>
-
-            <div class="ultra-role-grid">
-                <div>
-                    <strong>Admin</strong>
-                    <p>Voller Zugriff</p>
-                </div>
+    <main class="page">
+        <section class="command-shell">
+            <div class="panel login-panel">
+                <div class="scanline"></div>
 
                 <div>
-                    <strong>LSMD Abteilungszentrale</strong>
-                    <p>Dashboard Zugriff</p>
-                </div>
-            </div>
+                    <div class="brand-icon">🚑</div>
+                    <div class="kicker">LSMD Access System</div>
 
-            <p class="ultra-small-note">
-                Zugriff nur mit g&uuml;ltiger Discord-Rolle.
-            </p>
-        </section>
+                    <h1>LSMD<br>Abteilungs<br>Zentrale</h1>
 
-        <section class="ultra-info-panel">
-            <div class="ultra-panel-top">
-                <span>LIVE SYSTEM</span>
-                <strong>Online</strong>
-            </div>
+                    <p>
+                        Melde dich mit Discord an und verwalte Ausbildung, Overwatch,
+                        Punkte, Dokumente und interne Abteilungssysteme zentral an einem Ort.
+                    </p>
 
-            <h2>Abteilungen. Verwaltung. Kontrolle.</h2>
+                    <% if (typeof error !== "undefined" && error) { %>
+                        <p style="color:#fecaca;font-weight:900;"><%= error %></p>
+                    <% } %>
 
-            <p>
-                Die LSMD Abteilungszentrale verbindet Discord-Login,
-                Rollenpr&uuml;fung, Punkteverwaltung, Dokumente und MD-Eintr&auml;ge
-                in einem modernen System.
-            </p>
+                    <a href="/auth/discord" class="login-btn">
+                        <span>💬</span>
+                        Mit Discord einloggen
+                    </a>
 
-            <div class="ultra-feature-stack">
-                <div class="ultra-feature-card">
-                    <span>📅</span>
-                    <div>
-                        <strong>Abteilungen</strong>
-                        <p>Fahrfreigaben und Sanit&auml;ter-Pr&uuml;fungen sauber dokumentieren.</p>
+                    <div class="access-grid">
+                        <div class="access-card">
+                            <h3>Admin</h3>
+                            <span>Voller Zugriff</span>
+                        </div>
+
+                        <div class="access-card">
+                            <h3>Abteilungen</h3>
+                            <span>Rollenbasierter Zugriff</span>
+                        </div>
                     </div>
                 </div>
 
-                <div class="ultra-feature-card">
-                    <span>👥</span>
-                    <div>
-                        <strong>Mitglieder & Punkte</strong>
-                        <p>Wochenziel, Rang und Punkteverwaltung auf einen Blick.</p>
-                    </div>
-                </div>
-
-                <div class="ultra-feature-card">
-                    <span>📄</span>
-                    <div>
-                        <strong>Dokumente</strong>
-                        <p>Leitf&auml;den, Regelwerke und Checklisten zentral abrufen.</p>
-                    </div>
-                </div>
-
-                <div class="ultra-feature-card">
-                    <span>🛡️</span>
-                    <div>
-                        <strong>Admin Tools</strong>
-                        <p>Spontane-Pr&uuml;fungen Panel direkt per Discord senden.</p>
-                    </div>
+                <div class="small-note">
+                    Zugriff nur mit gültiger Discord-Rolle.
                 </div>
             </div>
 
-            <div class="ultra-system-row">
-                <div>
-                    <strong>Discord</strong>
-                    <span>Verbunden</span>
+            <div class="panel hero-panel">
+                <div class="scanline"></div>
+                <div class="online">Online</div>
+
+                <div class="kicker">Live System</div>
+
+                <h1 class="hero-title">Abteilungen.<br>Systeme.<br>Kontrolle.</h1>
+
+                <p>
+                    Die LSMD Abteilungszentrale verbindet Discord-Login, Rollenprüfung,
+                    Punkteverwaltung, Lizenzsysteme, Dokumente und interne Verwaltung
+                    in einem modernen System.
+                </p>
+
+                <div class="feature-grid">
+                    <div class="feature-card">
+                        <div class="feature-icon">🏥</div>
+                        <div>
+                            <h3>Abteilungen</h3>
+                            <p>Prakti/Sani, Overwatch und interne LSMD-Bereiche zentral verwalten.</p>
+                        </div>
+                    </div>
+
+                    <div class="feature-card">
+                        <div class="feature-icon">👁️</div>
+                        <div>
+                            <h3>Overwatch-System</h3>
+                            <p>Lizenzen, Auffrischungen und Prüfer sauber dokumentieren.</p>
+                        </div>
+                    </div>
+
+                    <div class="feature-card">
+                        <div class="feature-icon">📄</div>
+                        <div>
+                            <h3>Dokumente</h3>
+                            <p>Leitfäden, Regelwerke und Checklisten zentral abrufen.</p>
+                        </div>
+                    </div>
+
+                    <div class="feature-card">
+                        <div class="feature-icon">🛡️</div>
+                        <div>
+                            <h3>Admin Tools</h3>
+                            <p>Interne Panels, Rechte und Systeme übersichtlich steuern.</p>
+                        </div>
+                    </div>
                 </div>
 
-                <div>
-                    <strong>MongoDB</strong>
-                    <span>Online</span>
-                </div>
+                <div class="status-grid">
+                    <div class="status-card">
+                        <h3>Discord</h3>
+                        <strong>Verbunden</strong>
+                    </div>
 
-                <div>
-                    <strong>LSMD</strong>
-                    <span>Bereit</span>
+                    <div class="status-card">
+                        <h3>MongoDB</h3>
+                        <strong>Online</strong>
+                    </div>
+
+                    <div class="status-card">
+                        <h3>LSMD</h3>
+                        <strong>Bereit</strong>
+                    </div>
                 </div>
             </div>
         </section>
     </main>
-
 </body>
 </html>
