@@ -2275,10 +2275,20 @@ async function sendAusbildungsterminDiscordEmbed(data) {
             return false;
         }
 
-        const isSani = data.examType === "Sanitaeter-Pruefung";
-        const typeLabel = isSani ? "Sanitäter-Prüfung" : "Darf alleine fahren";
-        const typeEmoji = isSani ? "🚑" : "🚗";
-        const embedColor = isSani ? 0x22c55e : 0x2563eb;
+        const typeLabel = "Sanitäter-Prüfung";
+const typeEmoji = "🚑";
+
+const resultLabel = data.result === "bestanden"
+    ? "Bestanden"
+    : "Nicht bestanden";
+
+const resultEmoji = data.result === "bestanden"
+    ? "✅"
+    : "❌";
+
+const embedColor = data.result === "bestanden"
+    ? 0x22c55e
+    : 0xef4444;
 
         const timestamp = formatTerminDateForDiscord(data.date, data.time);
 
@@ -2306,6 +2316,12 @@ async function sendAusbildungsterminDiscordEmbed(data) {
                     inline: true
                 },
                 {
+                    name: "📌 Ergebnis",
+                    value: `${resultEmoji} **${resultLabel}**`,
+                    inline: true
+                },
+                { 
+
                     name: "📅 Termin",
                     value: timestamp
                         ? `<t:${timestamp}:F>\n<t:${timestamp}:R>`
@@ -2323,8 +2339,8 @@ async function sendAusbildungsterminDiscordEmbed(data) {
                     inline: true
                 },
                 {
-                    name: "📌 Status",
-                    value: "**Eingetragen**",
+                    name: "📊 Status",
+                    value: `${resultEmoji} **${resultLabel}**`,
                     inline: true
                 }
             )
@@ -7113,31 +7129,34 @@ res.redirect("/admin");
 app.post("/termine/create", requireLogin, requireAusbilderOrAdmin, async (req, res) => {
     try {
         const {
-            name,
-            examType,
-            date,
-            time,
-            examiner,
-            notes
-        } = req.body;
+    name,
+    examType,
+    result,
+    date,
+    time,
+    examiner,
+    notes
+} = req.body;
 
-        if (!name || !examType || !date || !examiner) {
-            return res.redirect("/termine");
-        }
+        if (!name || !examType || !result || !date || !examiner) {
+    return res.redirect("/termine");
+}
 
         const insertResult = await termineCollection.insertOne({
     name,
     discordId: "",
     examType,
+    result,
     date,
     time,
     examiner,
-    status: "Offen",
+    status: result === "bestanden" ? "Bestanden" : "Nicht bestanden",
     notes,
     source: "termine",
     createdBy: req.session.user?.discordId || null,
     createdByName: req.session.user?.username || "Unbekannt",
-    createdAt: new Date()
+    createdAt: new Date(),
+    updatedAt: new Date()
 });
 
 const discordOk = await sendAusbildungsterminDiscordEmbed({
