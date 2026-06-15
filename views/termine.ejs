@@ -1,115 +1,227 @@
 ﻿<style>
 /* =====================================================
-   LSMD AUSBILDUNGSTERMINE ULTRA DESIGN DIRECT FIX
-   Direkt in termine.ejs einfügen
+   LSMD AUSBILDUNGSTERMINE — MISSION CONTROL DESIGN
+   Direkt in views/termine.ejs einfügen
 ===================================================== */
 
-body {
-    background:
-        radial-gradient(circle at 10% 8%, rgba(239, 35, 60, 0.20), transparent 28%),
-        radial-gradient(circle at 92% 10%, rgba(37, 99, 235, 0.28), transparent 34%),
-        linear-gradient(135deg, #020617 0%, #050816 55%, #020617 100%) !important;
+:root {
+    --mc-bg: #020617;
+    --mc-panel: rgba(8, 13, 28, 0.92);
+    --mc-panel-2: rgba(15, 23, 42, 0.86);
+    --mc-line: rgba(125, 211, 252, 0.18);
+    --mc-line-soft: rgba(148, 163, 184, 0.14);
+    --mc-blue: #2563eb;
+    --mc-cyan: #06b6d4;
+    --mc-red: #ef233c;
+    --mc-pink: #db2777;
+    --mc-green: #22c55e;
+    --mc-yellow: #facc15;
+    --mc-text: #f8fafc;
+    --mc-muted: rgba(226, 232, 240, 0.65);
 }
 
-/* komplette Seite kompakter und edler */
+/* Seite */
+body {
+    background:
+        radial-gradient(circle at 0% 0%, rgba(239, 35, 60, 0.18), transparent 30%),
+        radial-gradient(circle at 100% 0%, rgba(37, 99, 235, 0.26), transparent 34%),
+        linear-gradient(135deg, #020617 0%, #050816 48%, #020617 100%) !important;
+}
+
+/* feines Raster, nicht animiert = kein Lag */
+body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    background-image:
+        linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px);
+    background-size: 44px 44px;
+    opacity: 0.55;
+    z-index: 0;
+}
+
 main,
 .content,
 .main-content,
 .dashboard-content,
 .page-content {
+    position: relative !important;
+    z-index: 1 !important;
     max-width: 1320px !important;
     margin: 0 auto !important;
-    padding: 18px 22px 40px !important;
+    padding: 18px 22px 46px !important;
 }
 
-/* Hero oben */
+/* ===========================
+   HERO — Mission Header
+=========================== */
+
 section:first-of-type {
     position: relative !important;
     overflow: hidden !important;
-    min-height: unset !important;
-    padding: 34px 38px !important;
-    border-radius: 28px !important;
+    padding: 30px 34px !important;
+    border-radius: 30px !important;
     background:
-        radial-gradient(circle at 92% 30%, rgba(59, 130, 246, 0.40), transparent 34%),
-        linear-gradient(135deg, rgba(239, 35, 60, 0.16), rgba(15, 23, 42, 0.92)) !important;
-    border: 1px solid rgba(96, 165, 250, 0.25) !important;
-    box-shadow: 0 24px 70px rgba(0, 0, 0, 0.38) !important;
+        linear-gradient(135deg, rgba(239, 35, 60, 0.17), rgba(37, 99, 235, 0.16)),
+        rgba(8, 13, 28, 0.92) !important;
+    border: 1px solid rgba(125, 211, 252, 0.22) !important;
+    box-shadow:
+        0 24px 70px rgba(0, 0, 0, 0.42),
+        inset 0 1px 0 rgba(255,255,255,0.05) !important;
+}
+
+section:first-of-type::before {
+    content: "LSMD TRAINING CONTROL";
+    position: absolute;
+    right: 34px;
+    top: 26px;
+    padding: 8px 13px;
+    border-radius: 999px;
+    background: rgba(34, 197, 94, 0.12);
+    border: 1px solid rgba(34, 197, 94, 0.28);
+    color: #bbf7d0;
+    font-size: 11px;
+    font-weight: 1000;
+    letter-spacing: 0.14em;
 }
 
 section:first-of-type::after {
     content: "";
     position: absolute;
     right: -80px;
-    top: -80px;
-    width: 260px;
-    height: 260px;
+    bottom: -90px;
+    width: 330px;
+    height: 330px;
     border-radius: 999px;
-    background: rgba(37, 99, 235, 0.22);
-    filter: blur(28px);
+    background: rgba(37, 99, 235, 0.20);
+    filter: blur(26px);
     pointer-events: none;
 }
 
 section:first-of-type h1 {
-    font-size: clamp(42px, 5vw, 64px) !important;
-    line-height: 0.95 !important;
+    position: relative !important;
+    z-index: 2 !important;
+    width: fit-content;
     margin: 0 0 10px !important;
-    letter-spacing: -0.06em !important;
-    color: #ffffff !important;
+    font-size: clamp(42px, 5vw, 68px) !important;
+    line-height: 0.92 !important;
+    letter-spacing: -0.07em !important;
+    color: #fff !important;
+    text-shadow: 0 18px 45px rgba(0,0,0,0.35) !important;
+}
+
+section:first-of-type h1::after {
+    content: "";
+    display: block;
+    width: 88px;
+    height: 4px;
+    margin-top: 16px;
+    border-radius: 999px;
+    background: linear-gradient(90deg, var(--mc-red), var(--mc-blue), var(--mc-cyan));
 }
 
 section:first-of-type p {
-    color: rgba(226, 232, 240, 0.78) !important;
+    position: relative !important;
+    z-index: 2 !important;
+    max-width: 760px !important;
+    color: var(--mc-muted) !important;
     font-size: 15px !important;
+    line-height: 1.55 !important;
 }
 
-/* Formular-Karte: Sektion die das Create-Form enthält */
+/* Hero Counter rechts */
+section:first-of-type div:last-child,
+section:first-of-type .hero-count,
+section:first-of-type .counter-card {
+    position: relative !important;
+    z-index: 2 !important;
+    border-radius: 22px !important;
+    background: rgba(37, 99, 235, 0.20) !important;
+    border: 1px solid rgba(125, 211, 252, 0.26) !important;
+    box-shadow: 0 18px 40px rgba(37, 99, 235, 0.22) !important;
+}
+
+/* ===========================
+   CREATE FORM — Command Card
+=========================== */
+
 section:has(form[action="/termine/create"]) {
-    margin-top: 20px !important;
-    padding: 24px !important;
-    border-radius: 28px !important;
-    background:
-        radial-gradient(circle at top right, rgba(14, 165, 233, 0.12), transparent 36%),
-        linear-gradient(145deg, rgba(15, 23, 42, 0.92), rgba(2, 6, 23, 0.88)) !important;
-    border: 1px solid rgba(59, 130, 246, 0.26) !important;
-    box-shadow: 0 24px 65px rgba(0, 0, 0, 0.32) !important;
+    position: relative !important;
+    overflow: hidden !important;
+    margin-top: 18px !important;
+    padding: 0 !important;
+    border-radius: 30px !important;
+    background: rgba(8, 13, 28, 0.94) !important;
+    border: 1px solid rgba(125, 211, 252, 0.20) !important;
+    box-shadow:
+        0 24px 70px rgba(0,0,0,0.38),
+        inset 0 1px 0 rgba(255,255,255,0.04) !important;
+}
+
+section:has(form[action="/termine/create"])::before {
+    content: "";
+    position: absolute;
+    inset: 0 0 auto 0;
+    height: 4px;
+    background: linear-gradient(90deg, var(--mc-red), var(--mc-blue), var(--mc-cyan));
+}
+
+section:has(form[action="/termine/create"]) > * {
+    position: relative;
+    z-index: 2;
 }
 
 section:has(form[action="/termine/create"]) h2 {
-    font-size: 24px !important;
-    margin: 0 0 4px !important;
-    color: #ffffff !important;
+    margin: 0 !important;
+    padding: 26px 28px 4px !important;
+    font-size: 26px !important;
+    line-height: 1 !important;
+    color: #fff !important;
+    letter-spacing: -0.04em !important;
+}
+
+section:has(form[action="/termine/create"]) h2::before {
+    content: "✦";
+    margin-right: 10px;
+    color: var(--mc-cyan);
 }
 
 section:has(form[action="/termine/create"]) p {
-    margin: 0 0 18px !important;
-    color: rgba(226, 232, 240, 0.62) !important;
+    margin: 0 !important;
+    padding: 0 28px 20px !important;
+    color: var(--mc-muted) !important;
+    font-size: 13px !important;
 }
 
-/* Formular komplett neu */
 form[action="/termine/create"] {
     display: grid !important;
-    grid-template-columns: 1.25fr 1fr 0.8fr 0.75fr 0.75fr !important;
+    grid-template-columns: 1.2fr 0.95fr 0.8fr 0.7fr 0.65fr !important;
     gap: 12px !important;
     align-items: stretch !important;
+    padding: 22px 28px 28px !important;
+    border-top: 1px solid rgba(148, 163, 184, 0.12) !important;
 }
 
-/* alle Felder */
+/* Inputs */
 form[action="/termine/create"] input,
 form[action="/termine/create"] select,
 form[action="/termine/create"] textarea {
     width: 100% !important;
-    height: 52px !important;
-    border-radius: 16px !important;
-    border: 1px solid rgba(148, 163, 184, 0.17) !important;
-    background: rgba(2, 6, 23, 0.78) !important;
+    height: 50px !important;
+    border-radius: 15px !important;
+    border: 1px solid rgba(148, 163, 184, 0.16) !important;
+    background:
+        linear-gradient(180deg, rgba(2, 6, 23, 0.88), rgba(2, 6, 23, 0.72)) !important;
     color: #f8fafc !important;
-    padding: 0 16px !important;
-    font-size: 14px !important;
+    padding: 0 15px !important;
+    font-size: 13px !important;
     font-weight: 850 !important;
     outline: none !important;
     box-shadow:
-        inset 0 1px 0 rgba(255, 255, 255, 0.035),
-        0 8px 22px rgba(0, 0, 0, 0.16) !important;
+        inset 0 1px 0 rgba(255,255,255,0.035),
+        0 10px 24px rgba(0,0,0,0.16) !important;
 }
 
 form[action="/termine/create"] input::placeholder,
@@ -120,48 +232,54 @@ form[action="/termine/create"] textarea::placeholder {
 form[action="/termine/create"] input:focus,
 form[action="/termine/create"] select:focus,
 form[action="/termine/create"] textarea:focus {
-    border-color: rgba(56, 189, 248, 0.80) !important;
+    border-color: rgba(34, 211, 238, 0.82) !important;
     box-shadow:
-        0 0 0 3px rgba(14, 165, 233, 0.16),
-        0 14px 34px rgba(14, 165, 233, 0.12) !important;
+        0 0 0 3px rgba(6, 182, 212, 0.14),
+        0 14px 34px rgba(6, 182, 212, 0.10) !important;
 }
 
-/* Datum und Uhrzeit kleiner */
+/* Selects wirken wie Command Dropdowns */
+form[action="/termine/create"] select {
+    cursor: pointer !important;
+    appearance: auto !important;
+}
+
+/* Datum / Uhrzeit */
 form[action="/termine/create"] input[type="date"],
 form[action="/termine/create"] input[type="time"] {
     text-align: center !important;
 }
 
-/* Prüfer-Feld */
+/* Prüfer */
 form[action="/termine/create"] select[name="examiner"] {
     grid-column: span 2 !important;
 }
 
-/* Notiz-Feld */
+/* Notiz */
 form[action="/termine/create"] textarea {
     grid-column: span 4 !important;
-    height: 78px !important;
-    min-height: 78px !important;
-    padding: 16px !important;
+    height: 76px !important;
+    min-height: 76px !important;
+    padding: 15px !important;
     resize: vertical !important;
 }
 
-/* Speichern Button */
+/* Button */
 form[action="/termine/create"] button {
     grid-row: span 2 !important;
-    min-height: 78px !important;
+    min-height: 76px !important;
     border: none !important;
-    border-radius: 20px !important;
+    border-radius: 19px !important;
     cursor: pointer !important;
     color: white !important;
-    font-size: 18px !important;
-    line-height: 1.15 !important;
+    font-size: 17px !important;
+    line-height: 1.12 !important;
     font-weight: 1000 !important;
     background:
         linear-gradient(135deg, #2563eb 0%, #06b6d4 100%) !important;
     box-shadow:
-        0 20px 45px rgba(37, 99, 235, 0.38),
-        inset 0 1px 0 rgba(255, 255, 255, 0.18) !important;
+        0 20px 44px rgba(37, 99, 235, 0.34),
+        inset 0 1px 0 rgba(255,255,255,0.18) !important;
     transition: transform 0.16s ease, filter 0.16s ease !important;
 }
 
@@ -170,44 +288,108 @@ form[action="/termine/create"] button:hover {
     filter: brightness(1.08) !important;
 }
 
-/* Statistik-Karten */
-section:has(form[action="/termine/create"]) + section,
-.stats-grid,
-.termine-stats,
-.ausbildung-stats {
-    margin-top: 22px !important;
-}
+/* ===========================
+   STATS — Command Tiles
+=========================== */
 
-/* alle Karten nach dem Formular edler */
-section:not(:first-of-type):not(:has(form[action="/termine/create"])) article,
-section:not(:first-of-type):not(:has(form[action="/termine/create"])) .card,
-.stat-card,
-.termine-stat-card,
-.ausbildung-stat-card {
-    border-radius: 22px !important;
-    background:
-        radial-gradient(circle at top left, rgba(37, 99, 235, 0.12), transparent 38%),
-        rgba(15, 23, 42, 0.82) !important;
-    border: 1px solid rgba(148, 163, 184, 0.15) !important;
-    box-shadow: 0 16px 42px rgba(0, 0, 0, 0.26) !important;
-}
-
-/* Falls Stats als direktes Grid kommen */
 .stats-grid,
 .termine-stats,
 .ausbildung-stats,
 section:has(form[action="/termine/create"]) + div {
     display: grid !important;
     grid-template-columns: repeat(4, 1fr) !important;
-    gap: 16px !important;
+    gap: 14px !important;
+    margin-top: 20px !important;
 }
 
-/* Überschriften unten */
+.stat-card,
+.termine-stat-card,
+.ausbildung-stat-card,
+section:has(form[action="/termine/create"]) + div > * {
+    position: relative !important;
+    overflow: hidden !important;
+    min-height: 112px !important;
+    padding: 18px !important;
+    border-radius: 22px !important;
+    background:
+        radial-gradient(circle at 10% 10%, rgba(37, 99, 235, 0.15), transparent 38%),
+        rgba(15, 23, 42, 0.82) !important;
+    border: 1px solid rgba(148, 163, 184, 0.14) !important;
+    box-shadow: 0 16px 42px rgba(0,0,0,0.24) !important;
+}
+
+.stat-card::before,
+.termine-stat-card::before,
+.ausbildung-stat-card::before,
+section:has(form[action="/termine/create"]) + div > *::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 18px;
+    bottom: 18px;
+    width: 4px;
+    border-radius: 999px;
+    background: linear-gradient(180deg, var(--mc-blue), var(--mc-cyan));
+}
+
+.stat-card h2,
+.termine-stat-card h2,
+.ausbildung-stat-card h2,
+section:has(form[action="/termine/create"]) + div h2 {
+    margin: 0 !important;
+    font-size: 34px !important;
+    line-height: 1 !important;
+    color: #fff !important;
+}
+
+.stat-card p,
+.termine-stat-card p,
+.ausbildung-stat-card p,
+section:has(form[action="/termine/create"]) + div p {
+    color: var(--mc-muted) !important;
+    margin: 5px 0 0 !important;
+}
+
+/* ===========================
+   UNTEN — Wochen-Doku/Ausbilder Panels
+=========================== */
+
+section:not(:first-of-type):not(:has(form[action="/termine/create"])) {
+    border-radius: 26px !important;
+}
+
+section:not(:first-of-type):not(:has(form[action="/termine/create"])) article,
+section:not(:first-of-type):not(:has(form[action="/termine/create"])) .card,
+.wochen-doku,
+.week-card,
+.ausbilder-card,
+.termine-list-card {
+    border-radius: 24px !important;
+    background:
+        linear-gradient(145deg, rgba(15, 23, 42, 0.88), rgba(2, 6, 23, 0.74)) !important;
+    border: 1px solid rgba(148, 163, 184, 0.15) !important;
+    box-shadow: 0 18px 45px rgba(0,0,0,0.26) !important;
+}
+
 h2, h3 {
-    color: #ffffff !important;
+    color: #fff !important;
 }
 
-/* Mobile */
+/* kleine Premium-Linie unter Überschriften */
+h2::after {
+    content: "";
+    display: block;
+    width: 48px;
+    height: 3px;
+    margin-top: 9px;
+    border-radius: 999px;
+    background: linear-gradient(90deg, var(--mc-blue), var(--mc-red));
+}
+
+/* ===========================
+   RESPONSIVE
+=========================== */
+
 @media (max-width: 1100px) {
     form[action="/termine/create"] {
         grid-template-columns: 1fr 1fr !important;
@@ -239,7 +421,16 @@ h2, h3 {
     section:first-of-type,
     section:has(form[action="/termine/create"]) {
         border-radius: 22px !important;
-        padding: 22px !important;
+    }
+
+    section:first-of-type {
+        padding: 24px !important;
+    }
+
+    section:first-of-type::before {
+        position: static;
+        display: inline-flex;
+        margin-bottom: 14px;
     }
 
     section:first-of-type h1 {
@@ -248,6 +439,7 @@ h2, h3 {
 
     form[action="/termine/create"] {
         grid-template-columns: 1fr !important;
+        padding: 18px !important;
     }
 
     form[action="/termine/create"] textarea,
