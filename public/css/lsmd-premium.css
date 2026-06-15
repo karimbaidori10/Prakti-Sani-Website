@@ -2129,7 +2129,7 @@ strong{color:#fff}
     box-shadow:
         0 30px 90px rgba(0, 0, 0, 0.55),
         inset 0 1px 0 rgba(255, 255, 255, 0.05);
-    backdrop-filter: blur(18px);
+    backdrop-filter: none;
 }
 
 .login-card {
@@ -2389,7 +2389,7 @@ strong{color:#fff}
     bottom: -180px;
     border-radius: 999px;
     background: rgba(239, 35, 60, 0.18);
-    filter: blur(70px);
+    filter: blur(18px);
     pointer-events: none;
     animation: orbFloat 8s ease-in-out infinite;
 }
@@ -2679,4 +2679,85 @@ strong{color:#fff}
 
 body {
     outline: 10px solid red !important;
+}
+
+/* ================================
+   FPS / PERFORMANCE FIX LOGIN
+================================ */
+
+/* Teure Hintergrundeffekte aus */
+body::before,
+body::after,
+.orb,
+.scanline {
+    animation: none !important;
+    filter: none !important;
+}
+
+/* Orbs leichter machen */
+.orb {
+    opacity: 0.18 !important;
+    filter: blur(18px) !important;
+}
+
+/* Grid nicht animieren */
+body::before {
+    animation: none !important;
+    opacity: 0.22 !important;
+}
+
+/* Blur raus, macht am meisten Lag */
+.command-shell,
+.panel {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+}
+
+/* Schwere Schatten kleiner */
+.command-shell {
+    box-shadow: 0 18px 45px rgba(0, 0, 0, 0.45) !important;
+}
+
+.panel {
+    box-shadow: none !important;
+}
+
+/* Puls-Animation aus */
+.brand-icon {
+    animation: none !important;
+}
+
+/* Hover weniger teuer */
+.login-btn,
+.access-card,
+.feature-card,
+.status-card,
+.preview-card {
+    transition: background 0.15s ease, border-color 0.15s ease !important;
+}
+
+.login-btn:hover,
+.access-card:hover,
+.feature-card:hover,
+.status-card:hover,
+.preview-card:hover {
+    transform: none !important;
+}
+
+/* Scanline komplett aus */
+.scanline {
+    display: none !important;
+}
+
+/* Falls Browser schwach ist: Layout flüssiger */
+.page {
+    overflow-y: auto !important;
+}
+
+body {
+    overflow-y: auto !important;
+}
+
+.orb {
+    display: none !important;
 }
