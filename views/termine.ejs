@@ -1,4 +1,271 @@
-﻿<%
+﻿<style>
+/* =====================================================
+   LSMD AUSBILDUNGSTERMINE ULTRA DESIGN DIRECT FIX
+   Direkt in termine.ejs einfügen
+===================================================== */
+
+body {
+    background:
+        radial-gradient(circle at 10% 8%, rgba(239, 35, 60, 0.20), transparent 28%),
+        radial-gradient(circle at 92% 10%, rgba(37, 99, 235, 0.28), transparent 34%),
+        linear-gradient(135deg, #020617 0%, #050816 55%, #020617 100%) !important;
+}
+
+/* komplette Seite kompakter und edler */
+main,
+.content,
+.main-content,
+.dashboard-content,
+.page-content {
+    max-width: 1320px !important;
+    margin: 0 auto !important;
+    padding: 18px 22px 40px !important;
+}
+
+/* Hero oben */
+section:first-of-type {
+    position: relative !important;
+    overflow: hidden !important;
+    min-height: unset !important;
+    padding: 34px 38px !important;
+    border-radius: 28px !important;
+    background:
+        radial-gradient(circle at 92% 30%, rgba(59, 130, 246, 0.40), transparent 34%),
+        linear-gradient(135deg, rgba(239, 35, 60, 0.16), rgba(15, 23, 42, 0.92)) !important;
+    border: 1px solid rgba(96, 165, 250, 0.25) !important;
+    box-shadow: 0 24px 70px rgba(0, 0, 0, 0.38) !important;
+}
+
+section:first-of-type::after {
+    content: "";
+    position: absolute;
+    right: -80px;
+    top: -80px;
+    width: 260px;
+    height: 260px;
+    border-radius: 999px;
+    background: rgba(37, 99, 235, 0.22);
+    filter: blur(28px);
+    pointer-events: none;
+}
+
+section:first-of-type h1 {
+    font-size: clamp(42px, 5vw, 64px) !important;
+    line-height: 0.95 !important;
+    margin: 0 0 10px !important;
+    letter-spacing: -0.06em !important;
+    color: #ffffff !important;
+}
+
+section:first-of-type p {
+    color: rgba(226, 232, 240, 0.78) !important;
+    font-size: 15px !important;
+}
+
+/* Formular-Karte: Sektion die das Create-Form enthält */
+section:has(form[action="/termine/create"]) {
+    margin-top: 20px !important;
+    padding: 24px !important;
+    border-radius: 28px !important;
+    background:
+        radial-gradient(circle at top right, rgba(14, 165, 233, 0.12), transparent 36%),
+        linear-gradient(145deg, rgba(15, 23, 42, 0.92), rgba(2, 6, 23, 0.88)) !important;
+    border: 1px solid rgba(59, 130, 246, 0.26) !important;
+    box-shadow: 0 24px 65px rgba(0, 0, 0, 0.32) !important;
+}
+
+section:has(form[action="/termine/create"]) h2 {
+    font-size: 24px !important;
+    margin: 0 0 4px !important;
+    color: #ffffff !important;
+}
+
+section:has(form[action="/termine/create"]) p {
+    margin: 0 0 18px !important;
+    color: rgba(226, 232, 240, 0.62) !important;
+}
+
+/* Formular komplett neu */
+form[action="/termine/create"] {
+    display: grid !important;
+    grid-template-columns: 1.25fr 1fr 0.8fr 0.75fr 0.75fr !important;
+    gap: 12px !important;
+    align-items: stretch !important;
+}
+
+/* alle Felder */
+form[action="/termine/create"] input,
+form[action="/termine/create"] select,
+form[action="/termine/create"] textarea {
+    width: 100% !important;
+    height: 52px !important;
+    border-radius: 16px !important;
+    border: 1px solid rgba(148, 163, 184, 0.17) !important;
+    background: rgba(2, 6, 23, 0.78) !important;
+    color: #f8fafc !important;
+    padding: 0 16px !important;
+    font-size: 14px !important;
+    font-weight: 850 !important;
+    outline: none !important;
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.035),
+        0 8px 22px rgba(0, 0, 0, 0.16) !important;
+}
+
+form[action="/termine/create"] input::placeholder,
+form[action="/termine/create"] textarea::placeholder {
+    color: rgba(226, 232, 240, 0.42) !important;
+}
+
+form[action="/termine/create"] input:focus,
+form[action="/termine/create"] select:focus,
+form[action="/termine/create"] textarea:focus {
+    border-color: rgba(56, 189, 248, 0.80) !important;
+    box-shadow:
+        0 0 0 3px rgba(14, 165, 233, 0.16),
+        0 14px 34px rgba(14, 165, 233, 0.12) !important;
+}
+
+/* Datum und Uhrzeit kleiner */
+form[action="/termine/create"] input[type="date"],
+form[action="/termine/create"] input[type="time"] {
+    text-align: center !important;
+}
+
+/* Prüfer-Feld */
+form[action="/termine/create"] select[name="examiner"] {
+    grid-column: span 2 !important;
+}
+
+/* Notiz-Feld */
+form[action="/termine/create"] textarea {
+    grid-column: span 4 !important;
+    height: 78px !important;
+    min-height: 78px !important;
+    padding: 16px !important;
+    resize: vertical !important;
+}
+
+/* Speichern Button */
+form[action="/termine/create"] button {
+    grid-row: span 2 !important;
+    min-height: 78px !important;
+    border: none !important;
+    border-radius: 20px !important;
+    cursor: pointer !important;
+    color: white !important;
+    font-size: 18px !important;
+    line-height: 1.15 !important;
+    font-weight: 1000 !important;
+    background:
+        linear-gradient(135deg, #2563eb 0%, #06b6d4 100%) !important;
+    box-shadow:
+        0 20px 45px rgba(37, 99, 235, 0.38),
+        inset 0 1px 0 rgba(255, 255, 255, 0.18) !important;
+    transition: transform 0.16s ease, filter 0.16s ease !important;
+}
+
+form[action="/termine/create"] button:hover {
+    transform: translateY(-2px) !important;
+    filter: brightness(1.08) !important;
+}
+
+/* Statistik-Karten */
+section:has(form[action="/termine/create"]) + section,
+.stats-grid,
+.termine-stats,
+.ausbildung-stats {
+    margin-top: 22px !important;
+}
+
+/* alle Karten nach dem Formular edler */
+section:not(:first-of-type):not(:has(form[action="/termine/create"])) article,
+section:not(:first-of-type):not(:has(form[action="/termine/create"])) .card,
+.stat-card,
+.termine-stat-card,
+.ausbildung-stat-card {
+    border-radius: 22px !important;
+    background:
+        radial-gradient(circle at top left, rgba(37, 99, 235, 0.12), transparent 38%),
+        rgba(15, 23, 42, 0.82) !important;
+    border: 1px solid rgba(148, 163, 184, 0.15) !important;
+    box-shadow: 0 16px 42px rgba(0, 0, 0, 0.26) !important;
+}
+
+/* Falls Stats als direktes Grid kommen */
+.stats-grid,
+.termine-stats,
+.ausbildung-stats,
+section:has(form[action="/termine/create"]) + div {
+    display: grid !important;
+    grid-template-columns: repeat(4, 1fr) !important;
+    gap: 16px !important;
+}
+
+/* Überschriften unten */
+h2, h3 {
+    color: #ffffff !important;
+}
+
+/* Mobile */
+@media (max-width: 1100px) {
+    form[action="/termine/create"] {
+        grid-template-columns: 1fr 1fr !important;
+    }
+
+    form[action="/termine/create"] textarea,
+    form[action="/termine/create"] button,
+    form[action="/termine/create"] select[name="examiner"] {
+        grid-column: span 2 !important;
+    }
+
+    .stats-grid,
+    .termine-stats,
+    .ausbildung-stats,
+    section:has(form[action="/termine/create"]) + div {
+        grid-template-columns: repeat(2, 1fr) !important;
+    }
+}
+
+@media (max-width: 650px) {
+    main,
+    .content,
+    .main-content,
+    .dashboard-content,
+    .page-content {
+        padding: 12px !important;
+    }
+
+    section:first-of-type,
+    section:has(form[action="/termine/create"]) {
+        border-radius: 22px !important;
+        padding: 22px !important;
+    }
+
+    section:first-of-type h1 {
+        font-size: 38px !important;
+    }
+
+    form[action="/termine/create"] {
+        grid-template-columns: 1fr !important;
+    }
+
+    form[action="/termine/create"] textarea,
+    form[action="/termine/create"] button,
+    form[action="/termine/create"] select[name="examiner"] {
+        grid-column: span 1 !important;
+    }
+
+    .stats-grid,
+    .termine-stats,
+    .ausbildung-stats,
+    section:has(form[action="/termine/create"]) + div {
+        grid-template-columns: 1fr !important;
+    }
+}
+</style>
+
+<%
     const allTermine = termine || [];
 
     function parseDate(value) {
