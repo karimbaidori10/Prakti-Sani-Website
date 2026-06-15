@@ -2083,3 +2083,271 @@ strong{color:#fff}
         grid-template-columns: 1fr !important;
     }
 }
+
+.login-page {
+    min-height: 100vh;
+    position: relative;
+    overflow: hidden;
+    background:
+        radial-gradient(circle at 15% 20%, rgba(239, 68, 68, 0.20), transparent 28%),
+        radial-gradient(circle at 80% 15%, rgba(37, 99, 235, 0.25), transparent 32%),
+        linear-gradient(135deg, #020617 0%, #070b1d 45%, #020617 100%);
+}
+
+.login-page::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    background-image:
+        linear-gradient(rgba(255,255,255,0.035) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.035) 1px, transparent 1px);
+    background-size: 42px 42px;
+    mask-image: radial-gradient(circle at center, black, transparent 75%);
+    pointer-events: none;
+}
+
+.login-shell {
+    position: relative;
+    z-index: 2;
+    min-height: 100vh;
+    display: grid;
+    grid-template-columns: 0.95fr 1.25fr;
+    gap: 46px;
+    align-items: center;
+    max-width: 1320px;
+    margin: 0 auto;
+    padding: 54px;
+}
+
+.login-card,
+.login-info-card {
+    position: relative;
+    overflow: hidden;
+    border-radius: 34px;
+    background: rgba(15, 23, 42, 0.74);
+    border: 1px solid rgba(148, 163, 184, 0.18);
+    box-shadow:
+        0 30px 90px rgba(0, 0, 0, 0.55),
+        inset 0 1px 0 rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(18px);
+}
+
+.login-card {
+    padding: 44px;
+    animation: loginFloat 6s ease-in-out infinite;
+}
+
+.login-info-card {
+    padding: 46px;
+    animation: loginFloat 7s ease-in-out infinite reverse;
+}
+
+.login-card::before,
+.login-info-card::before {
+    content: "";
+    position: absolute;
+    inset: -2px;
+    background:
+        linear-gradient(120deg, transparent, rgba(59, 130, 246, 0.35), transparent),
+        linear-gradient(300deg, transparent, rgba(239, 68, 68, 0.22), transparent);
+    opacity: 0.35;
+    pointer-events: none;
+}
+
+.login-logo {
+    width: 82px;
+    height: 82px;
+    border-radius: 26px;
+    display: grid;
+    place-items: center;
+    font-size: 34px;
+    background: linear-gradient(135deg, #ef233c, #b91c1c);
+    box-shadow: 0 18px 45px rgba(239, 35, 60, 0.35);
+    margin-bottom: 22px;
+}
+
+.login-kicker {
+    display: inline-flex;
+    align-items: center;
+    padding: 9px 16px;
+    border-radius: 999px;
+    background: rgba(239, 68, 68, 0.12);
+    border: 1px solid rgba(248, 113, 113, 0.30);
+    color: #fecaca;
+    font-size: 12px;
+    font-weight: 900;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+}
+
+.login-card h1,
+.login-info-card h1 {
+    margin: 18px 0 18px;
+    color: #ffffff;
+    font-size: clamp(42px, 5vw, 68px);
+    line-height: 0.96;
+    font-weight: 950;
+    letter-spacing: -0.06em;
+}
+
+.login-card p,
+.login-info-card p {
+    color: rgba(226, 232, 240, 0.78);
+    font-size: 16px;
+    line-height: 1.65;
+}
+
+.login-discord-btn {
+    margin-top: 28px;
+    height: 64px;
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    text-decoration: none;
+    color: white;
+    font-size: 20px;
+    font-weight: 950;
+    background: linear-gradient(135deg, #6366f1, #2563eb, #06b6d4);
+    box-shadow: 0 20px 45px rgba(37, 99, 235, 0.35);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.login-discord-btn:hover {
+    transform: translateY(-3px) scale(1.01);
+    box-shadow: 0 26px 60px rgba(37, 99, 235, 0.48);
+}
+
+.login-role-grid,
+.login-feature-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 14px;
+    margin-top: 22px;
+}
+
+.login-role-card,
+.login-feature-card,
+.login-status-card {
+    border-radius: 20px;
+    padding: 18px;
+    background: rgba(2, 6, 23, 0.46);
+    border: 1px solid rgba(148, 163, 184, 0.14);
+    transition: transform 0.2s ease, border-color 0.2s ease, background 0.2s ease;
+}
+
+.login-role-card:hover,
+.login-feature-card:hover,
+.login-status-card:hover {
+    transform: translateY(-3px);
+    border-color: rgba(96, 165, 250, 0.38);
+    background: rgba(15, 23, 42, 0.72);
+}
+
+.login-feature-card {
+    display: flex;
+    gap: 14px;
+    align-items: flex-start;
+}
+
+.login-feature-card span {
+    width: 46px;
+    height: 46px;
+    border-radius: 15px;
+    display: grid;
+    place-items: center;
+    background: rgba(37, 99, 235, 0.18);
+    border: 1px solid rgba(96, 165, 250, 0.25);
+    font-size: 22px;
+}
+
+.login-feature-card h3,
+.login-role-card h3,
+.login-status-card h3 {
+    margin: 0 0 6px;
+    color: white;
+    font-size: 17px;
+    font-weight: 950;
+}
+
+.login-feature-card p,
+.login-role-card p,
+.login-status-card p {
+    margin: 0;
+    font-size: 13px;
+    line-height: 1.45;
+    color: rgba(226, 232, 240, 0.74);
+}
+
+.login-status-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 14px;
+    margin-top: 26px;
+}
+
+.login-status-card strong {
+    color: #86efac;
+    font-size: 13px;
+}
+
+.login-online {
+    position: absolute;
+    right: 46px;
+    top: 42px;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    color: #86efac;
+    font-weight: 900;
+    font-size: 13px;
+}
+
+.login-online::before {
+    content: "";
+    width: 10px;
+    height: 10px;
+    border-radius: 999px;
+    background: #22c55e;
+    box-shadow: 0 0 18px #22c55e;
+}
+
+@keyframes loginFloat {
+    0%, 100% {
+        transform: translateY(0);
+    }
+    50% {
+        transform: translateY(-8px);
+    }
+}
+
+@media (max-width: 1050px) {
+    .login-shell {
+        grid-template-columns: 1fr;
+        padding: 28px;
+    }
+
+    .login-card h1,
+    .login-info-card h1 {
+        font-size: 46px;
+    }
+}
+
+@media (max-width: 650px) {
+    .login-shell {
+        padding: 16px;
+    }
+
+    .login-card,
+    .login-info-card {
+        padding: 26px;
+        border-radius: 26px;
+    }
+
+    .login-role-grid,
+    .login-feature-grid,
+    .login-status-grid {
+        grid-template-columns: 1fr;
+    }
+}
