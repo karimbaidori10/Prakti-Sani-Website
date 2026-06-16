@@ -384,38 +384,6 @@
 
 </style>
 
-<section class="ow-hero">
-<section class="ow-import-card">
-    <div class="ow-import-head">
-        <div>
-            <div class="ow-kicker">Dienstblatt Import</div>
-            <h2>Excel-Dienstblatt importieren</h2>
-            <p>
-                Lade hier das aktuelle LSMD-Dienstblatt hoch. OW, OW+ und Osprey werden automatisch übernommen.
-                Alle importierten Lizenzen starten ab dem 14.06.2026 bei Tag 0.
-            </p>
-        </div>
-    </div>
-
-    <% if (typeof query !== "undefined" && query.import === "success") { %>
-        <div class="ow-import-success">
-            Import erfolgreich:
-<strong><%= query.count || 0 %></strong> Mitglieder übernommen,
-<strong><%= query.withLicense || 0 %></strong> Personen mit Lizenz,
-<strong><%= query.withoutLicense || 0 %></strong> Personen ohne Lizenz,
-<strong><%= query.licenses || 0 %></strong> einzelne Lizenzen importiert.
-        </div>
-    <% } %>
-
-    <form action="/overwatch/import-dienstblatt-xlsx" method="POST" enctype="multipart/form-data" class="ow-import-form">
-        <input type="file" name="dienstblattFile" accept=".xlsx,.xls" required>
-
-        <button type="submit" class="ow-primary-btn">
-            Dienstblatt importieren
-        </button>
-    </form>
-</section>
-
     <div class="ow-hero-left">
         <div class="ow-kicker">LSMD • Overwatch-Abteilung</div>
         <h1>Overwatch Lizenzsystem</h1>
