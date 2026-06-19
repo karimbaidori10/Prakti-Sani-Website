@@ -2278,15 +2278,17 @@ async function sendAusbildungsterminDiscordEmbed(data) {
         const typeLabel = "Sanitäter-Prüfung";
 const typeEmoji = "🚑";
 
-const resultLabel = data.result === "bestanden"
+const normalizedResult = String(data.result || "").toLowerCase().trim();
+
+const resultLabel = normalizedResult === "bestanden"
     ? "Bestanden"
     : "Nicht bestanden";
 
-const resultEmoji = data.result === "bestanden"
+const resultEmoji = normalizedResult === "bestanden"
     ? "✅"
     : "❌";
 
-const embedColor = data.result === "bestanden"
+const embedColor = normalizedResult === "bestanden"
     ? 0x22c55e
     : 0xef4444;
 
@@ -7129,53 +7131,61 @@ res.redirect("/admin");
 app.post("/termine/create", requireLogin, requireAusbilderOrAdmin, async (req, res) => {
     try {
         const {
-    name,
-    examType,
-    result,
-    date,
-    time,
-    examiner,
-    notes
-} = req.body;
+            name,
+            examType,
+            result,
+            date,
+            time,
+            examiner,
+            notes
+        } = req.body;
 
-        if (!name || !examType || !result || !date || !examiner) {
-    return res.redirect("/termine");
-}
+        const normalizedResult = String(result || "").toLowerCase().trim();
+
+        if (!name || !examType || !normalizedResult || !date || !examiner) {
+            return res.redirect("/termine");
+        }
+
+        const statusLabel = normalizedResult === "bestanden"
+            ? "Bestanden"
+            : "Nicht bestanden";
 
         const insertResult = await termineCollection.insertOne({
-    name,
-    discordId: "",
-    examType,
-    result,
-    date,
-    time,
-    examiner,
-    status: result === "bestanden" ? "Bestanden" : "Nicht bestanden",
-    notes,
-    source: "termine",
-    createdBy: req.session.user?.discordId || null,
-    createdByName: req.session.user?.username || "Unbekannt",
-    createdAt: new Date(),
-    updatedAt: new Date()
-});
+            name,
+            discordId: "",
+            examType,
+            result: normalizedResult,
+            date,
+            time,
+            examiner,
+            status: statusLabel,
+            notes,
+            source: "termine",
+            createdBy: req.session.user?.discordId || null,
+            createdByName: req.session.user?.username || "Unbekannt",
+            createdAt: new Date(),
+            updatedAt: new Date()
+        });
 
-const discordOk = await sendAusbildungsterminDiscordEmbed({
-    id: insertResult.insertedId.toString(),
-    name,
-    examType,
-    date,
-    time,
-    examiner,
-    notes,
-    createdById: req.session.user?.discordId || null,
-    createdByName: req.session.user?.username || "Unbekannt"
-});
+        const discordOk = await sendAusbildungsterminDiscordEmbed({
+            id: insertResult.insertedId.toString(),
+            name,
+            examType,
+            result: normalizedResult,
+            date,
+            time,
+            examiner,
+            notes,
+            createdById: req.session.user?.discordId || null,
+            createdByName: req.session.user?.username || "Unbekannt"
+        });
 
-console.log("Ausbildung Discord gesendet:", discordOk);
+        console.log("Ausbildung Discord gesendet:", discordOk);
 
         await addLog("Ausbildungstermin erstellt", {
             name,
             examType,
+            result: normalizedResult,
             date,
             time,
             examiner,
